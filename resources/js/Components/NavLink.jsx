@@ -12,8 +12,8 @@ export default function NavLink({
             className={
                 'inline-flex items-center px-3 py-2 text-sm font-medium leading-5 transition-all duration-150 ease-in-out focus:outline-none rounded-lg ' +
                 (active
-                    ? 'text-green-900 bg-green-100 shadow-md shadow-green-100 font-semibold'
-                    : 'text-gray-600 hover:text-green-800 hover:bg-green-50 focus:text-green-800') +
+                    ? 'text-gray-900 bg-gray-100 shadow-md shadow-gray-100 font-semibold'
+                    : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50 focus:text-gray-800') +
                 (className ? ' ' + className : '')
             }
         >
