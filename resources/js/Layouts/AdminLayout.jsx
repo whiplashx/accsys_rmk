@@ -14,6 +14,9 @@ export default function AuthenticatedLayout({ children }) {
     <div className="min-h-screen bg-gray-100">
       <SideBarResponsive >
         <Breadcrumbs/>
+        <main>
+            {children}
+        </main>
         </SideBarResponsive>
     </div>
   );
