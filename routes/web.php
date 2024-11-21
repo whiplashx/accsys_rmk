@@ -5,6 +5,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -23,5 +24,22 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
+
+$adminPages = [
+    'department' => 'Department',
+    'documents' => 'Documents',
+    'accounts' => 'Accounts',
+    'accreditation' => 'Accreditation',
+    'scheduling' => 'Scheduling',
+    'settings' => 'Settings',
+];
+
+foreach ($adminPages as $uri => $component) {
+    Route::get("/$uri", function () use ($component) {
+        return Inertia::render('Admin/'. $component);
+    })->name($uri)->middleware('auth', 'verified');
+}
 
 require __DIR__.'/auth.php';
