@@ -1,6 +1,7 @@
 import Breadcrumbs from '@/Components/Breadcrumbs';
 import AdminLayout from '@/Layouts/AdminLayout';
 import TaskForceLayout from '@/Layouts/TaskForceLayout';
+import AccreditorLayout from '@/Layouts/AccreditorLayout';
 import { Head, usePage } from '@inertiajs/react';
 import { Children, useState } from 'react';
 
@@ -29,12 +30,43 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>     :
+        </AdminLayout>     
+        :(user.role === 'Task Force'?
         <TaskForceLayout>
             <Head title="Dashboard" />
             <Breadcrumbs></Breadcrumbs>
+            <div className="py-12">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                        <div className="p-6 text-gray-900">
+                            TaskForce
+                            You're logged in!
+                        </div>
+                    </div>
+                </div>
+            </div>
         </TaskForceLayout>
-}
+        :(user.role === 'Accreditor' ?
+            <AccreditorLayout>
+            <Breadcrumbs></Breadcrumbs>
+                            <div className="py-12">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                        <div className="p-6 text-gray-900">
+                            Accreditor
+                            You're logged in!
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </AccreditorLayout>
+            :
+            <main>
+                <h1>
+                    no role
+                </h1>
+            </main>
+))}
         </>
     );
 }
