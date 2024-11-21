@@ -1,14 +1,17 @@
+import Dropdown from '@/Components/Dropdown';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
+import DropdownSelect from '@/Components/DropdownSelect';
 import { Head, Link, useForm } from '@inertiajs/react';
 
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
+        role: '',
         password: '',
         password_confirmation: '',
     });
@@ -58,6 +61,21 @@ export default function Register() {
                     />
 
                     <InputError message={errors.email} className="mt-2" />
+                </div>
+                <div className="mt-4">
+                    <DropdownSelect
+                        id="role"
+                        name="role"
+                        label="Role"
+                        value={data.role}
+                        options={[
+                            { value: 'Admin', label: 'Admin' },
+                            { value: 'Task Force', label: 'Task Force' },
+                            { value: 'Accreditor', label: 'Accreditor' },
+                        ]}
+                        onChange={(e) => setData('role', e.target.value)}
+                        error={errors.role}
+                    />
                 </div>
 
                 <div className="mt-4">

@@ -6,6 +6,7 @@ import ProfileDropdown from '@/Components/ProfileSection';
 
 
 import React from 'react';
+import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 
 export default function AuthenticatedLayout({ children }) {
     const user = usePage().props.auth.user;
@@ -15,6 +16,7 @@ export default function AuthenticatedLayout({ children }) {
       <SideBarResponsive >
         <Breadcrumbs/>
         </SideBarResponsive>
+        
     </div>
   );
 }

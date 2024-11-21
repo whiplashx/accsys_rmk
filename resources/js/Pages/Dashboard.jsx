@@ -1,8 +1,15 @@
 import AdminLayout from '@/Layouts/AdminLayout';
-import { Head } from '@inertiajs/react';
+import TaskForceLayout from '@/Layouts/TaskForceLayout';
+import { Head, usePage } from '@inertiajs/react';
+import { Children, useState } from 'react';
 
 export default function Dashboard() {
-    return (
+    const user = usePage().props.auth.user;
+    const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
+    console.log(user);
+    return (<>
+        {user.role === 'Admin'
+        ?
         <AdminLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
@@ -21,6 +28,9 @@ export default function Dashboard() {
                     </div>
                 </div>
             </div>
-        </AdminLayout>
+        </AdminLayout>     :
+        <TaskForceLayout></TaskForceLayout>
+}
+        </>
     );
 }

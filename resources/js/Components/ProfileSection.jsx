@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Link } from 'lucide-react';
 import NavLink from './NavLink';
+import ResponsiveNavLink from './ResponsiveNavLink';
 
-const ProfileDropdown = ({ data }) => {
+const ProfileSection = ({ data }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -75,12 +76,13 @@ const ProfileDropdown = ({ data }) => {
                 <span className="flex-grow">Help & Support</span>
               </a>
               <div className="h-px bg-gray-200 my-1"></div>
-              <a 
+              <ResponsiveNavLink 
                 href={route('logout')}
-                className="flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-200"
+                method='post'
               >
                 <span className="flex-grow">Log Out</span>
-              </a>
+              </ResponsiveNavLink>
+              
             </div>
           </div>
         )}
@@ -89,4 +91,4 @@ const ProfileDropdown = ({ data }) => {
   );
 };
 
-export default ProfileDropdown;
+export default ProfileSection;
