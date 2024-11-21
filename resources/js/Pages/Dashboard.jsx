@@ -1,3 +1,4 @@
+import Breadcrumbs from '@/Components/Breadcrumbs';
 import AdminLayout from '@/Layouts/AdminLayout';
 import TaskForceLayout from '@/Layouts/TaskForceLayout';
 import { Head, usePage } from '@inertiajs/react';
@@ -18,18 +19,21 @@ export default function Dashboard() {
             }
         >
             <Head title="Dashboard" />
-
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
+                            Admin
                             You're logged in!
                         </div>
                     </div>
                 </div>
             </div>
         </AdminLayout>     :
-        <TaskForceLayout></TaskForceLayout>
+        <TaskForceLayout>
+            <Head title="Dashboard" />
+            <Breadcrumbs></Breadcrumbs>
+        </TaskForceLayout>
 }
         </>
     );

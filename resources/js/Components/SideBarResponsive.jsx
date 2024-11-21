@@ -5,6 +5,7 @@ import ApplicationLogo from './ApplicationLogo';
 const sidebarItems = [
   { icon: 'dashboard', label: 'Dashboard', href: '#' },
   { icon: 'programs', label: 'Programs', href: '#' },
+  { icon: 'accounts', label: 'Accounts', href: '#' },
   { icon: 'accreditation', label: 'Accreditation', href: '#' },
   { icon: 'scheduling', label: 'Scheduling', href: '#' },
   { icon: 'documents', label: 'Documents', href: '#' },
@@ -35,6 +36,12 @@ const icons = {
   documents: (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
+  accounts: (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="7" r="4" />
+      <path d="M5 21v-2a7 7 0 0 1 14 0v2" />
     </svg>
   ),
   settings: (
