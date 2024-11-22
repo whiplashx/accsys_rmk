@@ -9,6 +9,7 @@ const DataTable = ({ data: initialData }) => {
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
   const [filterRole, setFilterRole] = useState('');
+  const [filterDepartment, setFilterDepartment] = useState('');
 
   useEffect(() => {
     let filteredData = initialData;
@@ -27,6 +28,11 @@ const DataTable = ({ data: initialData }) => {
       filteredData = filteredData.filter(item => item.role === filterRole);
     }
 
+    // Apply department filter
+    if (filterDepartment) {
+      filteredData = filteredData.filter(item => item.department === filterDepartment);
+    }
+
     // Apply sorting
     if (sortColumn) {
       filteredData.sort((a, b) => {
@@ -37,7 +43,7 @@ const DataTable = ({ data: initialData }) => {
     }
 
     setData(filteredData);
-  }, [initialData, searchTerm, filterRole, sortColumn, sortDirection]);
+  }, [initialData, searchTerm, filterRole, filterDepartment, sortColumn, sortDirection]);
 
   const handleSort = (column) => {
     if (column === sortColumn) {
@@ -64,10 +70,15 @@ const DataTable = ({ data: initialData }) => {
     setCurrentPage(1);
   };
 
+  const handleFilterDepartment = (e) => {
+    setFilterDepartment(e.target.value);
+    setCurrentPage(1);
+  };
+
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
-      <div className="p-4 flex justify-between items-center border-b border-gray-200">
-        <div className="relative">
+      <div className="p-4 flex flex-wrap justify-between items-center border-b border-gray-200">
+        <div className="relative mb-2 sm:mb-0">
           <input
             type="text"
             placeholder="Search..."
@@ -77,7 +88,7 @@ const DataTable = ({ data: initialData }) => {
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         </div>
-        <div>
+        <div className="flex space-x-2">
           <select
             className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={filterRole}
@@ -88,61 +99,73 @@ const DataTable = ({ data: initialData }) => {
             <option value="User">User</option>
             <option value="Manager">Manager</option>
           </select>
+          <select
+            className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={filterDepartment}
+            onChange={handleFilterDepartment}
+          >
+            <option value="">All Departments</option>
+            <option value="BSIT">BSIT</option>
+            <option value="BSCpE">BSCpE</option>
+          </select>
         </div>
       </div>
-      <table className="w-full">
-        <thead className="bg-gray-50">
-          <tr>
-            {['ID', 'Name', 'Role', 'Email', 'Status', 'Valid Until', 'Actions'].map((column) => (
-              <th
-                key={column}
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => handleSort(column.toLowerCase())}
-              >
-                <div className="flex items-center">
-                  {column}
-                  {sortColumn === column.toLowerCase() && (
-                    <ChevronDown
-                      className={`ml-1 h-4 w-4 ${
-                        sortDirection === 'desc' ? 'transform rotate-180' : ''
-                      }`}
-                    />
-                  )}
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {currentItems.map((item) => (
-            <tr key={item.id}>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.id}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.name}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.role}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.email}</td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                  item.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                }`}>
-                  {item.status}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.validUntil}</td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                <button className="text-indigo-600 hover:text-indigo-900 mr-2">
-                  <Edit size={18} />
-                </button>
-                <button className="text-red-600 hover:text-red-900 mr-2">
-                  <Trash size={18} />
-                </button>
-                <button className="text-green-600 hover:text-green-900">
-                  <Check size={18} />
-                </button>
-              </td>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-gray-50">
+            <tr>
+              {['ID', 'Name', 'Role', 'Department', 'Email', 'Status', 'Valid Until', 'Actions'].map((column) => (
+                <th
+                  key={column}
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  onClick={() => handleSort(column.toLowerCase())}
+                >
+                  <div className="flex items-center">
+                    {column}
+                    {sortColumn === column.toLowerCase() && (
+                      <ChevronDown
+                        className={`ml-1 h-4 w-4 ${
+                          sortDirection === 'desc' ? 'transform rotate-180' : ''
+                        }`}
+                      />
+                    )}
+                  </div>
+                </th>
+              ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {currentItems.map((item) => (
+              <tr key={item.id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.id}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.name}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.role}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.department}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.email}</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                    item.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                  }`}>
+                    {item.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.validUntil}</td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                  <button className="text-indigo-600 hover:text-indigo-900 mr-2">
+                    <Edit size={18} />
+                  </button>
+                  <button className="text-red-600 hover:text-red-900 mr-2">
+                    <Trash size={18} />
+                  </button>
+                  <button className="text-green-600 hover:text-green-900">
+                    <Check size={18} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
       <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div className="flex-1 flex justify-between sm:hidden">
           <button
