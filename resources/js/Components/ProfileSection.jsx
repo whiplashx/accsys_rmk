@@ -35,9 +35,7 @@ const ProfileSection = ({ data }) => {
             />
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
           </div>
-          <div>
-            <p>{data?.name}</p>
-          </div>
+          
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium text-gray-700">{data?.name}</span>
             <ChevronDown 
