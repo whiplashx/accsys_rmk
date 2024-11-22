@@ -1,18 +1,15 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, Search, Edit, Trash, Check } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { ChevronDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
 
-const DataTable = ({ data: initialData }) => {
-  const [data, setData] = useState(initialData);
+const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
-  const [filterRole, setFilterRole] = useState('');
-  const [filterDepartment, setFilterDepartment] = useState('');
+  const [filters, setFilters] = useState({});
 
-  useEffect(() => {
-    let filteredData = initialData;
+  const filteredData = useMemo(() => {
+    let filteredData = data;
 
     // Apply search
     if (searchTerm) {
@@ -23,15 +20,12 @@ const DataTable = ({ data: initialData }) => {
       );
     }
 
-    // Apply role filter
-    if (filterRole) {
-      filteredData = filteredData.filter(item => item.role === filterRole);
-    }
-
-    // Apply department filter
-    if (filterDepartment) {
-      filteredData = filteredData.filter(item => item.department === filterDepartment);
-    }
+    // Apply filters
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) {
+        filteredData = filteredData.filter(item => item[key] === value);
+      }
+    });
 
     // Apply sorting
     if (sortColumn) {
@@ -42,8 +36,13 @@ const DataTable = ({ data: initialData }) => {
       });
     }
 
-    setData(filteredData);
-  }, [initialData, searchTerm, filterRole, filterDepartment, sortColumn, sortDirection]);
+    return filteredData;
+  }, [data, searchTerm, filters, sortColumn, sortDirection]);
+
+  const pageCount = Math.ceil(filteredData.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
 
   const handleSort = (column) => {
     if (column === sortColumn) {
@@ -54,26 +53,17 @@ const DataTable = ({ data: initialData }) => {
     }
   };
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
     setCurrentPage(1);
   };
 
-  const handleFilterRole = (e) => {
-    setFilterRole(e.target.value);
+  const handleFilter = (column, value) => {
+    setFilters(prev => ({ ...prev, [column]: value }));
     setCurrentPage(1);
   };
 
-  const handleFilterDepartment = (e) => {
-    setFilterDepartment(e.target.value);
-    setCurrentPage(1);
-  };
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
@@ -89,40 +79,34 @@ const DataTable = ({ data: initialData }) => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         </div>
         <div className="flex space-x-2">
-          <select
-            className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={filterRole}
-            onChange={handleFilterRole}
-          >
-            <option value="">All Roles</option>
-            <option value="Admin">Admin</option>
-            <option value="User">User</option>
-            <option value="Manager">Manager</option>
-          </select>
-          <select
-            className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={filterDepartment}
-            onChange={handleFilterDepartment}
-          >
-            <option value="">All Departments</option>
-            <option value="BSIT">BSIT</option>
-            <option value="BSCpE">BSCpE</option>
-          </select>
+          {columns.filter(col => col.filterable).map(col => (
+            <select
+              key={col.key}
+              className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={filters[col.key] || ''}
+              onChange={(e) => handleFilter(col.key, e.target.value)}
+            >
+              <option value="">All {col.label}s</option>
+              {[...new Set(data.map(item => item[col.key]))].map(value => (
+                <option key={value} value={value}>{value}</option>
+              ))}
+            </select>
+          ))}
         </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
-              {['ID', 'Name', 'Role', 'Department', 'Email', 'Status', 'Valid Until', 'Actions'].map((column) => (
+              {columns.map((column) => (
                 <th
-                  key={column}
+                  key={column.key}
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                  onClick={() => handleSort(column.toLowerCase())}
+                  onClick={() => handleSort(column.key)}
                 >
                   <div className="flex items-center">
-                    {column}
-                    {sortColumn === column.toLowerCase() && (
+                    {column.label}
+                    {sortColumn === column.key && (
                       <ChevronDown
                         className={`ml-1 h-4 w-4 ${
                           sortDirection === 'desc' ? 'transform rotate-180' : ''
@@ -135,32 +119,13 @@ const DataTable = ({ data: initialData }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {currentItems.map((item) => (
-              <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.id}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.name}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.role}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.department}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.email}</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    item.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {item.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{item.validUntil}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <button className="text-indigo-600 hover:text-indigo-900 mr-2">
-                    <Edit size={18} />
-                  </button>
-                  <button className="text-red-600 hover:text-red-900 mr-2">
-                    <Trash size={18} />
-                  </button>
-                  <button className="text-green-600 hover:text-green-900">
-                    <Check size={18} />
-                  </button>
-                </td>
+            {currentItems.map((item, index) => (
+              <tr key={index}>
+                {columns.map(column => (
+                  <td key={column.key} className="px-6 py-4 whitespace-nowrap">
+                    {column.render ? column.render(item) : item[column.key]}
+                  </td>
+                ))}
               </tr>
             ))}
           </tbody>
@@ -177,7 +142,7 @@ const DataTable = ({ data: initialData }) => {
           </button>
           <button
             onClick={() => paginate(currentPage + 1)}
-            disabled={indexOfLastItem >= data.length}
+            disabled={currentPage === pageCount}
             className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
           >
             Next
@@ -188,9 +153,9 @@ const DataTable = ({ data: initialData }) => {
             <p className="text-sm text-gray-700">
               Showing <span className="font-medium">{indexOfFirstItem + 1}</span> to{' '}
               <span className="font-medium">
-                {indexOfLastItem > data.length ? data.length : indexOfLastItem}
+                {indexOfLastItem > filteredData.length ? filteredData.length : indexOfLastItem}
               </span>{' '}
-              of <span className="font-medium">{data.length}</span> results
+              of <span className="font-medium">{filteredData.length}</span> results
             </p>
           </div>
           <div>
@@ -203,7 +168,7 @@ const DataTable = ({ data: initialData }) => {
                 <span className="sr-only">Previous</span>
                 <ChevronLeft className="h-5 w-5" aria-hidden="true" />
               </button>
-              {[...Array(Math.ceil(data.length / itemsPerPage)).keys()].map((number) => (
+              {[...Array(pageCount).keys()].map((number) => (
                 <button
                   key={number + 1}
                   onClick={() => paginate(number + 1)}
@@ -218,7 +183,7 @@ const DataTable = ({ data: initialData }) => {
               ))}
               <button
                 onClick={() => paginate(currentPage + 1)}
-                disabled={indexOfLastItem >= data.length}
+                disabled={currentPage === pageCount}
                 className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
               >
                 <span className="sr-only">Next</span>

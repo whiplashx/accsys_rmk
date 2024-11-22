@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Link } from 'lucide-react';
 import NavLink from './NavLink';
 import ResponsiveNavLink from './ResponsiveNavLink';
+import { usePage } from '@inertiajs/react';
 
 const ProfileSection = ({ data }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,7 +19,7 @@ const ProfileSection = ({ data }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-
+  const user = usePage().props.auth.user;
   return (
     <div className="fixed top-4 right-4 z-50" ref={dropdownRef}>
       <div className="relative">
@@ -35,7 +36,9 @@ const ProfileSection = ({ data }) => {
             />
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
           </div>
-          
+          <div className='text-black'>
+            <p>{user.name}</p>
+          </div>
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium text-gray-700">{data?.name}</span>
             <ChevronDown 
