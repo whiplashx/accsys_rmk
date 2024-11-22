@@ -5,7 +5,7 @@ import departments from '@/Pages/Admin/Department';
 
 const sidebarItems = [
   { icon: 'dashboard', label: 'Dashboard', href: route('dashboard') },
-  { icon: 'departments', label: 'Departments', href: route('department') },
+  { icon: 'departments', label: 'Departments', href: route('departments') },
   { icon: 'accounts', label: 'Accounts', href: route('accounts') },
   { icon: 'accreditation', label: 'Accreditation', href: route('accreditation') },
   { icon: 'scheduling', label: 'Scheduling', href: route('scheduling') },

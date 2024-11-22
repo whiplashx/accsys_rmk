@@ -43,7 +43,7 @@ export default function departments(){
 
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">User Management</h1>
-      <DataTable data={userData} columns={columns} itemsPerPage={10} />;
+      <DataTable  filterss={true} data={userData} columns={columns} itemsPerPage={10} />;
       </div>
         </AdminLayout>
     );

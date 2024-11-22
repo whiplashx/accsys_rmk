@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -28,7 +29,7 @@ Route::middleware('auth')->group(function () {
 
 
 $adminPages = [
-    'department' => 'Department',
+    'departments' => 'Department',
     'documents' => 'Documents',
     'accounts' => 'Accounts',
     'accreditation' => 'Accreditation',
@@ -41,5 +42,12 @@ foreach ($adminPages as $uri => $component) {
         return Inertia::render('Admin/'. $component);
     })->name($uri)->middleware('auth', 'verified');
 }
+
+
+//DEPARTMENT API
+Route::apiResource('department', DepartmentController::class);
+Route::get('fetchData', [DepartmentController::class, 'fetchData'])->name('fetchDepartment');
+
+
 
 require __DIR__.'/auth.php';

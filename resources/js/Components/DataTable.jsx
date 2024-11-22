@@ -4,7 +4,7 @@ import { useRef } from 'react';
 import { FileDown } from 'lucide-react';
 import { usePDF } from 'react-to-pdf';
 
-const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
+const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState('');
@@ -72,6 +72,7 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
           <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            {exports?(
       <div className="p-4 flex flex-wrap justify-between items-center border-b border-gray-200">
         {/* ... (previous search and filter code) */}
         <button
@@ -81,8 +82,10 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
           <FileDown className="mr-2" size={20} />
           Export to PDF
         </button>
-      </div>
+      </div>):
+      <></>}
       
+      { filterss? 
         <div className="flex space-x-2">
         <div className="relative mb-2 sm:mb-0">
           <input
@@ -107,7 +110,7 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
               ))}
             </select>
           ))}
-        </div>
+        </div>:<></>}
       </div>
       <div className="overflow-x-auto" ref={targetRef}>
         <table className="w-full" ref={tableRef}>

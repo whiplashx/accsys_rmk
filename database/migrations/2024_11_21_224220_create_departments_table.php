@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('departments', function (Blueprint $table) {
             $table->id();
+            $table->string('name'); // Department name
+            $table->string('code')->unique(); // Unique department code
+            $table->integer('areaID')->nullable(); // Unique department code
+            //$table->text('description')->nullable(); // Optional description
+            $table->date('schedule')->nullable(); // Optional description
             $table->timestamps();
         });
     }

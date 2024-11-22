@@ -1,11 +1,12 @@
 import React from 'react';
 import { Book, Users, Calendar, Trophy, ChartBar, Globe } from 'lucide-react';
-import { Link } from '@inertiajs/react';
+import { Link , Head} from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 
 const UniversityDashboard = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-800 to-emerald-950">
+      <Head title='MinSU - Accreditation'></Head>
       <header className="p-6 flex justify-between items-center">
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center">
