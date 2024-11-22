@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
+import { useRef } from 'react';
+import { FileDown } from 'lucide-react';
+import { usePDF } from 'react-to-pdf';
 
 const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
   const [currentPage, setCurrentPage] = useState(1);
@@ -7,7 +10,8 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
   const [sortColumn, setSortColumn] = useState('');
   const [sortDirection, setSortDirection] = useState('asc');
   const [filters, setFilters] = useState({});
-
+  const tableRef = useRef(null);
+  const { toPDF, targetRef } = usePDF({filename: 'table-export.pdf'});
   const filteredData = useMemo(() => {
     let filteredData = data;
 
@@ -67,7 +71,19 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
       <div className="p-4 flex flex-wrap justify-between items-center border-b border-gray-200">
+        {/* ... (previous search and filter code) */}
+        <button
+          onClick={() => toPDF()}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+        >
+          <FileDown className="mr-2" size={20} />
+          Export to PDF
+        </button>
+      </div>
+      
+        <div className="flex space-x-2">
         <div className="relative mb-2 sm:mb-0">
           <input
             type="text"
@@ -78,7 +94,6 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
           />
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
         </div>
-        <div className="flex space-x-2">
           {columns.filter(col => col.filterable).map(col => (
             <select
               key={col.key}
@@ -94,8 +109,8 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
           ))}
         </div>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full">
+      <div className="overflow-x-auto" ref={targetRef}>
+        <table className="w-full" ref={tableRef}>
           <thead className="bg-gray-50">
             <tr>
               {columns.map((column) => (
@@ -130,7 +145,10 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
             ))}
           </tbody>
         </table>
+        
       </div>
+      
+      
       <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div className="flex-1 flex justify-between sm:hidden">
           <button
@@ -193,7 +211,14 @@ const DataTable = ({ data, columns, itemsPerPage = 10 }) => {
           </div>
         </div>
       </div>
-    </div>
+    
+      <div className="p-4 flex flex-wrap justify-between items-center border-b border-gray-200">
+        
+   </div>
+   </div>
+   
+
+    
   );
 };
 
