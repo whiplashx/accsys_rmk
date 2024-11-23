@@ -1,14 +1,23 @@
-import React from "react";
+import React, { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import DataTable from "@/Components/DataTable";
 import { Check, Edit, Trash } from "lucide-react";
 
 export default function departments(){
-    const userData = [
+  
+  const [userData, setData] = useState([]);
+  axios.get('getUser')
+  .then(response=>{
+      setData(response.data);
+  })
+  .catch(error=>{
+      console.error('Error: ', error);
+  });
+   /* const userData = [
         { id: 1, name: 'John Doe', role: 'Admin', department: 'BSIT', email: 'john@example.com', status: 'Active', validUntil: '2023-12-31' },
         { id: 2, name: 'Jane Smith', role: 'User', department: 'BSCpE', email: 'jane@example.com', status: 'Inactive', validUntil: '2023-10-15' },
         // ... more user data
-      ];
+      ];*/
     
       const columns = [
         { key: 'id', label: 'ID' },

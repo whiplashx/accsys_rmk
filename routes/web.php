@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -47,6 +48,9 @@ foreach ($adminPages as $uri => $component) {
 //DEPARTMENT API
 Route::apiResource('department', DepartmentController::class);
 Route::get('fetchData', [DepartmentController::class, 'fetchData'])->name('fetchDepartment');
+
+//API FOR USERS
+Route::get('getUser', [AdminController::class, 'getUser'])->name('getUser');
 
 
 
