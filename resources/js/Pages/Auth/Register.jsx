@@ -25,6 +25,7 @@ export default function Register() {
     };
 
     return (
+        /*
         <GuestLayout>
             <Head title="Register" />
 
@@ -134,5 +135,7 @@ export default function Register() {
                 </div>
             </form>
         </GuestLayout>
+        */
+       <main></main>
     );
 }
