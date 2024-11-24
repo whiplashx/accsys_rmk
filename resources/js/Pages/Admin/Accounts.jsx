@@ -2,9 +2,17 @@ import React, { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import DataTable from "@/Components/DataTable";
 import { Check, Edit, Trash } from "lucide-react";
+import PrimaryButton from "@/Components/PrimaryButton";
+import AddUserModal from "@/Components/AddUserModal";
 
 export default function departments(){
-  
+  const [showModal, setShowModal] = useState(false);
+
+  const handleSave = (formData) => {
+    console.log("User Data:", formData); // Handle the form data
+  };
+
+
   const [userData, setData] = useState([]);
   axios.get('getUser')
   .then(response=>{
@@ -52,6 +60,22 @@ export default function departments(){
 
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4">User Management</h1>
+      <div className="p-6">
+      <button
+        onClick={() => setShowModal(true)}
+        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      >
+        Add User
+      </button>
+
+      <AddUserModal
+        show={showModal}
+        handleClose={() => setShowModal(false)}
+        handleSave={handleSave}
+      />
+    </div>
+
+      <PrimaryButton className="bg-green-900 " >Add User</PrimaryButton>
       <DataTable  filterss={true} data={userData} columns={columns} itemsPerPage={10} />;
       </div>
         </AdminLayout>
