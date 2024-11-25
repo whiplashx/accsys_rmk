@@ -74,8 +74,6 @@ export default function departments(){
         handleSave={handleSave}
       />
     </div>
-
-      <PrimaryButton className="bg-green-900 " >Add User</PrimaryButton>
       <DataTable  filterss={true} data={userData} columns={columns} itemsPerPage={10} />;
       </div>
         </AdminLayout>

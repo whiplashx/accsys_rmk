@@ -7,15 +7,15 @@ const AccreditationAreasPage = () => {
     loading,
     addArea,
     addParameter,
-    addCriterion,
+    addIndicator,
     deleteArea,
     deleteParameter,
-    deleteCriterion,
+    deleteIndicator,
   } = useAccreditationData();
 
   const [newAreaName, setNewAreaName] = useState('');
   const [newParameterName, setNewParameterName] = useState('');
-  const [newCriterionDescription, setNewCriterionDescription] = useState('');
+  const [newIndicatorDescription, setNewIndicatorDescription] = useState('');
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedParameter, setSelectedParameter] = useState(null);
 
@@ -24,8 +24,8 @@ const AccreditationAreasPage = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-green-50 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-green-800">Accreditation Areas</h1>
+    <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-gray-800">Accreditation Areas</h1>
       
       {/* Add Area Form */}
       <div className="mb-8">
@@ -34,7 +34,7 @@ const AccreditationAreasPage = () => {
           value={newAreaName}
           onChange={(e) => setNewAreaName(e.target.value)}
           placeholder="Enter area name"
-          className="w-full p-2 border border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
         />
         <button
           onClick={() => {
@@ -43,7 +43,7 @@ const AccreditationAreasPage = () => {
               setNewAreaName('');
             }
           }}
-          className="mt-2 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors w-full"
+          className="mt-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors w-full"
         >
           Add Area
         </button>
@@ -54,7 +54,7 @@ const AccreditationAreasPage = () => {
         {areas.map(area => (
           <div key={area.id} className="bg-white p-4 rounded-lg shadow">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-green-800">{area.name}</h3>
+              <h3 className="text-xl font-semibold text-gray-800">{area.name}</h3>
               <button
                 onClick={() => deleteArea(area.id)}
                 className="text-red-500 hover:text-red-700 transition-colors"
@@ -73,7 +73,7 @@ const AccreditationAreasPage = () => {
                   value={newParameterName}
                   onChange={(e) => setNewParameterName(e.target.value)}
                   placeholder="Enter parameter name"
-                  className="w-full p-2 border border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
                 />
                 <button
                   onClick={() => {
@@ -82,7 +82,7 @@ const AccreditationAreasPage = () => {
                       setNewParameterName('');
                     }
                   }}
-                  className="mt-2 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors w-full"
+                  className="mt-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors w-full"
                 >
                   Add Parameter
                 </button>
@@ -92,9 +92,9 @@ const AccreditationAreasPage = () => {
             {/* Parameters List */}
             <div className="ml-4 space-y-4">
               {area.parameters.map(parameter => (
-                <div key={parameter.id} className="bg-green-100 p-4 rounded">
+                <div key={parameter.id} className="bg-gray-100 p-4 rounded">
                   <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-lg font-medium text-green-800">{parameter.name}</h4>
+                    <h4 className="text-lg font-medium text-gray-800">{parameter.name}</h4>
                     <button
                       onClick={() => deleteParameter(area.id, parameter.id)}
                       className="text-red-500 hover:text-red-700 transition-colors"
@@ -105,37 +105,37 @@ const AccreditationAreasPage = () => {
                     </button>
                   </div>
 
-                  {/* Add Criterion Form */}
+                  {/* Add Indicator Form */}
                   {selectedArea === area.id && selectedParameter === parameter.id && (
                     <div className="mb-4">
                       <input
                         type="text"
-                        value={newCriterionDescription}
-                        onChange={(e) => setNewCriterionDescription(e.target.value)}
-                        placeholder="Enter criterion description"
-                        className="w-full p-2 border border-green-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+                        value={newIndicatorDescription}
+                        onChange={(e) => setNewIndicatorDescription(e.target.value)}
+                        placeholder="Enter Indicator description"
+                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
                       />
                       <button
                         onClick={() => {
-                          if (newCriterionDescription.trim()) {
-                            addCriterion(area.id, parameter.id, newCriterionDescription.trim());
-                            setNewCriterionDescription('');
+                          if (newIndicatorDescription.trim()) {
+                            addIndicator(area.id, parameter.id, newIndicatorDescription.trim());
+                            setNewIndicatorDescription('');
                           }
                         }}
-                        className="mt-2 bg-green-400 text-white px-4 py-2 rounded hover:bg-green-500 transition-colors w-full"
+                        className="mt-2 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors w-full"
                       >
-                        Add Criterion
+                        Add Indicator
                       </button>
                     </div>
                   )}
 
                   {/* Criteria List */}
                   <ul className="list-disc list-inside ml-4">
-                    {parameter.criteria.map(criterion => (
-                      <li key={criterion.id} className="flex justify-between items-center text-green-800">
-                        <span>{criterion.description}</span>
+                    {parameter.criteria.map(Indicator => (
+                      <li key={Indicator.id} className="flex justify-between items-center text-gray-800">
+                        <span>{Indicator.description}</span>
                         <button
-                          onClick={() => deleteCriterion(area.id, parameter.id, criterion.id)}
+                          onClick={() => deleteIndicator(area.id, parameter.id, Indicator.id)}
                           className="text-red-500 hover:text-red-700 transition-colors"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -156,7 +156,7 @@ const AccreditationAreasPage = () => {
                   setSelectedArea(area.id);
                   setSelectedParameter(null);
                 }}
-                className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 transition-colors"
+                className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 transition-colors"
               >
                 Add Parameter
               </button>
@@ -166,9 +166,9 @@ const AccreditationAreasPage = () => {
                     setSelectedArea(area.id);
                     setSelectedParameter(area.parameters[0].id);
                   }}
-                  className="bg-green-400 text-white px-3 py-1 rounded text-sm hover:bg-green-500 transition-colors"
+                  className="bg-gray-400 text-white px-3 py-1 rounded text-sm hover:bg-gray-500 transition-colors"
                 >
-                  Add Criterion
+                  Add Indicator
                 </button>
               )}
             </div>
