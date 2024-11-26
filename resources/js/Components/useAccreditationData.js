@@ -22,12 +22,12 @@ const useAccreditationData = () => {
               criteria: [
                 { id: '1-1-1', description: 'Alignment with industry standards' },
                 { id: '1-1-2', description: 'Regular curriculum review process' },
-              ],
+              ],  
             },
           ],
         },
         {
-          id: '2',
+          id: '2',  
           name: 'Faculty',
           parameters: [
             {
@@ -36,7 +36,7 @@ const useAccreditationData = () => {
               criteria: [
                 { id: '2-1-1', description: 'Advanced degrees in relevant fields' },
                 { id: '2-1-2', description: 'Industry experience' },
-              ],
+              ],  
             },
           ],
         },

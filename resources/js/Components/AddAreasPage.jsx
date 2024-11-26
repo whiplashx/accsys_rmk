@@ -21,7 +21,7 @@ const AccreditationAreasPage = () => {
 
   if (loading) {
     return <div className="text-center py-10">Loading...</div>;
-  }
+  } 
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
