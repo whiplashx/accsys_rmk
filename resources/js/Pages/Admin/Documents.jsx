@@ -7,43 +7,44 @@ export default function departments(){
     const handleSave = (formData) => {
       console.log("User Data:", formData); // Handle the form data
     };
-    const docData = [
+    const data = [
         {
           id: 1,
           name: 'Document A',
           date: '2024-11-20',
           uploader: 'Alice Johnson',
-          email: 'alice.johnson@example.com',
+          department: 'Human Resources',
         },
         {
           id: 2,
           name: 'Report B',
           date: '2024-11-22',
           uploader: 'Bob Smith',
-          email: 'bob.smith@example.com',
+          department: 'Finance',
         },
         {
           id: 3,
           name: 'Presentation C',
           date: '2024-11-23',
           uploader: 'Carol Williams',
-          email: 'carol.williams@example.com',
+          department: 'Marketing',
         },
         {
           id: 4,
           name: 'Spreadsheet D',
           date: '2024-11-24',
           uploader: 'David Brown',
-          email: 'david.brown@example.com',
+          department: 'IT Support',
         },
         {
           id: 5,
           name: 'Image E',
           date: '2024-11-25',
           uploader: 'Eve Davis',
-          email: 'eve.davis@example.com',
+          department: 'Design',
         },
       ];
+      
       
   
   
@@ -57,11 +58,10 @@ export default function departments(){
     });
     const columns = [
         { key: 'id', label: 'ID' },
-        { key: 'department', label: 'Departments' },
         { key: 'name', label: 'Name' },
         { key: 'date', label: 'Date Added'},
         { key: 'uploader', label: 'Uploader'},
-        { key: 'email', label: 'Email' },
+        { key: 'departments', label: 'Departments' }
       ];
     return(
         <AdminLayout>

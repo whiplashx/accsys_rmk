@@ -12,6 +12,7 @@ export default function Register() {
         name: '',
         email: '',
         role: '',
+        departments: '',
         password: '',
         password_confirmation: '',
     });
@@ -25,7 +26,7 @@ export default function Register() {
     };
 
     return (
-        /*
+        
         <GuestLayout>
             <Head title="Register" />
 
@@ -73,6 +74,20 @@ export default function Register() {
                             { value: 'Admin', label: 'Admin' },
                             { value: 'Task Force', label: 'Task Force' },
                             { value: 'Accreditor', label: 'Accreditor' },
+                        ]}
+                        onChange={(e) => setData('role', e.target.value)}
+                        error={errors.role}
+                    />
+                </div>
+                <div className="mt-4">
+                    <DropdownSelect
+                        id="departments"
+                        name="departments"
+                        label="Departments"
+                        value={data.departments}
+                        options={[
+                            { value: '1', label: 'Bachelor of Science in Information Technology' },
+                            { value: '2', label: 'Bachelor of Science in Computer Engineering' },
                         ]}
                         onChange={(e) => setData('role', e.target.value)}
                         error={errors.role}
@@ -135,7 +150,5 @@ export default function Register() {
                 </div>
             </form>
         </GuestLayout>
-        */
-       <main></main>
     );
 }
