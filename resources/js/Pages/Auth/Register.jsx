@@ -79,20 +79,7 @@ export default function Register() {
                         error={errors.role}
                     />
                 </div>
-                <div className="mt-4">
-                    <DropdownSelect
-                        id="departments"
-                        name="departments"
-                        label="Departments"
-                        value={data.departments}
-                        options={[
-                            { value: '1', label: 'Bachelor of Science in Information Technology' },
-                            { value: '2', label: 'Bachelor of Science in Computer Engineering' },
-                        ]}
-                        onChange={(e) => setData('role', e.target.value)}
-                        error={errors.role}
-                    />
-                </div>
+               
 
                 <div className="mt-4">
                     <InputLabel htmlFor="password" value="Password" />

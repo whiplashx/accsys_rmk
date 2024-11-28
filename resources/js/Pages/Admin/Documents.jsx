@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import DataTable from "@/Components/DataTable";
+import FileUpload from "@/Components/FileUpload";
 
 export default function departments(){
 
     const handleSave = (formData) => {
       console.log("User Data:", formData); // Handle the form data
     };
-    const data = [
+    const docData = [
         {
           id: 1,
           name: 'Document A',
@@ -66,6 +67,7 @@ export default function departments(){
     return(
         <AdminLayout>
             <DataTable data={docData} columns={columns} itemsPerPage={10}/>
+            <FileUpload> ge</FileUpload>
         </AdminLayout>
     );
 }
