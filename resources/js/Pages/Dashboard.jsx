@@ -4,6 +4,7 @@ import TaskForceLayout from '@/Layouts/TaskForceLayout';
 import AccreditorLayout from '@/Layouts/AccreditorLayout';
 import { Head, usePage } from '@inertiajs/react';
 import { Children, useState } from 'react';
+import Progress from '@/Components/DataVisualization/Progress';
 
 export default function Dashboard() {
     const user = usePage().props.auth.user;
@@ -26,6 +27,7 @@ export default function Dashboard() {
                         <div className="p-6 text-gray-900">
                             Admin
                             You're logged in!
+                            <Progress> </Progress>
                         </div>
                     </div>
                 </div>

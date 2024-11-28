@@ -83,7 +83,7 @@ export default function FileUploadDialog() {
         >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Upload files</h2>
-            <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-gray-700">
+            <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-gray-700 text-3xl">
               ×
             </button>
           </div>
