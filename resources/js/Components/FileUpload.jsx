@@ -1,9 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { CloudIcon } from 'lucide-react';
 
 export default function FileUploadDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [isDraggingContainer, setIsDraggingContainer] = useState(false);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (isDraggingContainer) {
+        setPosition(prevPosition => ({
+          x: prevPosition.x + e.movementX,
+          y: prevPosition.y + e.movementY
+        }));
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsDraggingContainer(false);
+    };
+
+    if (isDraggingContainer) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDraggingContainer]);
+
+  const handleDragStart = (e) => {
+    e.preventDefault();
+    setIsDraggingContainer(true);
+  };
   
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -36,8 +69,18 @@ export default function FileUploadDialog() {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-        <div className="p-6">
+      <div 
+        ref={containerRef}
+        style={{
+          transform: `translate(${position.x}px, ${position.y}px)`,
+          cursor: isDraggingContainer ? 'grabbing' : 'grab'
+        }}
+        className="bg-white rounded-lg shadow-xl max-w-md w-full"
+      >
+        <div 
+          className="p-6"
+          onMouseDown={handleDragStart}
+        >
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Upload files</h2>
             <button onClick={() => setIsOpen(false)} className="text-gray-500 hover:text-gray-700">
