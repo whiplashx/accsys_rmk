@@ -52,6 +52,10 @@ Route::get('fetchData', [DepartmentController::class, 'fetchData'])->name('fetch
 //API FOR USERS
 Route::get('getUser', [AdminController::class, 'getUser'])->name('getUser');
 
+//MAIL CONTROLLERS
 
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
 
 require __DIR__.'/auth.php';
