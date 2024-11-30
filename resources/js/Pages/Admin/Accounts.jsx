@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function departments(){
   const [showModal, setShowModal] = useState(false);
-  const notify = () => toast.success("User Added Successfuly!");
+
 
   const [userData, setData] = useState([]);
   axios.get('getUser')
@@ -63,25 +63,10 @@ export default function departments(){
       <AddUserModal
         show={showModal}
         handleClose={() => setShowModal(false)}
-        onSuccess={notify}
       />
     </div>
       <DataTable  filterss={true} data={userData} columns={columns} itemsPerPage={10} />
-      <div>
-        <ToastContainer 
-        position="top-left"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition: Bounce
-        />
-      </div>
+
       </div>
         </AdminLayout>
     );
