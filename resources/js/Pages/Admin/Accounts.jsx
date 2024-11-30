@@ -2,16 +2,13 @@ import React, { useState } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import DataTable from "@/Components/DataTable";
 import { Check, Edit, Trash } from "lucide-react";
-import PrimaryButton from "@/Components/PrimaryButton";
 import AddUserModal from "@/Components/AddUserModal";
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function departments(){
   const [showModal, setShowModal] = useState(false);
-
-  const handleSave = (formData) => {
-    console.log("User Data:", formData); // Handle the form data
-  };
-
+  const notify = () => toast.success("User Added Successfuly!");
 
   const [userData, setData] = useState([]);
   axios.get('getUser')
@@ -21,11 +18,6 @@ export default function departments(){
   .catch(error=>{
       console.error('Error: ', error);
   });
-   /* const userData = [
-        { id: 1, name: 'John Doe', role: 'Admin', department: 'BSIT', email: 'john@example.com', status: 'Active', validUntil: '2023-12-31' },
-        { id: 2, name: 'Jane Smith', role: 'User', department: 'BSCpE', email: 'jane@example.com', status: 'Inactive', validUntil: '2023-10-15' },
-        // ... more user data
-      ];*/
     
       const columns = [
         { key: 'id', label: 'ID' },
@@ -71,10 +63,25 @@ export default function departments(){
       <AddUserModal
         show={showModal}
         handleClose={() => setShowModal(false)}
-        handleSave={handleSave}
+        onSuccess={notify}
       />
     </div>
-      <DataTable  filterss={true} data={userData} columns={columns} itemsPerPage={10} />;
+      <DataTable  filterss={true} data={userData} columns={columns} itemsPerPage={10} />
+      <div>
+        <ToastContainer 
+        position="top-left"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        transition: Bounce
+        />
+      </div>
       </div>
         </AdminLayout>
     );
