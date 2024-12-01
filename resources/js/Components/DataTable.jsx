@@ -1,10 +1,8 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight, Search } from 'lucide-react';
-import { useRef } from 'react';
-import { FileDown } from 'lucide-react';
+import React, { useState, useMemo, useRef } from 'react';
+import { ChevronDown, ChevronLeft, ChevronRight, Search, FileDown } from 'lucide-react';
 import { usePDF } from 'react-to-pdf';
 
-const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
+const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [sortColumn, setSortColumn] = useState('');
@@ -12,10 +10,10 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
   const [filters, setFilters] = useState({});
   const tableRef = useRef(null);
   const { toPDF, targetRef } = usePDF({filename: 'table-export.pdf'});
+
   const filteredData = useMemo(() => {
     let filteredData = data;
 
-    // Apply search
     if (searchTerm) {
       filteredData = filteredData.filter(item =>
         Object.values(item).some(value =>
@@ -24,14 +22,12 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
       );
     }
 
-    // Apply filters
     Object.entries(filters).forEach(([key, value]) => {
       if (value) {
         filteredData = filteredData.filter(item => item[key] === value);
       }
     });
 
-    // Apply sorting
     if (sortColumn) {
       filteredData.sort((a, b) => {
         if (a[sortColumn] < b[sortColumn]) return sortDirection === 'asc' ? -1 : 1;
@@ -71,32 +67,30 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
 
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            {exports?(
-      <div className="p-4 flex flex-wrap justify-between items-center border-b border-gray-200">
-        {/* ... (previous search and filter code) */}
-        <button
-          onClick={() => toPDF()}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
-        >
-          <FileDown className="mr-2" size={20} />
-          Export to PDF
-        </button>
-      </div>):
-      <></>}
-      
-      { filterss? 
-        <div className="flex space-x-2">
-        <div className="relative mb-2 sm:mb-0">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+      {exports && (
+        <div className="p-4 flex flex-wrap justify-between items-center border-b border-gray-200">
+          <button
+            onClick={() => toPDF()}
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+          >
+            <FileDown className="mr-2" size={20} />
+            Export to PDF
+          </button>
         </div>
+      )}
+      
+      {filterss && (
+        <div className="p-4 flex flex-wrap space-x-2">
+          <div className="relative mb-2 sm:mb-0">
+            <input
+              type="text"
+              placeholder="Search..."
+              className="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+          </div>
           {columns.filter(col => col.filterable).map(col => (
             <select
               key={col.key}
@@ -110,8 +104,9 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
               ))}
             </select>
           ))}
-        </div>:<></>}
-      </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto" ref={targetRef}>
         <table className="w-full" ref={tableRef}>
           <thead className="bg-gray-50">
@@ -138,9 +133,9 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {currentItems.map((item, index) => (
-              <tr key={index}>
+              <tr key={item.id || `row-${index}`}>
                 {columns.map(column => (
-                  <td key={column.key} className="px-6 py-4 whitespace-nowrap">
+                  <td key={`${item.id || index}-${column.key}`} className="px-6 py-4 whitespace-nowrap">
                     {column.render ? column.render(item) : item[column.key]}
                   </td>
                 ))}
@@ -148,9 +143,7 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
             ))}
           </tbody>
         </table>
-        
       </div>
-      
       
       <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
         <div className="flex-1 flex justify-between sm:hidden">
@@ -191,7 +184,7 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
               </button>
               {[...Array(pageCount).keys()].map((number) => (
                 <button
-                  key={number + 1}
+                  key={`page-${number + 1}`}
                   onClick={() => paginate(number + 1)}
                   className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                     currentPage === number + 1
@@ -214,15 +207,9 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss}) => {
           </div>
         </div>
       </div>
-    
-      <div className="p-4 flex flex-wrap justify-between items-center border-b border-gray-200">
-        
-   </div>
-   </div>
-   
-
-    
+    </div>
   );
 };
 
 export default DataTable;
+

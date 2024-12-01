@@ -17,8 +17,8 @@ function AddUserModal({ show, handleClose, onSuccess }) {
         password_confirmation: '',
     });
 
-    const notify = () => toast.success("User Added Successfully!");
 
+    
     const submit = (e) => {
         e.preventDefault();
 
@@ -143,19 +143,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                     </form>
                 </div>
             </div>
-            <ToastContainer 
-                position="top-left"
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="light"
-                transition={Bounce}
-            />
+
         </>
     );
 }

@@ -8,7 +8,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 export default function departments(){
   const [showModal, setShowModal] = useState(false);
-
+  const notify = () => toast.success("User Added Successfully!");
 
   const [userData, setData] = useState([]);
   axios.get('getUser')
@@ -23,9 +23,9 @@ export default function departments(){
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
         { key: 'role', label: 'Role', filterable: true },
-        { key: 'department', label: 'Department', filterable: true },
+        { key: 'department', label: 'Department', filterable: true},
         { key: 'email', label: 'Email' },
-        { key: 'status', label: 'Status', filterable: true, render: (item) => (
+        { key: 'status', label: 'Status',  render: (item) => (
           <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
             item.status === 'Active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
           }`}>
@@ -63,10 +63,11 @@ export default function departments(){
       <AddUserModal
         show={showModal}
         handleClose={() => setShowModal(false)}
+        
       />
     </div>
       <DataTable  filterss={true} data={userData} columns={columns} itemsPerPage={10} />
-
+      
       </div>
         </AdminLayout>
     );
