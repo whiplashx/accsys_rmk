@@ -8,10 +8,18 @@ use Illuminate\Database\Eloquent\Model;
 class Department extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'name',
         'code',
+        'areaID',
         'schedule',
-        'areaID'
     ];
+
+    // If you have a relationship with an Area model, you can define it here
+    public function area()
+    {
+        return $this->belongsTo(Area::class, 'areaID');
+    }
 }
+

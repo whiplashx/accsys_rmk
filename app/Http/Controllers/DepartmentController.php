@@ -3,80 +3,64 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
 use App\Models\Department;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class DepartmentController extends Controller
 {
-    public function fetchData()
-    {
-        // Using the DB facade to query the database
+    public function fetchData(){
         $data = DB::table('departments')
-                ->get();
+        ->get();
 
-        // Return data as JSON for easy consumption in React
         return response()->json($data);
     }
-    
     public function index()
     {
-        // Retrieve all departments
         $departments = Department::all();
         return response()->json($departments);
     }
 
     public function store(Request $request)
     {
-        // Validate and create a department
-        $validatedData = $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:100|unique:departments',
-            'areaID' => 'required|string|max:100|unique:departments',
-            'schedule' => 'nullable|date'
+            'code' => 'required|string|max:255|unique:departments',
+            'areaID' => 'nullable|string|max:255',
+            'schedule' => 'nullable|string',
         ]);
 
-        $department = Department::create($validatedData);
-
-        return response()->json([
-            'message' => 'Department created successfully!',
-            'data' => $department,
-        ], 201);
+        $department = Department::create($validated);
+        return response()->json($department, 201);
     }
 
-    public function show($id)
+    public function show(Department $department)
     {
-        // Retrieve a specific department
-        $department = Department::findOrFail($id);
         return response()->json($department);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Department $department)
     {
-        // Validate and update the department
-        $validatedData = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'code' => 'sometimes|required|string|max:100|unique:departments,code,' . $id,
-            'areaID' => 'int|nullable,' . $id,
-            'schedule' => 'nullable|date,' . $id,
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'code' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('departments')->ignore($department->id),
+            ],
+            'areaID' => 'nullable|string|max:255',
+            'schedule' => 'nullable|string',
         ]);
 
-        $department = Department::findOrFail($id);
-        $department->update($validatedData);
-
-        return response()->json([
-            'message' => 'Department updated successfully!',
-            'data' => $department,
-        ], 200);
+        $department->update($validated);
+        return response()->json($department);
     }
 
-    public function destroy($id)
+    public function destroy(Department $department)
     {
-        // Delete a department
-        $department = Department::findOrFail($id);
         $department->delete();
-
-        return response()->json([
-            'message' => 'Department deleted successfully!',
-        ], 200);
+        return response()->json(null, 204);
     }
 }
+
