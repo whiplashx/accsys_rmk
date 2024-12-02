@@ -72,4 +72,7 @@ require __DIR__.'/auth.php';
 
 //API FOR ADMIN CRUD
 
+Route::middleware('auth')->group(function () {
+    Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
+})->middleware(['auth', 'verified']);
 

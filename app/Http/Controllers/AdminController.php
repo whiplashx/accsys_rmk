@@ -17,22 +17,23 @@ class AdminController extends Controller
         return response()->json($data);
     }
 
-
     public function updateUser(Request $request, User $user): JsonResponse
     {
+        // Validate the fields you want to allow editing.
         $request->validate([
             'name' => 'required|string|max:255',
             'role' => 'required|string|max:255',
-            //'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
         ]);
-        
     
+        // Update only the fields that can be modified
         $user->update([
             'name' => $request->name,
             'role' => $request->role,
-            'email' => $request->email,
+            // Do not include email if it's not allowed to change.
+            // 'email' => $request->email, // Comment out or remove this line
         ]);
     
+        // Return success response with the updated user data
         return response()->json(['message' => 'User updated successfully!', 'user' => $user]);
     }
     

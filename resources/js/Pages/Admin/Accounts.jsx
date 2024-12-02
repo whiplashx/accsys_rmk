@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import DataTable from "@/Components/DataTable";
-import { Check, Edit, Trash, Save } from "lucide-react";
+import { Check, Edit, Trash, Save } from 'lucide-react';
 import AddUserModal from "@/Components/AddUserModal";
 import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function departments() {
+export default function Departments() {
     const [showModal, setShowModal] = useState(false);
     const [userData, setUserData] = useState([]);
     const [editRowId, setEditRowId] = useState(null);
     const [editedData, setEditedData] = useState({});
+
+    const attachmentUrl = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/snippet-tnGGMkUnqNH8hCHFJ4g8VbE6ipfJCQ.txt";
 
     useEffect(() => {
         axios
@@ -31,59 +33,53 @@ export default function departments() {
 
     const handleSave = (id) => {
         const originalData = userData.find((user) => user.id === id);
+        const { name, role } = editedData;
 
-        // Remove uneditable fields (like email and activeDate) from editedData before comparing
-        const { email, activeDate, ...editedDataWithoutEmailAndDate } =
-            editedData;
-
-        // Check if there are any changes, excluding email and activeDate
-        const hasChanges = Object.keys(editedDataWithoutEmailAndDate).some(
-            (key) => editedDataWithoutEmailAndDate[key] !== originalData[key]
-        );
-
-        if (!hasChanges) {
+        // Check if there are any changes
+        if (name === originalData.name && role === originalData.role) {
             console.log("No changes detected. Skipping update.");
-            setEditRowId(null); // Exit edit mode
+            setEditRowId(null);
             return;
         }
 
-        // Log the data being sent
-        console.log("Sending data to update:", {
-            ...editedDataWithoutEmailAndDate,
-            email: originalData.email,
-            activeDate: originalData.activeDate,
-        });
+        const updatedData = {
+            name,
+            role
+        };
 
-        // Proceed with update if changes exist
         axios
-            .post(`/updateUser/${id}`, {
-                ...editedDataWithoutEmailAndDate,
-                email: originalData.email,
-                activeDate: originalData.activeDate,
-            })
+            .put(`/api/users/${id}`, updatedData)
             .then((response) => {
                 console.log("User updated successfully!", response.data);
-
-                // Update the local data with the new data
                 setUserData((prevData) =>
                     prevData.map((user) =>
                         user.id === id
-                            ? { ...user, ...editedDataWithoutEmailAndDate }
+                            ? { ...user, ...updatedData }
                             : user
                     )
                 );
-
                 toast.success("User updated successfully!");
             })
             .catch((error) => {
-                console.error(
-                    "Error updating user:",
-                    error.response?.data || error
-                );
+                console.error("Error updating user:", error.response?.data || error);
                 toast.error("Failed to update user.");
             })
             .finally(() => {
-                setEditRowId(null); // Exit edit mode
+                setEditRowId(null);
+            });
+    };
+
+    const handleDelete = (id) => {
+        axios
+            .post(`/deleteUser/${id}`, { attachmentUrl: attachmentUrl })
+            .then((response) => {
+                console.log("User deleted successfully!", response.data);
+                setUserData((prevData) => prevData.filter((user) => user.id !== id));
+                toast.success("User deleted successfully!");
+            })
+            .catch((error) => {
+                console.error("Error deleting user:", error.response?.data || error);
+                toast.error("Failed to delete user.");
             });
     };
 
@@ -97,9 +93,7 @@ export default function departments() {
                     <input
                         type="text"
                         value={editedData.name || ""}
-                        onChange={(e) =>
-                            handleInputChange("name", e.target.value)
-                        }
+                        onChange={(e) => handleInputChange("name", e.target.value)}
                         className="border p-1 rounded"
                     />
                 ) : (
@@ -113,14 +107,10 @@ export default function departments() {
                 editRowId === item.id ? (
                     <select
                         value={editedData.role || ""}
-                        onChange={(e) =>
-                            handleInputChange("role", e.target.value)
-                        }
+                        onChange={(e) => handleInputChange("role", e.target.value)}
                         className="border p-1 rounded"
                     >
-                        <option value="" disabled>
-                            Select Role
-                        </option>
+                        <option value="" disabled>Select Role</option>
                         <option value="Admin">Admin</option>
                         <option value="Task Force">Task Force</option>
                         <option value="Accreditor">Accreditor</option>
@@ -132,16 +122,12 @@ export default function departments() {
         {
             key: "email",
             label: "Email",
-            render: (item) => (
-                <span>{item.email}</span> // Email field is read-only
-            ),
+            render: (item) => <span>{item.email}</span>,
         },
         {
             key: "activeDate",
             label: "Active Date",
-            render: (item) => (
-                <span>{item.activeDate || "N/A"}</span> // Active Date field is read-only
-            ),
+            render: (item) => <span>{item.activeDate || "N/A"}</span>,
         },
         {
             key: "actions",
@@ -165,7 +151,7 @@ export default function departments() {
                     )}
                     <button
                         className="text-red-600 hover:text-red-900 mr-2"
-                        onClick={() => console.log("Delete action")}
+                        onClick={() => handleDelete(item.id)}
                     >
                         <Trash size={18} />
                     </button>
@@ -207,3 +193,4 @@ export default function departments() {
         </AdminLayout>
     );
 }
+
