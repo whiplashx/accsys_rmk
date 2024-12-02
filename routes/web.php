@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
 })->middleware(['auth', 'verified']);
 
 
@@ -54,7 +55,6 @@ Route::get('fetchData', [DepartmentController::class, 'fetchData'])->name('fetch
 Route::get('getUser', [AdminController::class, 'getUser'])->name('getUser');
 
 //MAIL CONTROLLERS
-
 Route::get('/email/verify', function () {
     return view('auth.verify-email');
 })->middleware('auth')->name('verification.notice');
@@ -68,3 +68,8 @@ Route::post('/email/verification-notification', function (Request $request) {
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 require __DIR__.'/auth.php';
+
+
+//API FOR ADMIN CRUD
+
+
