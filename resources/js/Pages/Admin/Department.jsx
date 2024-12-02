@@ -9,6 +9,8 @@ export default function Departments() {
     const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
     const [selectedDepartment, setSelectedDepartment] = useState(null);
     const [newSchedule, setNewSchedule] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
 
     useEffect(() => {
         fetchData();
@@ -21,24 +23,44 @@ export default function Departments() {
         })
         .catch(error => {
             console.error('Error: ', error);
+            setError("Failed to fetch data. Please try again.");
         });
     };
 
     const handleAddSchedule = (item) => {
         setSelectedDepartment(item);
         setIsAddScheduleOpen(true);
+        setError("");
     };
 
     const submitSchedule = () => {
-        axios.post('updateSchedule', { id: selectedDepartment.id, schedule: newSchedule })
-        .then(() => {
-            setIsAddScheduleOpen(false);
-            fetchData(); // Refresh data after updating
-        })
-        .catch(error => {
-            console.error('Error updating schedule: ', error);
-        });
-    };
+      setIsLoading(true);
+      setError("");
+      axios.post(`/departments/${selectedDepartment.id}/schedule`, { schedule: newSchedule })
+          .then(response => {
+              setIsLoading(false);
+              setIsAddScheduleOpen(false);
+              // Update the local state to reflect the change
+              setData(prevData => prevData.map(item => 
+                  item.id === selectedDepartment.id ? { ...item, schedule: response.data.schedule } : item
+              ));
+              setNewSchedule("");
+              setSelectedDepartment(null);
+          })
+          .catch(error => {
+              setIsLoading(false);
+              console.error('Error updating schedule: ', error);
+              if (error.response && error.response.data && error.response.data.errors) {
+                  // Laravel validation errors
+                  const errorMessages = Object.values(error.response.data.errors).flat();
+                  setError(errorMessages.join(' '));
+              } else {
+                  setError("Failed to update schedule. Please try again.");
+              }
+          });
+  };
+  
+  
 
     const getStatus = (schedule) => {
         if (!schedule) return 'Inactive';
@@ -105,17 +127,23 @@ export default function Departments() {
                                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
                                 />
                             </div>
+                            {error && <p className="text-red-500 text-sm">{error}</p>}
                             <div className="items-center px-4 py-3">
                                 <button
                                     onClick={submitSchedule}
-                                    className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                    disabled={isLoading}
+                                    className="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:opacity-50"
                                 >
-                                    Save
+                                    {isLoading ? 'Saving...' : 'Save'}
                                 </button>
                             </div>
                             <div className="items-center px-4 py-3">
                                 <button
-                                    onClick={() => setIsAddScheduleOpen(false)}
+                                    onClick={() => {
+                                        setIsAddScheduleOpen(false);
+                                        setError("");
+                                        setNewSchedule("");
+                                    }}
                                     className="px-4 py-2 bg-gray-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-300"
                                 >
                                     Cancel

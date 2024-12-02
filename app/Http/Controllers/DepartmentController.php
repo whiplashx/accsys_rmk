@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
 use App\Models\Department;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class DepartmentController extends Controller
 {
@@ -23,14 +23,16 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'code' => 'required|string|max:255|unique:departments',
-            'areaID' => 'nullable|string|max:255',
-            'schedule' => 'nullable|string',
+            'code' => 'required|string|max:50|unique:departments',
         ]);
 
-        $department = Department::create($validated);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $department = Department::create($request->all());
         return response()->json($department, 201);
     }
 
@@ -41,19 +43,16 @@ class DepartmentController extends Controller
 
     public function update(Request $request, Department $department)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'code' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::unique('departments')->ignore($department->id),
-            ],
-            'areaID' => 'nullable|string|max:255',
-            'schedule' => 'nullable|string',
+        $validator = Validator::make($request->all(), [
+            'name' => 'string|max:255',
+            'code' => 'string|max:50|unique:departments,code,' . $department->id,
         ]);
 
-        $department->update($validated);
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $department->update($request->all());
         return response()->json($department);
     }
 
@@ -62,5 +61,20 @@ class DepartmentController extends Controller
         $department->delete();
         return response()->json(null, 204);
     }
-}
 
+    public function updateSchedule(Request $request, Department $department)
+    {
+        $validator = Validator::make($request->all(), [
+            'schedule' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $department->schedule = $request->schedule;
+        $department->save();
+
+        return response()->json($department);
+    }
+}

@@ -50,7 +50,12 @@ foreach ($adminPages as $uri => $component) {
 //DEPARTMENT API
 Route::apiResource('department', DepartmentController::class);
 Route::get('fetchData', [DepartmentController::class, 'fetchData'])->name('fetchDepartment');
-
+Route::prefix('departments')->group(function () {
+    Route::get('/{department}', [DepartmentController::class, 'show']);
+    Route::put('/{department}', [DepartmentController::class, 'update']);
+    Route::delete('/{department}', [DepartmentController::class, 'destroy']);
+    Route::post('/{department}/schedule', [DepartmentController::class, 'updateSchedule']);
+});
 //API FOR USERS
 Route::get('getUser', [AdminController::class, 'getUser'])->name('getUser');
 
