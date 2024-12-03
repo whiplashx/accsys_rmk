@@ -6,10 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Parameter extends Model
 {
-    protected $fillable = ['id', 'area_id', 'name'];
+    //
+    public function area()
+{
+    return $this->belongsTo(Area::class);
+}
 
-    public function indicator()
-    {
-        return $this->hasMany(Indicator::class);
-    }
+public function indicators()
+{
+    return $this->hasMany(Indicator::class);
+}
+
 }

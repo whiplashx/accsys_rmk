@@ -1,4 +1,5 @@
 <?php
+use App\Http\Controllers\AccreditationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DepartmentController;
@@ -80,4 +81,8 @@ require __DIR__.'/auth.php';
 Route::middleware('auth')->group(function () {
     Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
 })->middleware(['auth', 'verified']);
+
+
+Route::get('/accreditation-areas', [AccreditationController::class, 'index']);
+
 
