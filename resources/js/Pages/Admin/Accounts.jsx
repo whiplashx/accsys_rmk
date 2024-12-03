@@ -120,6 +120,21 @@ export default function Departments() {
                 ),
         },
         {
+            key: "department",
+            label: "Department",
+            render: (item) =>
+                editRowId === item.id ? (
+                    <input
+                        type="text"
+                        value={editedData.department || ""}
+                        onChange={(e) => handleInputChange("department", e.target.value)}
+                        className="border p-1 rounded"
+                    />
+                ) : (
+                    item.department || "N/A"
+                ),
+        },
+        {
             key: "email",
             label: "Email",
             render: (item) => <span>{item.email}</span>,
@@ -165,6 +180,7 @@ export default function Departments() {
             ),
         },
     ];
+    
 
     return (
         <AdminLayout>
