@@ -7,7 +7,7 @@ const useAccreditationData = () => {
 
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('/api/accreditation-areas');
+      const response = await axios.get('/accreditation-areas');
       setAreas(response.data);
       setLoading(false);
     } catch (error) {
