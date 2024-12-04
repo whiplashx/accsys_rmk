@@ -16,9 +16,10 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
 
     if (searchTerm) {
       filteredData = filteredData.filter(item =>
-        Object.values(item).some(value =>
-          value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        columns.some(column => {
+          const value = item[column.key];
+          return value && value.toString().toLowerCase().includes(searchTerm.toLowerCase());
+        })
       );
     }
 
@@ -37,7 +38,7 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
     }
 
     return filteredData;
-  }, [data, searchTerm, filters, sortColumn, sortDirection]);
+  }, [data, searchTerm, filters, sortColumn, sortDirection, columns]);
 
   const pageCount = Math.ceil(filteredData.length / itemsPerPage);
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -68,10 +69,10 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
   return (
     <div className="bg-white shadow-md rounded-lg overflow-hidden">
       {exports && (
-        <div className="p-4 flex flex-wrap justify-between items-center border-b border-gray-200">
+        <div className="p-4 flex flex-wrap justify-between items-center border-b border-slate-200">
           <button
             onClick={() => toPDF()}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
+            className="bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded inline-flex items-center"
           >
             <FileDown className="mr-2" size={20} />
             Export to PDF
@@ -85,16 +86,16 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
             <input
               type="text"
               placeholder="Search..."
-              className="pl-10 pr-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="pl-10 pr-4 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"
               value={searchTerm}
               onChange={handleSearch}
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
           </div>
           {columns.filter(col => col.filterable).map(col => (
             <select
               key={col.key}
-              className="border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-slate-500"
               value={filters[col.key] || ''}
               onChange={(e) => handleFilter(col.key, e.target.value)}
             >
@@ -109,12 +110,12 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
 
       <div className="overflow-x-auto" ref={targetRef}>
         <table className="w-full" ref={tableRef}>
-          <thead className="bg-gray-50">
+          <thead className="bg-slate-50">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                  className="px-6 py-3 text-left text-xs font-medium text-slate-700 uppercase tracking-wider cursor-pointer"
                   onClick={() => handleSort(column.key)}
                 >
                   <div className="flex items-center">
@@ -131,11 +132,11 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white divide-y divide-slate-200">
             {currentItems.map((item, index) => (
               <tr key={item.id || `row-${index}`}>
                 {columns.map(column => (
-                  <td key={`${item.id || index}-${column.key}`} className="px-6 py-4 whitespace-nowrap">
+                  <td key={`${item.id || index}-${column.key}`} className="px-6 py-4 whitespace-nowrap text-slate-800">
                     {column.render ? column.render(item) : item[column.key]}
                   </td>
                 ))}
@@ -145,26 +146,26 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
         </table>
       </div>
       
-      <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
         <div className="flex-1 flex justify-between sm:hidden">
           <button
             onClick={() => paginate(currentPage - 1)}
             disabled={currentPage === 1}
-            className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
           >
             Previous
           </button>
           <button
             onClick={() => paginate(currentPage + 1)}
             disabled={currentPage === pageCount}
-            className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+            className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50"
           >
             Next
           </button>
         </div>
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p className="text-sm text-gray-700">
+            <p className="text-sm text-slate-700">
               Showing <span className="font-medium">{indexOfFirstItem + 1}</span> to{' '}
               <span className="font-medium">
                 {indexOfLastItem > filteredData.length ? filteredData.length : indexOfLastItem}
@@ -177,7 +178,7 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
               <button
                 onClick={() => paginate(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-slate-300 bg-white text-sm font-medium text-slate-500 hover:bg-slate-50"
               >
                 <span className="sr-only">Previous</span>
                 <ChevronLeft className="h-5 w-5" aria-hidden="true" />
@@ -188,8 +189,8 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
                   onClick={() => paginate(number + 1)}
                   className={`relative inline-flex items-center px-4 py-2 border text-sm font-medium ${
                     currentPage === number + 1
-                      ? 'z-10 bg-indigo-50 border-indigo-500 text-indigo-600'
-                      : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                      ? 'z-10 bg-slate-50 border-slate-500 text-slate-600'
+                      : 'bg-white border-slate-300 text-slate-500 hover:bg-slate-50'
                   }`}
                 >
                   {number + 1}
@@ -198,7 +199,7 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
               <button
                 onClick={() => paginate(currentPage + 1)}
                 disabled={currentPage === pageCount}
-                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50"
+                className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-slate-300 bg-white text-sm font-medium text-slate-500 hover:bg-slate-50"
               >
                 <span className="sr-only">Next</span>
                 <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -212,4 +213,3 @@ const DataTable = ({ data, columns, itemsPerPage = 10, exports, filterss }) => {
 };
 
 export default DataTable;
-
