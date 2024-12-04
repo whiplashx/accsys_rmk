@@ -56,7 +56,7 @@ const AccreditationAdminDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-white p-8">
+    <div className="min-h-screen bg-white ">
       <div className="bg-slate-600 text-white p-8 rounded-lg mb-8">
         <h1 className="text-3xl font-bold mb-4">Accreditation Dashboard</h1>
         <div className="flex space-x-4">

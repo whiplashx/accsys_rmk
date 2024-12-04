@@ -6,7 +6,7 @@ import TextInput from '@/Components/TextInput';
 import GuestLayout from '@/Layouts/GuestLayout';
 import DropdownSelect from '@/Components/DropdownSelect';
 import { Head, Link, useForm } from '@inertiajs/react';
-
+/*
 export default function Register() {
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
@@ -139,3 +139,4 @@ export default function Register() {
         </GuestLayout>
     );
 }
+    */
