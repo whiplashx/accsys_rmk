@@ -5,6 +5,7 @@ import AccreditorLayout from '@/Layouts/AccreditorLayout';
 import { Head, usePage } from '@inertiajs/react';
 import { Children, useState } from 'react';
 import Progress from '@/Components/DataVisualization/Progress';
+import AccreditationAdminDashboard from '@/Components/AccreditationAdminDashboard';
 
 export default function Dashboard() {
     const user = usePage().props.auth.user;
@@ -25,9 +26,9 @@ export default function Dashboard() {
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
-                            Admin
-                            You're logged in!
-                            <Progress> </Progress>
+                            <AccreditationAdminDashboard>
+
+                            </AccreditationAdminDashboard>
                         </div>
                     </div>
                 </div>
