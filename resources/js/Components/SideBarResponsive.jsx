@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ProfileSection from './ProfileSection';
 import ApplicationLogo from './ApplicationLogo';
-import departments from '@/Pages/Admin/Department';
+import departments from '@/Pages/Admin/Departments';
 
 const sidebarItems = [
   { icon: 'dashboard', label: 'Dashboard', href: route('dashboard') },

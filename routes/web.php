@@ -33,20 +33,42 @@ Route::middleware('auth')->group(function () {
 
 
 
-$adminPages = [
-    'departments' => 'Departments',
-    'documents' => 'Documents',
-    'accounts' => 'Accounts',
-    'accreditation' => 'Accreditation',
-    'scheduling' => 'Scheduling',
-    'settings' => 'Settings',
-];
+Route::middleware(['auth', 'verified', 'role:admin'])
+    ->group(function () {
+        Route::get('/departments', function () {
+            return Inertia::render('Admin/Departments');
+        })->name('departments');
 
-foreach ($adminPages as $uri => $component) {
-    Route::get("/$uri", function () use ($component) {
-        return Inertia::render('Admin/'. $component);
-    })->name($uri)->middleware('auth', 'verified', 'role:admin');
-}
+        Route::get('/documents', function () {
+            return Inertia::render('Admin/Documents');
+        })->name('documents');
+
+        Route::get('/accounts', function () {
+            return Inertia::render('Admin/Accounts');
+        })->name('accounts');
+
+        Route::get('/accreditation', function () {
+            return Inertia::render('Admin/Accreditation');
+        })->name('accreditation');
+
+        Route::get('/scheduling', function () {
+            return Inertia::render('Admin/Scheduling');
+        })->name('scheduling');
+
+        Route::get('/settings', function () {
+            return Inertia::render('Admin/Settings');
+        })->name('settings');
+    });
+
+Route::middleware(['auth', 'verified', 'role:localtaskforce'])
+    ->group(function () {
+        Route::get('/departments', function () {
+            return Inertia::render('Admin/Departments');
+        })->name('departments');
+
+        
+    });
+
 
 
 
