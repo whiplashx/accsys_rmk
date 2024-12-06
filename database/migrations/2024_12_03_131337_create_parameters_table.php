@@ -6,13 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
+    /*
      * Run the migrations.
-     */
+    
     public function up(): void
     {
+        /*
+        /*
+        /*
         Schema::create('parameters', function (Blueprint $table) {
-            $table->unsignedBigInteger('10')->primary();
+            $table->unsignedBigInteger('id')->primary();
             $table->string('name');
             $table->unsignedBigInteger('area_id');
             $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
@@ -21,11 +24,10 @@ return new class extends Migration
         
     }
 
-    /**
-     * Reverse the migrations.
-     */
+
     public function down(): void
     {
         Schema::dropIfExists('parameters');
     }
+        */
 };

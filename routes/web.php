@@ -43,15 +43,15 @@ $rolePages = [
         'settings' => 'Settings',
     ],
     'localtaskforce' => [
-        'dashboard' => 'TaskforceDashboard',
+        'dashboard' => 'Dashboard',
         'reports' => 'Reports',
     ],
     'accreditor' => [
-        'dashboard' => 'AccreditorDashboard',
+        'dashboard' => 'Dashboard',
         'submissions' => 'Submissions',
     ],
     'localaccreditor' => [
-        'dashboard' => 'LocalDashboard',
+        'dashboard' => 'Dashboard',
         'reviews' => 'Reviews',
     ],
 ];
@@ -59,13 +59,14 @@ $rolePages = [
 // Loop through roles and define routes
 foreach ($rolePages as $role => $pages) {
     foreach ($pages as $uri => $component) {
-        Route::get("/$uri", function () use ($component) {
-            return Inertia::render("Admin/". $component);
+        Route::get("/$uri", function () use ($role, $component) {
+            // Render the component with a dynamic directory based on the role
+            $directory = ucfirst($role); // e.g., Admin, LocalTaskForce
+            return Inertia::render("$directory/$component");
         })->name("$role.$uri")
-          ->middleware('auth', 'verified');
+          ->middleware(['auth', 'verified', "role:$role"]); // Role-based middleware
     }
 }
-
 
 
 
