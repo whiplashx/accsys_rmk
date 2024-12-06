@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 const sidebarItems = [
   { icon: 'dashboard', label: 'Dashboard', href: '#' },
   { icon: 'accreditation', label: 'Accreditation', href: '#' },
-  { icon: 'tasks', label: 'Tasks', href: '#' },
+  //{ icon: 'tasks', label: 'Tasks', href: '#' },
   { icon: 'selfsurvey', label: 'Self-Survey', href: '#' },
   { icon: 'settings', label: 'Settings', href: '#' },
 ];

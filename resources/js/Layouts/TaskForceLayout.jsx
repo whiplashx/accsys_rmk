@@ -55,7 +55,7 @@ const icons = {
   ),
 };
 
-export default function AccreditationLayout({ children }) {
+export default function TaskForceLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
