@@ -62,13 +62,35 @@ Route::middleware(['auth', 'verified', 'role:admin'])
 
 Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     ->group(function () {
-        Route::get('/departments', function () {
-            return Inertia::render('Admin/Departments');
-        })->name('departments');
         Route::get('/accreditation', function () {
             return Inertia::render('LocalTaskForce/Accreditation');
         })->name('accreditation');
-        
+        Route::get('/tasks', function () {
+            return Inertia::render('LocalTaskForce/Tasks');
+        })->name('tasks');
+        Route::get('/selfsurvey', function () {
+            return Inertia::render('LocalTaskForce/Selfsurvey');
+        })->name('selfsuvey');
+        Route::get('/settings', function () {
+            return Inertia::render('LocalTaskForce/settings');
+        })->name('settings');
+
+    });
+Route::middleware(['auth', 'verified', 'role:localaccreditor'])
+    ->group(function () {
+        Route::get('/accreditation', function () {
+            return Inertia::render('LocalAccreditor/Accreditation');
+        })->name('accreditation');
+        Route::get('/tasks', function () {
+            return Inertia::render('LocalAccreditor/Tasks');
+        })->name('tasks');
+        Route::get('/selfsurvey', function () {
+            return Inertia::render('LocalAccreditor/Selfsurvey');
+        })->name('selfsuvey');
+        Route::get('/settings', function () {
+            return Inertia::render('LocalAccreditor/settings');
+        })->name('settings');
+
     });
 
 
@@ -92,14 +114,14 @@ Route::get('/email/verify', function () {
 })->middleware('auth')->name('verification.notice');
 Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
     $request->fulfill();
- 
+
     return redirect('/home');
-})->middleware(['auth', 'signed'])->name('verification.verify'); 
+})->middleware(['auth', 'signed'])->name('verification.verify');
 Route::post('/email/verification-notification', function (Request $request) {
     $request->user()->sendEmailVerificationNotification();
     return back()->with('message', 'Verification link sent!');
 })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 
 //API FOR ADMIN CRUD

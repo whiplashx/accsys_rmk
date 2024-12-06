@@ -10,6 +10,7 @@ import {
   ExclamationCircleIcon,
   AcademicCapIcon
 } from '@heroicons/react/24/outline';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const AccreditationAdminDashboard = () => {
   const [dashboardData, setDashboardData] = useState({
@@ -24,7 +25,9 @@ const AccreditationAdminDashboard = () => {
     overallProgress: 0,
     teamMembers: 0,
     completedCriteria: 0,
-    totalCriteria: 0
+    totalCriteria: 0,
+    criteriaCompletionData: [],
+    progressTrendData: []
   });
 
   const [selectedDepartment, setSelectedDepartment] = useState(null);
@@ -32,7 +35,48 @@ const AccreditationAdminDashboard = () => {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const response = await axios.get('/api/accreditation/dashboard');
+        // Simulated API call
+        const response = {
+          data: {
+            departments: [
+              { name: 'BSIT', progress: 75 },
+              { name: 'BSFi', progress: 60 },
+              { name: 'BSCpE', progress: 80 }
+            ],
+            areas: [
+              { name: 'Curriculum', progress: 85 },
+              { name: 'Faculty', progress: 70 },
+              { name: 'Facilities', progress: 65 },
+              { name: 'Research', progress: 55 },
+              { name: 'Extension', progress: 75 }
+            ],
+            recentActivities: [
+              { description: 'Updated curriculum for BSIT', date: '2023-06-01' },
+              { description: 'Conducted faculty evaluation', date: '2023-05-28' },
+              { description: 'Submitted research papers', date: '2023-05-25' }
+            ],
+            upcomingDeadlines: [
+              { task: 'Complete self-survey report', date: '2023-06-15' },
+              { task: 'Prepare for mock visit', date: '2023-06-20' },
+              { task: 'Submit final documentation', date: '2023-06-25' }
+            ],
+            overallProgress: 72,
+            teamMembers: 45,
+            completedCriteria: 128,
+            totalCriteria: 180,
+            criteriaCompletionData: [
+              { name: 'Completed', value: 128 },
+              { name: 'Remaining', value: 52 }
+            ],
+            progressTrendData: [
+              { month: 'Jan', progress: 20 },
+              { month: 'Feb', progress: 35 },
+              { month: 'Mar', progress: 45 },
+              { month: 'Apr', progress: 60 },
+              { month: 'May', progress: 72 }
+            ]
+          }
+        };
         setDashboardData(response.data);
         setSelectedDepartment(response.data.departments[0]);
       } catch (error) {
@@ -55,8 +99,10 @@ const AccreditationAdminDashboard = () => {
     </div>
   );
 
+  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
+
   return (
-    <div className="min-h-screen bg-white ">
+    <div className="min-h-screen bg-white">
       <div className="bg-slate-600 text-white p-8 rounded-lg mb-8">
         <h1 className="text-3xl font-bold mb-4">Accreditation Dashboard</h1>
         <div className="flex space-x-4">
@@ -113,25 +159,75 @@ const AccreditationAdminDashboard = () => {
         />
       </div>
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="bg-slate-50 rounded-lg p-6 shadow-md">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Criteria Completion</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <PieChart>
+              <Pie
+                data={dashboardData.criteriaCompletionData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+              >
+                {dashboardData.criteriaCompletionData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        <div className="bg-slate-50 rounded-lg p-6 shadow-md">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Progress Trend</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={dashboardData.progressTrendData}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line type="monotone" dataKey="progress" stroke="#8884d8" activeDot={{ r: 8 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-slate-50 rounded-lg p-6 shadow-md">
           <h2 className="text-xl font-semibold text-slate-800 mb-4">Accreditation Areas</h2>
-          <div className="space-y-4">
-            {dashboardData.areas.map((area, index) => (
-              <div key={index} className="bg-white rounded-lg p-4 shadow">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-slate-700">{area.name}</span>
-                  <span className="text-sm text-slate-600">{area.progress}%</span>
-                </div>
-                <div className="w-full bg-slate-200 rounded-full h-2.5">
-                  <div 
-                    className="bg-slate-600 h-2.5 rounded-full" 
-                    style={{ width: `${area.progress}%` }}
-                  ></div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={dashboardData.areas}
+              margin={{
+                top: 5,
+                right: 30,
+                left: 20,
+                bottom: 5,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="progress" fill="#8884d8" />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
 
         <div className="space-y-8">
@@ -165,3 +261,4 @@ const AccreditationAdminDashboard = () => {
 };
 
 export default AccreditationAdminDashboard;
+

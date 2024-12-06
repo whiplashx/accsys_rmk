@@ -85,13 +85,13 @@ const LocalTaskForceDashboard = () => {
   }, []);
 
   const StatCard = ({ title, value, icon: Icon }) => (
-    <div className="bg-blue-50 rounded-lg p-6 shadow-md">
+    <div className="bg-slate-50 rounded-lg p-6 shadow-md">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-blue-600">{title}</p>
-          <p className="text-2xl font-semibold text-blue-800">{value}</p>
+          <p className="text-sm font-medium text-slate-600">{title}</p>
+          <p className="text-2xl font-semibold text-slate-800">{value}</p>
         </div>
-        <Icon className="h-8 w-8 text-blue-500" />
+        <Icon className="h-8 w-8 text-slate-500" />
       </div>
     </div>
   );
@@ -100,13 +100,13 @@ const LocalTaskForceDashboard = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <div className="bg-blue-600 text-white p-8 rounded-lg mb-8">
+      <div className="bg-slate-600 text-white p-8 rounded-lg mb-8">
         <h1 className="text-3xl font-bold mb-4">LocalTaskForce Dashboard</h1>
         <div className="flex space-x-4">
           {dashboardData.departments.map((dept, index) => (
             <button
               key={index}
-              className={`px-4 py-2 rounded-full ${selectedDepartment?.name === dept.name ? 'bg-white text-blue-600' : 'bg-blue-500 hover:bg-blue-400'}`}
+              className={`px-4 py-2 rounded-full ${selectedDepartment?.name === dept.name ? 'bg-white text-slate-600' : 'bg-slate-500 hover:bg-slate-400'}`}
               onClick={() => setSelectedDepartment(dept)}
             >
               {dept.name}
@@ -116,17 +116,17 @@ const LocalTaskForceDashboard = () => {
       </div>
 
       {selectedDepartment && (
-        <div className="bg-blue-100 p-6 rounded-lg mb-8">
+        <div className="bg-slate-100 p-6 rounded-lg mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold text-blue-800">{selectedDepartment.name}</h2>
-              <p className="text-blue-600">Task Completion Progress</p>
+              <h2 className="text-2xl font-bold text-slate-800">{selectedDepartment.name}</h2>
+              <p className="text-slate-600">Task Completion Progress</p>
             </div>
-            <div className="text-4xl font-bold text-blue-600">{selectedDepartment.progress}%</div>
+            <div className="text-4xl font-bold text-slate-600">{selectedDepartment.progress}%</div>
           </div>
-          <div className="w-full bg-blue-200 rounded-full h-4 mt-4">
+          <div className="w-full bg-slate-200 rounded-full h-4 mt-4">
             <div 
-              className="bg-blue-500 h-4 rounded-full" 
+              className="bg-slate-500 h-4 rounded-full" 
               style={{ width: `${selectedDepartment.progress}%` }}
             ></div>
           </div>
@@ -157,8 +157,8 @@ const LocalTaskForceDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        <div className="bg-blue-50 rounded-lg p-6 shadow-md">
-          <h2 className="text-xl font-semibold text-blue-800 mb-4">Task Completion</h2>
+        <div className="bg-slate-50 rounded-lg p-6 shadow-md">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Task Completion</h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
@@ -181,8 +181,8 @@ const LocalTaskForceDashboard = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-blue-50 rounded-lg p-6 shadow-md">
-          <h2 className="text-xl font-semibold text-blue-800 mb-4">Resource Allocation</h2>
+        <div className="bg-slate-50 rounded-lg p-6 shadow-md">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Resource Allocation</h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
               data={dashboardData.resourceAllocationData}
@@ -205,18 +205,18 @@ const LocalTaskForceDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-blue-50 rounded-lg p-6 shadow-md">
-          <h2 className="text-xl font-semibold text-blue-800 mb-4">Task Categories</h2>
+        <div className="bg-slate-50 rounded-lg p-6 shadow-md">
+          <h2 className="text-xl font-semibold text-slate-800 mb-4">Task Categories</h2>
           <div className="space-y-4">
             {dashboardData.taskCategories.map((category, index) => (
               <div key={index} className="bg-white rounded-lg p-4 shadow">
                 <div className="flex justify-between items-center mb-2">
-                  <span className="font-medium text-blue-700">{category.name}</span>
-                  <span className="text-sm text-blue-600">{category.progress}%</span>
+                  <span className="font-medium text-slate-700">{category.name}</span>
+                  <span className="text-sm text-slate-600">{category.progress}%</span>
                 </div>
-                <div className="w-full bg-blue-200 rounded-full h-2.5">
+                <div className="w-full bg-slate-200 rounded-full h-2.5">
                   <div 
-                    className="bg-blue-600 h-2.5 rounded-full" 
+                    className="bg-slate-600 h-2.5 rounded-full" 
                     style={{ width: `${category.progress}%` }}
                   ></div>
                 </div>
@@ -226,24 +226,24 @@ const LocalTaskForceDashboard = () => {
         </div>
 
         <div className="space-y-8">
-          <div className="bg-blue-50 rounded-lg p-6 shadow-md">
-            <h2 className="text-xl font-semibold text-blue-800 mb-4">Recent Activities</h2>
+          <div className="bg-slate-50 rounded-lg p-6 shadow-md">
+            <h2 className="text-xl font-semibold text-slate-800 mb-4">Recent Activities</h2>
             <ul className="space-y-2">
               {dashboardData.recentActivities.map((activity, index) => (
-                <li key={index} className="flex items-center text-blue-700">
-                  <ClockIcon className="h-5 w-5 mr-2 text-blue-600" />
+                <li key={index} className="flex items-center text-slate-700">
+                  <ClockIcon className="h-5 w-5 mr-2 text-slate-600" />
                   <span>{activity.description} - {activity.date}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="bg-blue-50 rounded-lg p-6 shadow-md">
-            <h2 className="text-xl font-semibold text-blue-800 mb-4">Upcoming Events</h2>
+          <div className="bg-slate-50 rounded-lg p-6 shadow-md">
+            <h2 className="text-xl font-semibold text-slate-800 mb-4">Upcoming Events</h2>
             <ul className="space-y-2">
               {dashboardData.upcomingEvents.map((event, index) => (
-                <li key={index} className="flex items-center text-blue-700">
-                  <ExclamationCircleIcon className="h-5 w-5 mr-2 text-blue-600" />
+                <li key={index} className="flex items-center text-slate-700">
+                  <ExclamationCircleIcon className="h-5 w-5 mr-2 text-slate-600" />
                   <span>{event.task} - Date: {event.date}</span>
                 </li>
               ))}
