@@ -62,7 +62,7 @@ foreach ($rolePages as $role => $pages) {
         Route::get("/$uri", function () use ($component) {
             return Inertia::render("Admin/". $component);
         })->name("$role.$uri")
-          ->middleware('auth', 'verified', "role:$role");
+          ->middleware('auth', 'verified');
     }
 }
 

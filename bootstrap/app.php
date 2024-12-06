@@ -3,6 +3,8 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Spatie\Permission\Middleware\RoleMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,7 +16,12 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
-            'role'=>\App\Http\Middleware\RoleMiddleware::class,
+           // 'role'=>\App\Http\Middleware\RoleMiddleware::class,
+
+        ]);
+        $middleware->alias(aliases:[
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
 
         ]);
 
