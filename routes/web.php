@@ -32,40 +32,20 @@ Route::middleware('auth')->group(function () {
 
 
 
-// Role-based pages
-$rolePages = [
-    'admin' => [
-        'departments' => 'Department',
-        'documents' => 'Documents',
-        'accounts' => 'Accounts',
-        'accreditation' => 'Accreditation',
-        'scheduling' => 'Scheduling',
-        'settings' => 'Settings',
-    ],
-    'localtaskforce' => [
-        'dashboard' => 'Dashboard',
-        'reports' => 'Reports',
-    ],
-    'accreditor' => [
-        'dashboard' => 'Dashboard',
-        'submissions' => 'Submissions',
-    ],
-    'localaccreditor' => [
-        'dashboard' => 'Dashboard',
-        'reviews' => 'Reviews',
-    ],
+
+$adminPages = [
+    'departments' => 'Departments',
+    'documents' => 'Documents',
+    'accounts' => 'Accounts',
+    'accreditation' => 'Accreditation',
+    'scheduling' => 'Scheduling',
+    'settings' => 'Settings',
 ];
 
-// Loop through roles and define routes
-foreach ($rolePages as $role => $pages) {
-    foreach ($pages as $uri => $component) {
-        Route::get("/$uri", function () use ($role, $component) {
-            // Render the component with a dynamic directory based on the role
-            $directory = ucfirst($role); // e.g., Admin, LocalTaskForce
-            return Inertia::render("$directory/$component");
-        })->name("$role.$uri")
-          ->middleware(['auth', 'verified', "role:$role"]); // Role-based middleware
-    }
+foreach ($adminPages as $uri => $component) {
+    Route::get("/$uri", function () use ($component) {
+        return Inertia::render('Admin/'. $component);
+    })->name($uri)->middleware('auth', 'verified', 'role:admin');
 }
 
 
@@ -73,7 +53,7 @@ foreach ($rolePages as $role => $pages) {
 //DEPARTMENT API
 Route::apiResource('department', DepartmentController::class);
 Route::get('fetchData', [DepartmentController::class, 'fetchData'])->name('fetchDepartment');
-Route::prefix('departments')->group(function () {
+Route::prefix('department')->group(function () {
     Route::get('/{department}', [DepartmentController::class, 'show']);
     Route::put('/{department}', [DepartmentController::class, 'update']);
     Route::delete('/{department}', [DepartmentController::class, 'destroy']);
