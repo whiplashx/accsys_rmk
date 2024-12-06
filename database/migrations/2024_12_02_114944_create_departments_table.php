@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up()
     {
+  
         Schema::create('departments', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
             $table->string('name'); // Department name

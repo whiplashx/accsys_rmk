@@ -32,21 +32,41 @@ Route::middleware('auth')->group(function () {
 
 
 
-$adminPages = [
-    'departments' => 'Department',
-    'documents' => 'Documents',
-    'accounts' => 'Accounts',
-    'accreditation' => 'Accreditation',
-    'scheduling' => 'Scheduling',
-    'settings' => 'Settings',
+// Role-based pages
+$rolePages = [
+    'admin' => [
+        'departments' => 'Department',
+        'documents' => 'Documents',
+        'accounts' => 'Accounts',
+        'accreditation' => 'Accreditation',
+        'scheduling' => 'Scheduling',
+        'settings' => 'Settings',
+    ],
+    'localtaskforce' => [
+        'dashboard' => 'TaskforceDashboard',
+        'reports' => 'Reports',
+    ],
+    'accreditor' => [
+        'dashboard' => 'AccreditorDashboard',
+        'submissions' => 'Submissions',
+    ],
+    'localaccreditor' => [
+        'dashboard' => 'LocalDashboard',
+        'reviews' => 'Reviews',
+    ],
 ];
 
-foreach ($adminPages as $uri => $component) {
-    Route::get("/$uri", function () use ($component) {
-        return Inertia::render('Admin/' . $component);
-    })->name("$uri")
-      ->middleware(['auth', 'verified', 'role:admin']); // Use the role middleware
+// Loop through roles and define routes
+foreach ($rolePages as $role => $pages) {
+    foreach ($pages as $uri => $component) {
+        Route::get("/$uri", function () use ($component) {
+            return Inertia::render("Admin/". $component);
+        })->name("$role.$uri")
+          ->middleware('auth', 'verified', "role:$role");
+    }
 }
+
+
 
 
 //DEPARTMENT API

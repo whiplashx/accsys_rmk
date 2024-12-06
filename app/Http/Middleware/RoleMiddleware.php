@@ -1,10 +1,12 @@
 <?php
+
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Auth;
 
-class RoleMiddleware
+class RoleMiddleware extends Middleware
 {
     /**
      * Handle an incoming request.
@@ -16,11 +18,9 @@ class RoleMiddleware
      */
     public function handle($request, Closure $next, $role)
     {
-        if (Auth::check() && Auth::user()->role === $role) {
+        if (auth()->user() && auth()->user()->role === $role) {
             return $next($request);
         }
-
-        // Handle unauthorized access
-        return response()->json(['message' => 'Forbidden'], 403);
+        abort(403, 'Unauthorized.');
     }
 }

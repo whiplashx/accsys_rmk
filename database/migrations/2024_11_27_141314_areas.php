@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('areas', function (Blueprint $table) {
-            $table->string('id', 10)->primary();
+            $table->unsignedBigInteger('id')->primary();
             $table->string('name');
             $table->timestamps();
         });
