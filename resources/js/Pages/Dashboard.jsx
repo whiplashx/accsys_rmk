@@ -6,6 +6,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { Children, useState } from 'react';
 import Progress from '@/Components/DataVisualization/Progress';
 import AccreditationAdminDashboard from '@/Components/AccreditationAdminDashboard';
+import LocalTaskForceDashboard from '@/Components/LocalTaskForceDashboard';
 
 export default function Dashboard() {
     const user = usePage().props.auth.user;
@@ -37,14 +38,13 @@ export default function Dashboard() {
         :(user.role === 'Task Force'?
         <TaskForceLayout>
             <Head title="Dashboard" />
-            <Breadcrumbs></Breadcrumbs>
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                         <div className="p-6 text-gray-900">
                             TaskForce
                             You're logged in!
-                            
+                            <LocalTaskForceDashboard></LocalTaskForceDashboard>
                         </div>
                     </div>
                 </div>
@@ -52,7 +52,6 @@ export default function Dashboard() {
         </TaskForceLayout>
         :(user.role === 'Accreditor' ?
             <AccreditorLayout>
-            <Breadcrumbs></Breadcrumbs>
                             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">

@@ -1,11 +1,12 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import Breadcrumbs from '@/Components/Breadcrumbs';
 import ProfileSection from '@/Components/ProfileSection';
 import React, { useState } from 'react';
 
 
 const sidebarItems = [
-  { icon: 'dashboard', label: 'Dashboard', href: '#' },
-  { icon: 'accreditation', label: 'Accreditation', href: '#' },
+  { icon: 'dashboard', label: 'Dashboard', href: route('dashboard') },
+  { icon: 'accreditation', label: 'Accreditation', href: route('accreditation') },
   { icon: 'tasks', label: 'Tasks', href: '#' },
   { icon: 'selfsurvey', label: 'Self-Survey', href: '#' },
   { icon: 'settings', label: 'Settings', href: '#' },
@@ -123,7 +124,7 @@ export default function TaskForceLayout({ children }) {
             </div>
           </div>
         </header>
-
+      <Breadcrumbs></Breadcrumbs>
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-white p-6">
           {children}

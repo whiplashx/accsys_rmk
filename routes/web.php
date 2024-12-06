@@ -65,7 +65,9 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         Route::get('/departments', function () {
             return Inertia::render('Admin/Departments');
         })->name('departments');
-
+        Route::get('/accreditation', function () {
+            return Inertia::render('LocalTaskForce/Accreditation');
+        })->name('accreditation');
         
     });
 
