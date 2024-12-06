@@ -43,8 +43,9 @@ $adminPages = [
 
 foreach ($adminPages as $uri => $component) {
     Route::get("/$uri", function () use ($component) {
-        return Inertia::render('Admin/'. $component);
-    })->name($uri)->middleware('auth', 'verified');
+        return Inertia::render('Admin/' . $component);
+    })->name("$uri")
+      ->middleware(['auth', 'verified', 'role:admin']); // Use the role middleware
 }
 
 
