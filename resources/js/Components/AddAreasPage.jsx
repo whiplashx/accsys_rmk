@@ -2,15 +2,18 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Modal from './Modal';
 
 const AccreditationAreasPage = () => {
   const [areas, setAreas] = useState([]);
   const [newAreaName, setNewAreaName] = useState('');
   const [newParameterName, setNewParameterName] = useState('');
   const [newIndicatorDescription, setNewIndicatorDescription] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalType, setModalType] = useState('');
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedParameter, setSelectedParameter] = useState(null);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchAreas();
@@ -18,7 +21,7 @@ const AccreditationAreasPage = () => {
 
   const fetchAreas = async () => {
     try {
-      const response = await axios.get(' /areas');
+      const response = await axios.get('/areas');
       setAreas(response.data);
       setLoading(false);
     } catch (error) {
@@ -30,47 +33,58 @@ const AccreditationAreasPage = () => {
 
   const addArea = async () => {
     try {
-      const response = await axios.post(' /areas', { name: newAreaName });
-      setAreas([...areas, response.data]);
+      const response = await axios.post('/areas', { name: newAreaName });
+      setAreas([...areas, { ...response.data, parameters: [] }]);
       setNewAreaName('');
       toast.success('Area added successfully');
+      setModalOpen(false);
     } catch (error) {
       console.error('Error adding area:', error);
       toast.error('Failed to add area');
     }
   };
 
-  const addParameter = async (areaId) => {
+  const addParameter = async () => {
+    if (!selectedArea) {
+      toast.error('No area selected');
+      return;
+    }
     try {
-      const response = await axios.post(' /parameters', { area_id: areaId, name: newParameterName });
+      const response = await axios.post('/parameters', { area_id: selectedArea.id, name: newParameterName });
       const updatedAreas = areas.map(area => 
-        area.id === areaId 
-          ? { ...area, parameters: [...area.parameters, response.data] }
+        area.id === selectedArea.id 
+          ? { ...area, parameters: [...(area.parameters || []), { ...response.data, indicators: [] }] }
           : area
       );
       setAreas(updatedAreas);
       setNewParameterName('');
       toast.success('Parameter added successfully');
+      setModalOpen(false);
     } catch (error) {
       console.error('Error adding parameter:', error);
       toast.error('Failed to add parameter');
     }
   };
 
-  const addIndicator = async (parameterId) => {
+  const addIndicator = async () => {
+    if (!selectedParameter) {
+      toast.error('No parameter selected');
+      return;
+    }
     try {
-      const response = await axios.post(' /indicators', { parameter_id: parameterId, description: newIndicatorDescription });
+      const response = await axios.post('/indicators', { parameter_id: selectedParameter.id, description: newIndicatorDescription });
       const updatedAreas = areas.map(area => ({
         ...area,
-        parameters: area.parameters.map(param =>
-          param.id === parameterId
-            ? { ...param, indicators: [...param.indicators, response.data] }
+        parameters: (area.parameters || []).map(param =>
+          param.id === selectedParameter.id
+            ? { ...param, indicators: [...(param.indicators || []), response.data] }
             : param
         )
       }));
       setAreas(updatedAreas);
       setNewIndicatorDescription('');
       toast.success('Indicator added successfully');
+      setModalOpen(false);
     } catch (error) {
       console.error('Error adding indicator:', error);
       toast.error('Failed to add indicator');
@@ -79,7 +93,7 @@ const AccreditationAreasPage = () => {
 
   const deleteArea = async (areaId) => {
     try {
-      await axios.delete(` /areas/${areaId}`);
+      await axios.delete(`/areas/${areaId}`);
       setAreas(areas.filter(area => area.id !== areaId));
       toast.success('Area deleted successfully');
     } catch (error) {
@@ -90,10 +104,10 @@ const AccreditationAreasPage = () => {
 
   const deleteParameter = async (areaId, parameterId) => {
     try {
-      await axios.delete(` /parameters/${parameterId}`);
+      await axios.delete(`/parameters/${parameterId}`);
       const updatedAreas = areas.map(area => 
         area.id === areaId 
-          ? { ...area, parameters: area.parameters.filter(param => param.id !== parameterId) }
+          ? { ...area, parameters: (area.parameters || []).filter(param => param.id !== parameterId) }
           : area
       );
       setAreas(updatedAreas);
@@ -106,12 +120,12 @@ const AccreditationAreasPage = () => {
 
   const deleteIndicator = async (areaId, parameterId, indicatorId) => {
     try {
-      await axios.delete(` /indicators/${indicatorId}`);
+      await axios.delete(`/indicators/${indicatorId}`);
       const updatedAreas = areas.map(area => ({
         ...area,
-        parameters: area.parameters.map(param =>
+        parameters: (area.parameters || []).map(param =>
           param.id === parameterId
-            ? { ...param, indicators: param.indicators.filter(ind => ind.id !== indicatorId) }
+            ? { ...param, indicators: (param.indicators || []).filter(ind => ind.id !== indicatorId) }
             : param
         )
       }));
@@ -121,6 +135,23 @@ const AccreditationAreasPage = () => {
       console.error('Error deleting indicator:', error);
       toast.error('Failed to delete indicator');
     }
+  };
+
+  const openModal = (type, area = null, parameter = null) => {
+    setModalType(type);
+    setSelectedArea(area);
+    setSelectedParameter(parameter);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalType('');
+    setSelectedArea(null);
+    setSelectedParameter(null);
+    setNewAreaName('');
+    setNewParameterName('');
+    setNewIndicatorDescription('');
   };
 
   const toRoman = (num) => {
@@ -139,94 +170,82 @@ const AccreditationAreasPage = () => {
       <ToastContainer />
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Accreditation Areas</h1>
       
-      {/* Add Area Form */}
-      <div className="mb-8">
-        <input
-          type="text"
-          value={newAreaName}
-          onChange={(e) => setNewAreaName(e.target.value)}
-          placeholder="Enter area name"
-          className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-        />
-        <button
-          onClick={addArea}
-          className="mt-2 bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-700 transition-colors w-full"
-        >
-          Add Area
-        </button>
-      </div>
+      <button
+        onClick={() => openModal('area')}
+        className="mb-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+      >
+        Add Area
+      </button>
 
       {/* Areas List */}
-      <div className="space-y-6">
+      <div className="space-y-4">
         {areas.map((area, index) => (
-          <div key={area.id} className="bg-white p-4 rounded-lg shadow">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-800">
-                Area {toRoman(index + 1)}. {area.name}
-              </h3>
-              <button
-                onClick={() => deleteArea(area.id)}
-                className="text-red-500 hover:text-red-700 transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-
-            {/* Add Parameter Form */}
-            <div className="mb-4">
-              <input
-                type="text"
-                value={newParameterName}
-                onChange={(e) => setNewParameterName(e.target.value)}
-                placeholder="Enter parameter name"
-                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-              />
-              <button
-                onClick={() => addParameter(area.id)}
-                className="mt-2 bg-slate-500 text-white px-4 py-2 rounded hover:bg-slate-600 transition-colors w-full"
-              >
-                Add Parameter
-              </button>
-            </div>
+          <details key={area.id} className="bg-white rounded-lg shadow">
+            <summary className="p-4 cursor-pointer focus:outline-none">
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold text-gray-800">
+                  Area {toRoman(index + 1)}. {area.name}
+                </h3>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      openModal('parameter', area);
+                    }}
+                    className="bg-green-500 text-white px-2 py-1 rounded text-sm hover:bg-green-600 transition-colors"
+                  >
+                    Add Parameter
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      deleteArea(area.id);
+                    }}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </summary>
 
             {/* Parameters List */}
-            <div className="ml-4 space-y-4">
-              {area.parameters.map((parameter, paramIndex) => (
-                <div key={parameter.id} className="bg-gray-100 p-4 rounded">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-lg font-medium text-gray-800">
-                      Parameter {toLetter(paramIndex + 1)}. {parameter.name}
-                    </h4>
-                    <button
-                      onClick={() => deleteParameter(area.id, parameter.id)}
-                      className="text-red-500 hover:text-red-700 transition-colors"
-                    >
-                      Delete
-                    </button>
-                  </div>
-
-                  {/* Add Indicator Form */}
-                  <div className="mb-4">
-                    <input
-                      type="text"
-                      value={newIndicatorDescription}
-                      onChange={(e) => setNewIndicatorDescription(e.target.value)}
-                      placeholder="Enter Indicator description"
-                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-                    />
-                    <button
-                      onClick={() => addIndicator(parameter.id)}
-                      className="mt-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors w-full"
-                    >
-                      Add Indicator
-                    </button>
-                  </div>
+            <div className="p-4 space-y-4">
+              {(area.parameters || []).map((parameter, paramIndex) => (
+                <details key={parameter.id} className="bg-gray-100 rounded">
+                  <summary className="p-2 cursor-pointer focus:outline-none">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-lg font-medium text-gray-800">
+                        Parameter {toLetter(paramIndex + 1)}. {parameter.name}
+                      </h4>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            openModal('indicator', area, parameter);
+                          }}
+                          className="bg-yellow-500 text-white px-2 py-1 rounded text-sm hover:bg-yellow-600 transition-colors"
+                        >
+                          Add Indicator
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            deleteParameter(area.id, parameter.id);
+                          }}
+                          className="text-red-500 hover:text-red-700 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </summary>
 
                   {/* Indicators List */}
-                  <ul className="list-disc list-inside ml-4">
-                    {parameter.indicators.map(indicator => (
-                      <li key={indicator.id} className="flex justify-between items-center text-gray-800">
-                        <span>{indicator.description}</span>
+                  <ul className="list-disc list-inside ml-4 p-2">
+                    {(parameter.indicators || []).map((indicator, indIndex) => (
+                      <li key={indicator.id} className="flex justify-between items-center text-gray-800 py-1">
+                        <span>{indIndex + 1}. {indicator.description}</span>
                         <button
                           onClick={() => deleteIndicator(area.id, parameter.id, indicator.id)}
                           className="text-red-500 hover:text-red-700 transition-colors"
@@ -236,14 +255,80 @@ const AccreditationAreasPage = () => {
                       </li>
                     ))}
                   </ul>
-                </div>
+                </details>
               ))}
             </div>
-          </div>
+          </details>
         ))}
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modalOpen}
+        onClose={closeModal}
+        title={
+          modalType === 'area'
+            ? 'Add Area'
+            : modalType === 'parameter'
+            ? 'Add Parameter'
+            : 'Add Indicator'
+        }
+      >
+        {modalType === 'area' && (
+          <div>
+            <input
+              type="text"
+              value={newAreaName}
+              onChange={(e) => setNewAreaName(e.target.value)}
+              placeholder="Enter area name"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              onClick={addArea}
+              className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors w-full"
+            >
+              Add Area
+            </button>
+          </div>
+        )}
+        {modalType === 'parameter' && (
+          <div>
+            <input
+              type="text"
+              value={newParameterName}
+              onChange={(e) => setNewParameterName(e.target.value)}
+              placeholder="Enter parameter name"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-500"
+            />
+            <button
+              onClick={addParameter}
+              className="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors w-full"
+            >
+              Add Parameter
+            </button>
+          </div>
+        )}
+        {modalType === 'indicator' && (
+          <div>
+            <textarea
+              value={newIndicatorDescription}
+              onChange={(e) => setNewIndicatorDescription(e.target.value)}
+              placeholder="Enter indicator description"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              rows="3"
+            />
+            <button
+              onClick={addIndicator}
+              className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors w-full"
+            >
+              Add Indicator
+            </button>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
 
 export default AccreditationAreasPage;
+
