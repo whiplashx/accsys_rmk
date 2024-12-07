@@ -62,18 +62,15 @@ Route::middleware(['auth', 'verified', 'role:admin'])
 
 Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     ->group(function () {
-        Route::get('/accreditation', function () {
+        Route::get('/accreditation - Task Force', function () {
             return Inertia::render('LocalTaskForce/Accreditation');
-        })->name('accreditation');
+        })->name('accreditationLTF');
         Route::get('/tasks', function () {
             return Inertia::render('LocalTaskForce/Tasks');
         })->name('tasks');
-        Route::get('/selfsurvey', function () {
+        Route::get('/selfsurveyLTF', function () {
             return Inertia::render('LocalTaskForce/Selfsurvey');
-        })->name('selfsuvey');
-        Route::get('/settings', function () {
-            return Inertia::render('LocalTaskForce/settings');
-        })->name('settings');
+        })->name('selfsurveyLTF');
 
     });
 Route::middleware(['auth', 'verified', 'role:localaccreditor'])
@@ -84,9 +81,7 @@ Route::middleware(['auth', 'verified', 'role:localaccreditor'])
         Route::get('/selfsurvey', function () {
             return Inertia::render('LocalAccreditor/Selfsurvey');
         })->name('selfsuvey');
-        Route::get('/settings', function () {
-            return Inertia::render('LocalAccreditor/settings');
-        })->name('settings');
+
     });
 
 
