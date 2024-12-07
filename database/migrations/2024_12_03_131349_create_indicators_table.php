@@ -6,25 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /*
-    public function up(): void
+    public function up()
     {
         Schema::create('indicators', function (Blueprint $table) {
-            $table->unsignedBigInteger('id')->primary();
+            $table->id();
+            $table->foreignId('parameter_id')->constrained()->onDelete('cascade');
             $table->text('description');
-            $table->unsignedBigInteger('parameter_id');
-            $table->foreign('parameter_id')->references('id')->on('parameters')->onDelete('cascade');
             $table->timestamps();
         });
-        
     }
 
-    /**
-     * Reverse the migrations.
- 
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('indicators');
     }
-        */
 };
+

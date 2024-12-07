@@ -16,7 +16,7 @@ class Parameter extends Model
         return $this->belongsTo(Area::class);
     }
 
-    public function criteria()
+    public function indicators()
     {
         return $this->hasMany(Indicator::class);
     }

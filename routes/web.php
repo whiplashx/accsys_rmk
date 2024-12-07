@@ -10,6 +10,7 @@ use Inertia\Inertia;
 use Illuminate\Http\Request;
 
 
+
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -60,7 +61,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
 
 Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     ->group(function () {
-        Route::get('/accreditation - Task Force', function () {
+        Route::get('/accreditationLTF', function () {
             return Inertia::render('LocalTaskForce/Accreditation');
         })->name('accreditationLTF');
         Route::get('/tasks', function () {
@@ -73,9 +74,9 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     });
 Route::middleware(['auth', 'verified', 'role:localaccreditor'])
     ->group(function () {
-        Route::get('/accreditation', function () {
+        Route::get('/accreditationAcc', function () {
             return Inertia::render('LocalAccreditor/Accreditation');
-        })->name('accreditation');
+        })->name('accreditationAcc');
         Route::get('/selfsurvey', function () {
             return Inertia::render('LocalAccreditor/Selfsurvey');
         })->name('selfsuvey');
@@ -122,4 +123,13 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/accreditation-areas', [AccreditationController::class, 'index']);
 
+
+
+Route::get('/areas', [AccreditationController::class, 'index']);
+Route::post('/areas', [AccreditationController::class, 'addArea']);
+Route::post('/parameters', [AccreditationController::class, 'addParameter']);
+Route::post('/indicators', [AccreditationController::class, 'addIndicator']);
+Route::delete('/areas/{id}', [AccreditationController::class, 'deleteArea']);
+Route::delete('/parameters/{id}', [AccreditationController::class, 'deleteParameter']);
+Route::delete('/indicators/{id}', [AccreditationController::class, 'deleteIndicator']);
 

@@ -6,11 +6,10 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /*
     public function up()
     {
         Schema::create('areas', function (Blueprint $table) {
-            $table->unsignedBigInteger('id')->primary();
+            $table->id();
             $table->string('name');
             $table->timestamps();
         });
@@ -20,5 +19,5 @@ return new class extends Migration
     {
         Schema::dropIfExists('areas');
     }
-        */
 };
+

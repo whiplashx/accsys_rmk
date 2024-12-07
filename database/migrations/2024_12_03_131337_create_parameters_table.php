@@ -6,28 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /*
-     * Run the migrations.
-    
-    public function up(): void
+    public function up()
     {
-        /*
-        /*
-        /*
         Schema::create('parameters', function (Blueprint $table) {
-            $table->unsignedBigInteger('id')->primary();
+            $table->id();
+            $table->foreignId('area_id')->constrained()->onDelete('cascade');
             $table->string('name');
-            $table->unsignedBigInteger('area_id');
-            $table->foreign('area_id')->references('id')->on('areas')->onDelete('cascade');
             $table->timestamps();
         });
-        
     }
 
-
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('parameters');
     }
-        */
 };
+

@@ -1,30 +1,142 @@
-import React, { useState } from 'react';
-import useAccreditationData from './useAccreditationData';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AccreditationAreasPage = () => {
-  const {
-    areas,
-    loading,
-    addArea,
-    addParameter,
-    addIndicator,
-    deleteArea,
-    deleteParameter,
-    deleteIndicator,
-  } = useAccreditationData();
-
+  const [areas, setAreas] = useState([]);
   const [newAreaName, setNewAreaName] = useState('');
   const [newParameterName, setNewParameterName] = useState('');
   const [newIndicatorDescription, setNewIndicatorDescription] = useState('');
   const [selectedArea, setSelectedArea] = useState(null);
   const [selectedParameter, setSelectedParameter] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAreas();
+  }, []);
+
+  const fetchAreas = async () => {
+    try {
+      const response = await axios.get(' /areas');
+      setAreas(response.data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching areas:', error);
+      toast.error('Failed to fetch areas');
+      setLoading(false);
+    }
+  };
+
+  const addArea = async () => {
+    try {
+      const response = await axios.post(' /areas', { name: newAreaName });
+      setAreas([...areas, response.data]);
+      setNewAreaName('');
+      toast.success('Area added successfully');
+    } catch (error) {
+      console.error('Error adding area:', error);
+      toast.error('Failed to add area');
+    }
+  };
+
+  const addParameter = async (areaId) => {
+    try {
+      const response = await axios.post(' /parameters', { area_id: areaId, name: newParameterName });
+      const updatedAreas = areas.map(area => 
+        area.id === areaId 
+          ? { ...area, parameters: [...area.parameters, response.data] }
+          : area
+      );
+      setAreas(updatedAreas);
+      setNewParameterName('');
+      toast.success('Parameter added successfully');
+    } catch (error) {
+      console.error('Error adding parameter:', error);
+      toast.error('Failed to add parameter');
+    }
+  };
+
+  const addIndicator = async (parameterId) => {
+    try {
+      const response = await axios.post(' /indicators', { parameter_id: parameterId, description: newIndicatorDescription });
+      const updatedAreas = areas.map(area => ({
+        ...area,
+        parameters: area.parameters.map(param =>
+          param.id === parameterId
+            ? { ...param, indicators: [...param.indicators, response.data] }
+            : param
+        )
+      }));
+      setAreas(updatedAreas);
+      setNewIndicatorDescription('');
+      toast.success('Indicator added successfully');
+    } catch (error) {
+      console.error('Error adding indicator:', error);
+      toast.error('Failed to add indicator');
+    }
+  };
+
+  const deleteArea = async (areaId) => {
+    try {
+      await axios.delete(` /areas/${areaId}`);
+      setAreas(areas.filter(area => area.id !== areaId));
+      toast.success('Area deleted successfully');
+    } catch (error) {
+      console.error('Error deleting area:', error);
+      toast.error('Failed to delete area');
+    }
+  };
+
+  const deleteParameter = async (areaId, parameterId) => {
+    try {
+      await axios.delete(` /parameters/${parameterId}`);
+      const updatedAreas = areas.map(area => 
+        area.id === areaId 
+          ? { ...area, parameters: area.parameters.filter(param => param.id !== parameterId) }
+          : area
+      );
+      setAreas(updatedAreas);
+      toast.success('Parameter deleted successfully');
+    } catch (error) {
+      console.error('Error deleting parameter:', error);
+      toast.error('Failed to delete parameter');
+    }
+  };
+
+  const deleteIndicator = async (areaId, parameterId, indicatorId) => {
+    try {
+      await axios.delete(` /indicators/${indicatorId}`);
+      const updatedAreas = areas.map(area => ({
+        ...area,
+        parameters: area.parameters.map(param =>
+          param.id === parameterId
+            ? { ...param, indicators: param.indicators.filter(ind => ind.id !== indicatorId) }
+            : param
+        )
+      }));
+      setAreas(updatedAreas);
+      toast.success('Indicator deleted successfully');
+    } catch (error) {
+      console.error('Error deleting indicator:', error);
+      toast.error('Failed to delete indicator');
+    }
+  };
+
+  const toRoman = (num) => {
+    const roman = ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X"];
+    return roman[num - 1] || num;
+  };
+
+  const toLetter = (num) => String.fromCharCode(64 + num);
 
   if (loading) {
     return <div className="text-center py-10">Loading...</div>;
-  } 
+  }
 
   return (
     <div className="container mx-auto px-4 py-8 bg-gray-50 min-h-screen">
+      <ToastContainer />
       <h1 className="text-3xl font-bold mb-6 text-gray-800">Accreditation Areas</h1>
       
       {/* Add Area Form */}
@@ -37,13 +149,8 @@ const AccreditationAreasPage = () => {
           className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
         />
         <button
-          onClick={() => {
-            if (newAreaName.trim()) {
-              addArea(newAreaName.trim());
-              setNewAreaName('');
-            }
-          }}
-          className="mt-2 bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors w-full"
+          onClick={addArea}
+          className="mt-2 bg-slate-600 text-white px-4 py-2 rounded hover:bg-slate-700 transition-colors w-full"
         >
           Add Area
         </button>
@@ -51,126 +158,86 @@ const AccreditationAreasPage = () => {
 
       {/* Areas List */}
       <div className="space-y-6">
-        {areas.map(area => (
+        {areas.map((area, index) => (
           <div key={area.id} className="bg-white p-4 rounded-lg shadow">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-semibold text-gray-800">{area.name}</h3>
+              <h3 className="text-xl font-semibold text-gray-800">
+                Area {toRoman(index + 1)}. {area.name}
+              </h3>
               <button
                 onClick={() => deleteArea(area.id)}
                 className="text-red-500 hover:text-red-700 transition-colors"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
+                Delete
               </button>
             </div>
 
             {/* Add Parameter Form */}
-            {selectedArea === area.id && (
-              <div className="mb-4">
-                <input
-                  type="text"
-                  value={newParameterName}
-                  onChange={(e) => setNewParameterName(e.target.value)}
-                  placeholder="Enter parameter name"
-                  className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-                />
-                <button
-                  onClick={() => {
-                    if (newParameterName.trim()) {
-                      addParameter(area.id, newParameterName.trim());
-                      setNewParameterName('');
-                    }
-                  }}
-                  className="mt-2 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors w-full"
-                >
-                  Add Parameter
-                </button>
-              </div>
-            )}
+            <div className="mb-4">
+              <input
+                type="text"
+                value={newParameterName}
+                onChange={(e) => setNewParameterName(e.target.value)}
+                placeholder="Enter parameter name"
+                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+              />
+              <button
+                onClick={() => addParameter(area.id)}
+                className="mt-2 bg-slate-500 text-white px-4 py-2 rounded hover:bg-slate-600 transition-colors w-full"
+              >
+                Add Parameter
+              </button>
+            </div>
 
             {/* Parameters List */}
             <div className="ml-4 space-y-4">
-              {area.parameters.map(parameter => (
+              {area.parameters.map((parameter, paramIndex) => (
                 <div key={parameter.id} className="bg-gray-100 p-4 rounded">
                   <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-lg font-medium text-gray-800">{parameter.name}</h4>
+                    <h4 className="text-lg font-medium text-gray-800">
+                      Parameter {toLetter(paramIndex + 1)}. {parameter.name}
+                    </h4>
                     <button
                       onClick={() => deleteParameter(area.id, parameter.id)}
                       className="text-red-500 hover:text-red-700 transition-colors"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                      </svg>
+                      Delete
                     </button>
                   </div>
 
                   {/* Add Indicator Form */}
-                  {selectedArea === area.id && selectedParameter === parameter.id && (
-                    <div className="mb-4">
-                      <input
-                        type="text"
-                        value={newIndicatorDescription}
-                        onChange={(e) => setNewIndicatorDescription(e.target.value)}
-                        placeholder="Enter Indicator description"
-                        className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
-                      />
-                      <button
-                        onClick={() => {
-                          if (newIndicatorDescription.trim()) {
-                            addIndicator(area.id, parameter.id, newIndicatorDescription.trim());
-                            setNewIndicatorDescription('');
-                          }
-                        }}
-                        className="mt-2 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors w-full"
-                      >
-                        Add Indicator
-                      </button>
-                    </div>
-                  )}
+                  <div className="mb-4">
+                    <input
+                      type="text"
+                      value={newIndicatorDescription}
+                      onChange={(e) => setNewIndicatorDescription(e.target.value)}
+                      placeholder="Enter Indicator description"
+                      className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    />
+                    <button
+                      onClick={() => addIndicator(parameter.id)}
+                      className="mt-2 bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition-colors w-full"
+                    >
+                      Add Indicator
+                    </button>
+                  </div>
 
-                  {/* Criteria List */}
+                  {/* Indicators List */}
                   <ul className="list-disc list-inside ml-4">
-                    {parameter.criteria.map(Indicator => (
-                      <li key={Indicator.id} className="flex justify-between items-center text-gray-800">
-                        <span>{Indicator.description}</span>
+                    {parameter.indicators.map(indicator => (
+                      <li key={indicator.id} className="flex justify-between items-center text-gray-800">
+                        <span>{indicator.description}</span>
                         <button
-                          onClick={() => deleteIndicator(area.id, parameter.id, Indicator.id)}
+                          onClick={() => deleteIndicator(area.id, parameter.id, indicator.id)}
                           className="text-red-500 hover:text-red-700 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path fillRule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
+                          Delete
                         </button>
                       </li>
                     ))}
                   </ul>
                 </div>
               ))}
-            </div>
-
-            {/* Area Action Buttons */}
-            <div className="mt-4 space-x-2">
-              <button
-                onClick={() => {
-                  setSelectedArea(area.id);
-                  setSelectedParameter(null);
-                }}
-                className="bg-gray-500 text-white px-3 py-1 rounded text-sm hover:bg-gray-600 transition-colors"
-              >
-                Add Parameter
-              </button>
-              {area.parameters.length > 0 && (
-                <button
-                  onClick={() => {
-                    setSelectedArea(area.id);
-                    setSelectedParameter(area.parameters[0].id);
-                  }}
-                  className="bg-gray-400 text-white px-3 py-1 rounded text-sm hover:bg-gray-500 transition-colors"
-                >
-                  Add Indicator
-                </button>
-              )}
             </div>
           </div>
         ))}

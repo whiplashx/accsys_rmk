@@ -15,9 +15,5 @@ class Indicator extends Model
     {
         return $this->belongsTo(Parameter::class);
     }
-
-    public function tasks()
-    {
-        return $this->hasMany(Task::class);
-    }
 }
+
