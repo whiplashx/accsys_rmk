@@ -96,9 +96,9 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                                 label="Role"
                                 value={data.role}
                                 options={[
-                                    { value: 'Admin', label: 'Admin' },
-                                    { value: 'Task Force', label: 'Task Force' },
-                                    { value: 'Accreditor', label: 'Accreditor' },
+                                    { value: 'admin', label: 'Admin' },
+                                    { value: 'localtaskforce', label: 'Task Force' },
+                                    { value: 'localaccreditor', label: 'Accreditor' },
                                 ]}
                                 onChange={(e) => setData('role', e.target.value)}
                                 error={errors.role}

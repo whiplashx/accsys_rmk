@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
-
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 class RegisteredUserController extends Controller
 {
     /**
@@ -28,28 +29,41 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function store(Request $request): RedirectResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'role' => 'required|string|max:255',
-            //'departments' => 'bigint|unsigned  ',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
 
-        $user = User::create([
-            'name' => $request->name,
-            'role' => $request->role,
-            //'departments' => $request->departments,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        event(new Registered($user));
-
-        Auth::login($user);
-
-        return redirect(route('accounts'));
-    }
+     public function store(Request $request): RedirectResponse
+     {
+         $request->validate([
+             'name' => 'required|string|max:255',
+             'role' => 'required|string|max:255', // Ensure the role exists in your system
+             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+         ]);
+     
+         // Create the user
+         $user = User::create([
+             'name' => $request->name,
+             'role' => $request->role,
+             'email' => $request->email,
+             'password' => Hash::make($request->password),
+         ]);
+     
+         // Assign the role to the user
+         $roleName = $request->role;
+     
+         // Check if the role exists and assign it
+         $role = Role::findByName($roleName); // Throws error if role doesn't exist
+         if ($role) {
+             $user->assignRole($roleName);
+         } else {
+             return redirect()->back()->withErrors(['role' => 'Invalid role selected.']);
+         }
+     
+         // Trigger registered event
+         event(new Registered($user));
+     
+         // Log the user in
+         //Auth::login($user);
+     
+         return redirect(route('accounts'));
+     }
 }

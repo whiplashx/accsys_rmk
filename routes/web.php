@@ -31,8 +31,6 @@ Route::middleware('auth')->group(function () {
 })->middleware(['auth', 'verified']);
 
 
-
-
 Route::middleware(['auth', 'verified', 'role:admin'])
     ->group(function () {
         Route::get('/departments', function () {

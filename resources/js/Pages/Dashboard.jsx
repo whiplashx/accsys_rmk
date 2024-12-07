@@ -13,7 +13,7 @@ export default function Dashboard() {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     console.log(user);
     return (<>
-        {user.role === 'Admin'
+        {user.role === 'admin'
         ?
         <AdminLayout
             header={
@@ -35,7 +35,7 @@ export default function Dashboard() {
                 </div>
             </div>
         </AdminLayout>     
-        :(user.role === 'Task Force'?
+        :(user.role === 'localtaskforce'?
         <TaskForceLayout>
             <Head title="Dashboard" />
             <div className="py-12">
@@ -50,7 +50,7 @@ export default function Dashboard() {
                 </div>
             </div>
         </TaskForceLayout>
-        :(user.role === 'Accreditor' ?
+        :(user.role === 'localaccreditor' ?
             <AccreditorLayout>
                             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
