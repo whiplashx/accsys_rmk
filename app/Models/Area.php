@@ -9,6 +9,8 @@ class Area extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['name'];
+
     public function parameters()
     {
         return $this->hasMany(Parameter::class);

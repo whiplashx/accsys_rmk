@@ -81,9 +81,6 @@ Route::middleware(['auth', 'verified', 'role:localaccreditor'])
         Route::get('/accreditation', function () {
             return Inertia::render('LocalAccreditor/Accreditation');
         })->name('accreditation');
-        Route::get('/tasks', function () {
-            return Inertia::render('LocalAccreditor/Tasks');
-        })->name('tasks');
         Route::get('/selfsurvey', function () {
             return Inertia::render('LocalAccreditor/Selfsurvey');
         })->name('selfsuvey');
