@@ -87,7 +87,6 @@ Route::middleware(['auth', 'verified', 'role:localaccreditor'])
         Route::get('/settings', function () {
             return Inertia::render('LocalAccreditor/settings');
         })->name('settings');
-
     });
 
 
