@@ -17,9 +17,9 @@ class AdminController extends Controller
         return response()->json($data);
     }
 
-    public function getLTF(){
+    public function getLocalTaskForceUsers()
+    {
         return User::where('role', 'localtaskforce')->get();
-
     }
 
     public function updateUser(Request $request, User $user): JsonResponse

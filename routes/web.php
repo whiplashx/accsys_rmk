@@ -13,6 +13,10 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
+use App\Http\Controllers\ParameterController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\TaskAssignmentController;
+
 
 
 Route::get('/', function () {
@@ -132,13 +136,13 @@ Route::get('/accreditation-areas', [AccreditationController::class, 'index']);
 
 
 
-Route::get('/areas', [AccreditationController::class, 'index']);
-Route::post('/areas', [AccreditationController::class, 'addArea']);
-Route::post('/parameters', [AccreditationController::class, 'addParameter']);
-Route::post('/indicators', [AccreditationController::class, 'addIndicator']);
-Route::delete('/areas/{id}', [AccreditationController::class, 'deleteArea']);
-Route::delete('/parameters/{id}', [AccreditationController::class, 'deleteParameter']);
-Route::delete('/indicators/{id}', [AccreditationController::class, 'deleteIndicator']);
+Route::get('/areasTB', [AccreditationController::class, 'index']);
+Route::post('/areasTB', [AccreditationController::class, 'addArea']);
+Route::post('/parametersTB', [AccreditationController::class, 'addParameter']);
+Route::post('/indicatorsTB', [AccreditationController::class, 'addIndicator']);
+Route::delete('/areasTB/{id}', [AccreditationController::class, 'deleteArea']);
+Route::delete('/parametersTB/{id}', [AccreditationController::class, 'deleteParameter']);
+Route::delete('/indicatorsTB/{id}', [AccreditationController::class, 'deleteIndicator']);
 
 
 //Route::get('/team-members', [::class, 'index']);
@@ -152,5 +156,13 @@ Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);
 Route::middleware('auth')->group(function () {
     Route::get('/indicators', [IndicatorController::class, 'index']);
     Route::get('/users/localtaskforce', [AdminController::class, 'getLTF']);
+    Route::post('/assign-task', [TaskController::class, 'assignTask']);
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/areas', [AreaController::class, 'index']);
+    Route::get('/areas/{area}/parameters', [ParameterController::class, 'index']);
+    Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'index']);
+    Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
     Route::post('/assign-task', [TaskController::class, 'assignTask']);
 });

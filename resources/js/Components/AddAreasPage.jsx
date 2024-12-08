@@ -21,7 +21,7 @@ const AccreditationAreasPage = () => {
 
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('/areas');
+      const response = await axios.get('/areasTB');
       setAreas(response.data);
       setLoading(false);
     } catch (error) {
@@ -33,7 +33,7 @@ const AccreditationAreasPage = () => {
 
   const addArea = async () => {
     try {
-      const response = await axios.post('/areas', { name: newAreaName });
+      const response = await axios.post('/areasTB', { name: newAreaName });
       setAreas([...areas, { ...response.data, parameters: [] }]);
       setNewAreaName('');
       toast.success('Area added successfully');
@@ -50,7 +50,7 @@ const AccreditationAreasPage = () => {
       return;
     }
     try {
-      const response = await axios.post('/parameters', { area_id: selectedArea.id, name: newParameterName });
+      const response = await axios.post('/parametersTB', { area_id: selectedArea.id, name: newParameterName });
       const updatedAreas = areas.map(area => 
         area.id === selectedArea.id 
           ? { ...area, parameters: [...(area.parameters || []), { ...response.data, indicators: [] }] }
@@ -72,7 +72,7 @@ const AccreditationAreasPage = () => {
       return;
     }
     try {
-      const response = await axios.post('/indicators', { parameter_id: selectedParameter.id, description: newIndicatorDescription });
+      const response = await axios.post('/indicatorsTB', { parameter_id: selectedParameter.id, description: newIndicatorDescription });
       const updatedAreas = areas.map(area => ({
         ...area,
         parameters: (area.parameters || []).map(param =>
@@ -93,7 +93,7 @@ const AccreditationAreasPage = () => {
 
   const deleteArea = async (areaId) => {
     try {
-      await axios.delete(`/areas/${areaId}`);
+      await axios.delete(`/areasTB/${areaId}`);
       setAreas(areas.filter(area => area.id !== areaId));
       toast.success('Area deleted successfully');
     } catch (error) {
@@ -104,7 +104,7 @@ const AccreditationAreasPage = () => {
 
   const deleteParameter = async (areaId, parameterId) => {
     try {
-      await axios.delete(`/parameters/${parameterId}`);
+      await axios.delete(`/parametersTB/${parameterId}`);
       const updatedAreas = areas.map(area => 
         area.id === areaId 
           ? { ...area, parameters: (area.parameters || []).filter(param => param.id !== parameterId) }
@@ -120,7 +120,7 @@ const AccreditationAreasPage = () => {
 
   const deleteIndicator = async (areaId, parameterId, indicatorId) => {
     try {
-      await axios.delete(`/indicators/${indicatorId}`);
+      await axios.delete(`/indicatorsTB/${indicatorId}`);
       const updatedAreas = areas.map(area => ({
         ...area,
         parameters: (area.parameters || []).map(param =>

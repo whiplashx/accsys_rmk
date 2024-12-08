@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Indicator;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -34,13 +36,13 @@ class TaskController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        $task = Task::create([
-            'indicator_id' => $request->indicator_id,
-            'user_id' => $request->user_id,
-            'status' => 'assigned',
-        ]);
+        $indicator = Indicator::findOrFail($request->indicator_id);
+        $user = User::findOrFail($request->user_id);
 
-        return response()->json(['message' => 'Task assigned successfully', 'task' => $task], 201);
+        $indicator->task = 'Assigned to ' . $user->name;
+        $indicator->save();
+
+        return response()->json(['message' => 'Task assigned successfully']);
     }
 }
 

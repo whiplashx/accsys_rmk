@@ -12,6 +12,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('parameter_id')->constrained()->onDelete('cascade');
             $table->text('description');
+            $table->text('task')->nullable();
             $table->timestamps();
         });
     }

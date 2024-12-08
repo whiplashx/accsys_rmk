@@ -5,6 +5,10 @@ use App\Models\Area;
 
 class AreaController extends Controller
 {
+    public function index()
+    {
+        return Area::all();
+    }
     public function fetchData()
     {
         $data = Area::with('parameters.indicators')->get()->map(function ($area) {

@@ -2,8 +2,12 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const TaskAssignment = () => {
+  const [areas, setAreas] = useState([]);
+  const [parameters, setParameters] = useState([]);
   const [indicators, setIndicators] = useState([]);
   const [users, setUsers] = useState([]);
+  const [selectedArea, setSelectedArea] = useState('');
+  const [selectedParameter, setSelectedParameter] = useState('');
   const [selectedIndicator, setSelectedIndicator] = useState('');
   const [selectedUser, setSelectedUser] = useState('');
   const [loading, setLoading] = useState(true);
@@ -11,23 +15,68 @@ const TaskAssignment = () => {
   const [success, setSuccess] = useState(null);
 
   useEffect(() => {
-    fetchData();
+    fetchInitialData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchInitialData = async () => {
     try {
       setLoading(true);
-      const [indicatorsResponse, usersResponse] = await Promise.all([
-        axios.get('/indicators'),
+      const [areasResponse, usersResponse] = await Promise.all([
+        axios.get('/areas'),
         axios.get('/users/localtaskforce')
       ]);
-      setIndicators(indicatorsResponse.data);
+      setAreas(areasResponse.data);
       setUsers(usersResponse.data);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching data:', error);
-      setError('Failed to load data. Please try again.');
+      console.error('Error fetching initial data:', error);
+      setError('Failed to load initial data. Please try again.');
       setLoading(false);
+    }
+  };
+
+  const fetchParameters = async (areaId) => {
+    try {
+      const response = await axios.get(`/areas/${areaId}/parameters`);
+      setParameters(response.data);
+      setSelectedParameter('');
+      setIndicators([]);
+      setSelectedIndicator('');
+    } catch (error) {
+      console.error('Error fetching parameters:', error);
+      setError('Failed to load parameters. Please try again.');
+    }
+  };
+
+  const fetchIndicators = async (parameterId) => {
+    try {
+      const response = await axios.get(`/parameters/${parameterId}/indicators`);
+      setIndicators(response.data);
+      setSelectedIndicator('');
+    } catch (error) {
+      console.error('Error fetching indicators:', error);
+      setError('Failed to load indicators. Please try again.');
+    }
+  };
+
+  const handleAreaChange = (e) => {
+    const areaId = e.target.value;
+    setSelectedArea(areaId);
+    if (areaId) {
+      fetchParameters(areaId);
+    } else {
+      setParameters([]);
+      setIndicators([]);
+    }
+  };
+
+  const handleParameterChange = (e) => {
+    const parameterId = e.target.value;
+    setSelectedParameter(parameterId);
+    if (parameterId) {
+      fetchIndicators(parameterId);
+    } else {
+      setIndicators([]);
     }
   };
 
@@ -47,6 +96,10 @@ const TaskAssignment = () => {
       setSelectedIndicator('');
       setSelectedUser('');
       setError(null);
+      // Refresh the indicators list to reflect the new assignment
+      if (selectedParameter) {
+        fetchIndicators(selectedParameter);
+      }
     } catch (error) {
       console.error('Error assigning task:', error);
       setError('Failed to assign task. Please try again.');
@@ -81,6 +134,43 @@ const TaskAssignment = () => {
             )}
             <form onSubmit={handleAssignment} className="space-y-6">
               <div>
+                <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Area
+                </label>
+                <select
+                  id="area"
+                  value={selectedArea}
+                  onChange={handleAreaChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Choose an area</option>
+                  {areas.map((area) => (
+                    <option key={area.id} value={area.id}>
+                      {area.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label htmlFor="parameter" className="block text-sm font-medium text-gray-700 mb-1">
+                  Select Parameter
+                </label>
+                <select
+                  id="parameter"
+                  value={selectedParameter}
+                  onChange={handleParameterChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={!selectedArea}
+                >
+                  <option value="">Choose a parameter</option>
+                  {parameters.map((parameter) => (
+                    <option key={parameter.id} value={parameter.id}>
+                      {parameter.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label htmlFor="indicator" className="block text-sm font-medium text-gray-700 mb-1">
                   Select Indicator
                 </label>
@@ -89,6 +179,7 @@ const TaskAssignment = () => {
                   value={selectedIndicator}
                   onChange={(e) => setSelectedIndicator(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  disabled={!selectedParameter}
                 >
                   <option value="">Choose an indicator</option>
                   {indicators.map((indicator) => (
