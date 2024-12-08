@@ -17,6 +17,11 @@ class AdminController extends Controller
         return response()->json($data);
     }
 
+    public function getLTF(){
+        return User::where('role', 'localtaskforce')->get();
+
+    }
+
     public function updateUser(Request $request, User $user): JsonResponse
     {
         // Validate the fields you want to allow editing.

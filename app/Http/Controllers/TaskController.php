@@ -27,5 +27,20 @@ class TaskController extends Controller
 
         return response()->json($task, 201);
     }
+    public function assignTask(Request $request)
+    {
+        $request->validate([
+            'indicator_id' => 'required|exists:indicators,id',
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        $task = Task::create([
+            'indicator_id' => $request->indicator_id,
+            'user_id' => $request->user_id,
+            'status' => 'assigned',
+        ]);
+
+        return response()->json(['message' => 'Task assigned successfully', 'task' => $task], 201);
+    }
 }
 

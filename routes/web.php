@@ -1,6 +1,8 @@
 <?php
 use App\Http\Controllers\AccreditationController;
 use App\Http\Controllers\AreaController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\AdminController;
@@ -39,6 +41,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/departments', function () {
             return Inertia::render('Admin/Departments');
         })->name('departments');
+        Route::get('/assignTask', function () {
+            return Inertia::render('Admin/TaskAssignmentPage');
+        })->name('assignTask');
 
         Route::get('/documents', function () {
             return Inertia::render('Admin/Documents');
@@ -142,3 +147,10 @@ Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
 
 // Route for updating task status
 Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/indicators', [IndicatorController::class, 'index']);
+    Route::get('/users/localtaskforce', [AdminController::class, 'getLTF']);
+    Route::post('/assign-task', [TaskController::class, 'assignTask']);
+});
