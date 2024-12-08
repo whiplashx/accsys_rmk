@@ -1,5 +1,7 @@
 <?php
 use App\Http\Controllers\AccreditationController;
+use App\Http\Controllers\AreaController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DepartmentController;
@@ -133,3 +135,10 @@ Route::delete('/areas/{id}', [AccreditationController::class, 'deleteArea']);
 Route::delete('/parameters/{id}', [AccreditationController::class, 'deleteParameter']);
 Route::delete('/indicators/{id}', [AccreditationController::class, 'deleteIndicator']);
 
+
+//Route::get('/team-members', [::class, 'index']);
+// Route for fetching assigned tasks
+Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
+
+// Route for updating task status
+Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);

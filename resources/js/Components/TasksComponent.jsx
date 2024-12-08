@@ -13,7 +13,7 @@ const LocalTaskForceTaskView = () => {
   const fetchAssignedTasks = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/assigned-tasks');
+      const response = await axios.get('/assigned-tasks');
       setTasks(response.data);
       setLoading(false);
     } catch (error) {
@@ -25,7 +25,7 @@ const LocalTaskForceTaskView = () => {
 
   const handleStatusChange = async (taskId, newStatus) => {
     try {
-      await axios.patch(`/api/tasks/${taskId}`, { status: newStatus });
+      await axios.patch(`/tasks/${taskId}`, { status: newStatus });
       setTasks(tasks.map(task => 
         task.id === taskId ? { ...task, status: newStatus } : task
       ));
