@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('description');
             $table->foreignId('assignee')->constrained('users');
             $table->enum('status', ['pending', 'in-progress', 'completed'])->default('pending');
-            $table->foreignId('indicator_id')->constrained('indicator');
+            $table->foreignId('indicator_id')->constrained('indicators');
             $table->timestamps();
         });
     }
