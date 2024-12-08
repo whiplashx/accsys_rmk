@@ -7,6 +7,7 @@ import { Children, useState } from 'react';
 import Progress from '@/Components/DataVisualization/Progress';
 import AccreditationAdminDashboard from '@/Components/AccreditationAdminDashboard';
 import LocalTaskForceDashboard from '@/Components/LocalTaskForceDashboard';
+import ActivityLog from '@/Components/ActivityLog';
 
 export default function Dashboard() {
     const user = usePage().props.auth.user;
@@ -30,6 +31,7 @@ export default function Dashboard() {
                             <AccreditationAdminDashboard>
 
                             </AccreditationAdminDashboard>
+                            <ActivityLog></ActivityLog>
                         </div>
                     </div>
                 </div>

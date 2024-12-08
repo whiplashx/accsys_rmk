@@ -15,6 +15,8 @@ export default function Departments() {
 
     const attachmentUrl = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/snippet-tnGGMkUnqNH8hCHFJ4g8VbE6ipfJCQ.txt";
 
+
+    const [loading, setLoading] = useState(true);
     useEffect(() => {
         axios
             .get("getUser")
