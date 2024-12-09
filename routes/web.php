@@ -1,5 +1,6 @@
 <?php
 use App\Http\Controllers\AccreditationController;
+use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\IndicatorController;
@@ -39,6 +40,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
 })->middleware(['auth', 'verified']);
 
+Route::post('/activities', [ActivityController::class, 'store']);
+Route::get('/activities_log', [ActivityController::class, 'index']);
 
 Route::middleware(['auth', 'verified', 'role:admin'])
     ->group(function () {

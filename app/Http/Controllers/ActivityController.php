@@ -9,14 +9,18 @@ class ActivityController extends Controller
 {
     public function index()
     {
-        $activities = Activity::with('user')
-            ->whereHas('user', function ($query) {
-                $query->whereIn('role', ['outside_accreditor', 'local_accreditor', 'local_taskforce']);
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        try {
+            // Fetch activity logs with related user information
+            $activities = Activity::with('user:id,name')
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        return response()->json($activities);
+            return response()->json($activities, 200);
+        } catch (\Exception $e) {
+            // Log error and return a 500 response
+            \Log::error('Failed to fetch activity logs:', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'Failed to fetch activity logs.'], 500);
+        }
     }
 
     public function store(Request $request)
