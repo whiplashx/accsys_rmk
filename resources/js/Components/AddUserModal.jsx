@@ -1,24 +1,40 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import InputLabel from "./InputLabel";
 import TextInput from "./TextInput";
 import InputError from "./InputError";
 import DropdownSelect from "./DropdownSelect";
 import PrimaryButton from "./PrimaryButton";
 import { useForm } from "@inertiajs/react";
-import { ToastContainer, toast, Bounce } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
+import axios from 'axios';
 
 function AddUserModal({ show, handleClose, onSuccess }) {
+    const [departments, setDepartments] = useState([]);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         role: '',
+        department_id: '',
         password: '',
         password_confirmation: '',
     });
 
+    useEffect(() => {
+        if (show) {
+            fetchDepartments();
+        }
+    }, [show]);
 
-    
+    const fetchDepartments = async () => {
+        try {
+            const response = await axios.get('/departments');
+            setDepartments(response.data);
+        } catch (error) {
+            console.error('Error fetching departments:', error);
+            toast.error('Failed to load departments');
+        }
+    };
+
     const submit = (e) => {
         e.preventDefault();
 
@@ -28,11 +44,12 @@ function AddUserModal({ show, handleClose, onSuccess }) {
             onSuccess: (page) => {
                 reset('password', 'password_confirmation');
                 handleClose();
-                notify(); // Trigger the toast notification
+                toast.success('User added successfully!');
                 onSuccess(page.props.flash.success);
             },
             onError: (errors) => {
                 console.error(errors);
+                toast.error('Failed to add user. Please check the form and try again.');
             },
         });
     };
@@ -40,25 +57,17 @@ function AddUserModal({ show, handleClose, onSuccess }) {
     if (!show) return null;
 
     return (
-        <>
-            <div
-                className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
-                aria-labelledby="modal-title"
-                role="dialog"
-                aria-modal="true"
-            >
-                <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                    <div className="flex justify-between items-center border-b pb-2 mb-4">
-                        <h3 className="text-lg font-medium leading-6 text-gray-900">Add User</h3>
-                        <button
-                            className="text-gray-400 hover:text-gray-600"
-                            onClick={handleClose}
-                        >
-                            <span className="sr-only">Close</span>
-                            ✖
-                        </button>
-                    </div>
-                    <form onSubmit={submit}>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
+                <div className="flex justify-between items-center border-b pb-2 mb-4">
+                    <h3 className="text-lg font-medium leading-6 text-gray-900">Add User</h3>
+                    <button className="text-gray-400 hover:text-gray-600" onClick={handleClose}>
+                        <span className="sr-only">Close</span>
+                        ✖
+                    </button>
+                </div>
+                <form onSubmit={submit}>
+                    <div className="space-y-4">
                         <div>
                             <InputLabel htmlFor="name" value="Name" />
                             <TextInput
@@ -74,7 +83,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                             <InputError message={errors.name} className="mt-2" />
                         </div>
 
-                        <div className="mt-4">
+                        <div>
                             <InputLabel htmlFor="email" value="Email" />
                             <TextInput
                                 id="email"
@@ -89,23 +98,31 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                             <InputError message={errors.email} className="mt-2" />
                         </div>
 
-                        <div className="mt-4">
-                            <DropdownSelect
-                                id="role"
-                                name="role"
-                                label="Role"
-                                value={data.role}
-                                options={[
-                                    { value: 'admin', label: 'Admin' },
-                                    { value: 'localtaskforce', label: 'Task Force' },
-                                    { value: 'localaccreditor', label: 'Accreditor' },
-                                ]}
-                                onChange={(e) => setData('role', e.target.value)}
-                                error={errors.role}
-                            />
-                        </div>
+                        <DropdownSelect
+                            id="role"
+                            name="role"
+                            label="Role"
+                            value={data.role}
+                            options={[
+                                { value: 'admin', label: 'Admin' },
+                                { value: 'localtaskforce', label: 'Task Force' },
+                                { value: 'localaccreditor', label: 'Accreditor' },
+                            ]}
+                            onChange={(e) => setData('role', e.target.value)}
+                            error={errors.role}
+                        />
 
-                        <div className="mt-4">
+                        <DropdownSelect
+                            id="department_id"
+                            name="department_id"
+                            label="Department"
+                            value={data.department_id}
+                            options={departments.map(dept => ({ value: dept.id, label: dept.name }))}
+                            onChange={(e) => setData('department_id', e.target.value)}
+                            error={errors.department_id}
+                        />
+
+                        <div>
                             <InputLabel htmlFor="password" value="Password" />
                             <TextInput
                                 id="password"
@@ -120,7 +137,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                             <InputError message={errors.password} className="mt-2" />
                         </div>
 
-                        <div className="mt-4">
+                        <div>
                             <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
                             <TextInput
                                 id="password_confirmation"
@@ -134,17 +151,16 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                             />
                             <InputError message={errors.password_confirmation} className="mt-2" />
                         </div>
+                    </div>
 
-                        <div className="mt-4 flex items-center justify-end">
-                            <PrimaryButton className="ms-4" disabled={processing}>
-                                Register
-                            </PrimaryButton>
-                        </div>
-                    </form>
-                </div>
+                    <div className="mt-6 flex justify-end">
+                        <PrimaryButton className="ms-4" disabled={processing}>
+                            Register
+                        </PrimaryButton>
+                    </div>
+                </form>
             </div>
-
-        </>
+        </div>
     );
 }
 

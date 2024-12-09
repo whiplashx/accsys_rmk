@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import DataTable from "@/Components/DataTable";
 import { Check, Edit, Trash, Save } from 'lucide-react';
@@ -7,22 +7,33 @@ import { ToastContainer, toast } from "react-toastify";
 import axios from "axios";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function Departments() {
+export default function UserManagement() {
     const [showModal, setShowModal] = useState(false);
     const [userData, setUserData] = useState([]);
+    const [departments, setDepartments] = useState([]);
     const [editRowId, setEditRowId] = useState(null);
     const [editedData, setEditedData] = useState({});
-
-    const attachmentUrl = "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/snippet-tnGGMkUnqNH8hCHFJ4g8VbE6ipfJCQ.txt";
-
-
     const [loading, setLoading] = useState(true);
-    useEffect(() => {
-        axios
-            .get("getUser")
-            .then((response) => setUserData(response.data))
-            .catch((error) => console.error("Error:", error));
+
+    const fetchUsers = useCallback(async () => {
+        try {
+            const [usersResponse, departmentsResponse] = await Promise.all([
+                axios.get("getUser"),
+                axios.get("/departments")
+            ]);
+            setUserData(usersResponse.data);
+            setDepartments(departmentsResponse.data);
+            setLoading(false);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            toast.error("Failed to load data.");
+            setLoading(false);
+        }
     }, []);
+
+    useEffect(() => {
+        fetchUsers();
+    }, [fetchUsers]);
 
     const handleEditClick = (id, item) => {
         setEditRowId(id);
@@ -30,59 +41,43 @@ export default function Departments() {
     };
 
     const handleInputChange = (key, value) => {
-        setEditedData((prev) => ({ ...prev, [key]: value }));
+        setEditedData(prev => ({ ...prev, [key]: value }));
     };
 
-    const handleSave = (id) => {
-        const originalData = userData.find((user) => user.id === id);
-        const { name, role } = editedData;
+    const handleSave = async (id) => {
+        const originalData = userData.find(user => user.id === id);
+        const { name, role, department_id } = editedData;
 
-        // Check if there are any changes
-        if (name === originalData.name && role === originalData.role) {
-            console.log("No changes detected. Skipping update.");
+        if (name === originalData.name && role === originalData.role && department_id === originalData.department_id) {
             setEditRowId(null);
             return;
         }
 
-        const updatedData = {
-            name,
-            role
-        };
-
-        axios
-            .put(`/api/users/${id}`, updatedData)
-            .then((response) => {
-                console.log("User updated successfully!", response.data);
-                setUserData((prevData) =>
-                    prevData.map((user) =>
-                        user.id === id
-                            ? { ...user, ...updatedData }
-                            : user
-                    )
-                );
-                toast.success("User updated successfully!");
-            })
-            .catch((error) => {
-                console.error("Error updating user:", error.response?.data || error);
-                toast.error("Failed to update user.");
-            })
-            .finally(() => {
-                setEditRowId(null);
-            });
+        try {
+            const response = await axios.put(`/users/${id}`, { name, role, department_id });
+            setUserData(prevData =>
+                prevData.map(user =>
+                    user.id === id ? { ...user, ...response.data } : user
+                )
+            );
+            toast.success("User updated successfully!");
+        } catch (error) {
+            console.error("Error updating user:", error);
+            toast.error("Failed to update user.");
+        } finally {
+            setEditRowId(null);
+        }
     };
 
-    const handleDelete = (id) => {
-        axios
-            .post(`/deleteUser/${id}`, { attachmentUrl: attachmentUrl })
-            .then((response) => {
-                console.log("User deleted successfully!", response.data);
-                setUserData((prevData) => prevData.filter((user) => user.id !== id));
-                toast.success("User deleted successfully!");
-            })
-            .catch((error) => {
-                console.error("Error deleting user:", error.response?.data || error);
-                toast.error("Failed to delete user.");
-            });
+    const handleDelete = async (id) => {
+        try {
+            await axios.post(`/deleteUser/${id}`);
+            setUserData(prevData => prevData.filter(user => user.id !== id));
+            toast.success("User deleted successfully!");
+        } catch (error) {
+            console.error("Error deleting user:", error);
+            toast.error("Failed to delete user.");
+        }
     };
 
     const columns = [
@@ -90,61 +85,52 @@ export default function Departments() {
         {
             key: "name",
             label: "Name",
-            render: (item) =>
-                editRowId === item.id ? (
-                    <input
-                        type="text"
-                        value={editedData.name || ""}
-                        onChange={(e) => handleInputChange("name", e.target.value)}
-                        className="border p-1 rounded"
-                    />
-                ) : (
-                    item.name
-                ),
+            render: (item) => editRowId === item.id ? (
+                <input
+                    type="text"
+                    value={editedData.name || ""}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    className="border p-1 rounded"
+                />
+            ) : item.name,
         },
         {
             key: "role",
             label: "Role",
-            render: (item) =>
-                editRowId === item.id ? (
-                    <select
-                        value={editedData.role || ""}
-                        onChange={(e) => handleInputChange("role", e.target.value)}
-                        className="border p-1 rounded"
-                    >
-                        <option value="" disabled>Select Role</option>
-                        <option value="Admin">Admin</option>
-                        <option value="Task Force">Task Force</option>
-                        <option value="Accreditor">Accreditor</option>
-                    </select>
-                ) : (
-                    item.role
-                ),
+            render: (item) => editRowId === item.id ? (
+                <select
+                    value={editedData.role || ""}
+                    onChange={(e) => handleInputChange("role", e.target.value)}
+                    className="border p-1 rounded"
+                >
+                    <option value="" disabled>Select Role</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Task Force">Task Force</option>
+                    <option value="Accreditor">Accreditor</option>
+                </select>
+            ) : item.role,
         },
         {
             key: "department",
             label: "Department",
-            render: (item) =>
-                editRowId === item.id ? (
-                    <input
-                        type="text"
-                        value={editedData.department || ""}
-                        onChange={(e) => handleInputChange("department", e.target.value)}
-                        className="border p-1 rounded"
-                    />
-                ) : (
-                    item.department || "N/A"
-                ),
+            render: (item) => editRowId === item.id ? (
+                <select
+                    value={editedData.department_id || ""}
+                    onChange={(e) => handleInputChange("department_id", e.target.value)}
+                    className="border p-1 rounded"
+                >
+                    <option value="" disabled>Select Department</option>
+                    {departments.map(dept => (
+                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                    ))}
+                </select>
+            ) : departments.find(dept => dept.id === item.department_id)?.name || "N/A",
         },
-        {
-            key: "email",
-            label: "Email",
-            render: (item) => <span>{item.email}</span>,
-        },
+        { key: "email", label: "Email" },
         {
             key: "activeDate",
             label: "Active Date",
-            render: (item) => <span>{item.activeDate || "N/A"}</span>,
+            render: (item) => item.activeDate || "N/A",
         },
         {
             key: "actions",
@@ -182,7 +168,6 @@ export default function Departments() {
             ),
         },
     ];
-    
 
     return (
         <AdminLayout>
@@ -198,14 +183,19 @@ export default function Departments() {
                     <AddUserModal
                         show={showModal}
                         handleClose={() => setShowModal(false)}
+                        onSuccess={() => fetchUsers()}
                     />
                 </div>
-                <DataTable
-                    filterss={true}
-                    data={userData}
-                    columns={columns}
-                    itemsPerPage={10}
-                />
+                {loading ? (
+                    <div className="text-center">Loading...</div>
+                ) : (
+                    <DataTable
+                        filterss={true}
+                        data={userData}
+                        columns={columns}
+                        itemsPerPage={10}
+                    />
+                )}
                 <ToastContainer />
             </div>
         </AdminLayout>

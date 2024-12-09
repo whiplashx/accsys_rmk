@@ -77,4 +77,21 @@ class DepartmentController extends Controller
 
         return response()->json($department);
     }
+
+    public function selectDepartment()
+    {
+        $departments = Department::all();
+        return view('select-department', compact('departments'));
+    }
+
+    public function setDepartment(Request $request)
+    {
+        $request->validate([
+            'department_id' => 'required|exists:departments,id',
+        ]);
+
+        auth()->user()->update(['department_id' => $request->department_id]);
+
+        return redirect()->intended('/dashboard');
+    }
 }

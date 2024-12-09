@@ -36,6 +36,7 @@ class RegisteredUserController extends Controller
              'name' => 'required|string|max:255',
              'role' => 'required|string|max:255', // Ensure the role exists in your system
              'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+             'departments' => 'required|string|max:255', 
              'password' => ['required', 'confirmed', Rules\Password::defaults()],
          ]);
      
@@ -45,10 +46,12 @@ class RegisteredUserController extends Controller
              'role' => $request->role,
              'email' => $request->email,
              'password' => Hash::make($request->password),
+             'departments' => $request->departments,
          ]);
      
          // Assign the role to the user
          $roleName = $request->role;
+         $departmentname = $request->departments;
      
          // Check if the role exists and assign it
          $role = Role::findByName($roleName); // Throws error if role doesn't exist
@@ -56,6 +59,12 @@ class RegisteredUserController extends Controller
              $user->assignRole($roleName);
          } else {
              return redirect()->back()->withErrors(['role' => 'Invalid role selected.']);
+         }
+         $departments = Role::findByName($departmentname); // Throws error if role doesn't exist
+         if ($departments) {
+             $user->assignDepartmen($departmentname);
+         } else {
+             return redirect()->back()->withErrors(['department' => 'Invalid role selected.']);
          }
      
          // Trigger registered event
