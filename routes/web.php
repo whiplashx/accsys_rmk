@@ -166,3 +166,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
     Route::post('/assign-task', [TaskController::class, 'assignTask']);
 });
+
+Route::get('/select-department', [DepartmentController::class, 'selectDepartment'])->name('select-department');
+Route::post('/set-department', [DepartmentController::class, 'setDepartment'])->name('set-department');
+
+// API routes
+Route::get('/departmentsTB', [DepartmentController::class, 'index']);

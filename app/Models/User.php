@@ -56,5 +56,9 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Task::class, 'assignee');
     }
     
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
 }
 

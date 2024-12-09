@@ -1,7 +1,10 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-
+use App\Mail\AuthMail;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
@@ -30,49 +33,29 @@ class RegisteredUserController extends Controller
      * @throws \Illuminate\Validation\ValidationException
      */
 
-     public function store(Request $request): RedirectResponse
-     {
-         $request->validate([
-             'name' => 'required|string|max:255',
-             'role' => 'required|string|max:255', // Ensure the role exists in your system
-             'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
-             'departments' => 'required|string|max:255', 
-             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-         ]);
-     
-         // Create the user
-         $user = User::create([
-             'name' => $request->name,
-             'role' => $request->role,
-             'email' => $request->email,
-             'password' => Hash::make($request->password),
-             'departments' => $request->departments,
-         ]);
-     
-         // Assign the role to the user
-         $roleName = $request->role;
-         $departmentname = $request->departments;
-     
-         // Check if the role exists and assign it
-         $role = Role::findByName($roleName); // Throws error if role doesn't exist
-         if ($role) {
-             $user->assignRole($roleName);
-         } else {
-             return redirect()->back()->withErrors(['role' => 'Invalid role selected.']);
-         }
-         $departments = Role::findByName($departmentname); // Throws error if role doesn't exist
-         if ($departments) {
-             $user->assignDepartmen($departmentname);
-         } else {
-             return redirect()->back()->withErrors(['department' => 'Invalid role selected.']);
-         }
-     
-         // Trigger registered event
-         event(new Registered($user));
-     
-         // Log the user in
-         //Auth::login($user);
-     
-         return redirect(route('accounts'));
-     }
+    public function store(Request $request): RedirectResponse//|JsonResponse
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'role' => 'required|string|max:255', // Ensure the role exists in your system
+            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
+            'departments' => 'required|string|max:255',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'role' => $request->role,
+            'password' => Hash::make($request->password),
+            'departments' => $request->departments,
+        ]);
+
+        $role = Role::findByName($request->role);
+        $user->assignRole($role);
+
+        event(new Registered($user));
+
+        return redirect(route('accounts'));
+    }
 }

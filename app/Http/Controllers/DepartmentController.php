@@ -94,4 +94,5 @@ class DepartmentController extends Controller
 
         return redirect()->intended('/dashboard');
     }
+    
 }

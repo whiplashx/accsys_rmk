@@ -9,12 +9,12 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 function AddUserModal({ show, handleClose, onSuccess }) {
-    const [departments, setDepartments] = useState([]);
+    const [departmentsTB, setDepartments] = useState([]);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
         role: '',
-        department_id: '',
+        departments: '',
         password: '',
         password_confirmation: '',
     });
@@ -27,7 +27,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
 
     const fetchDepartments = async () => {
         try {
-            const response = await axios.get('/departments');
+            const response = await axios.get('/departmentsTB');
             setDepartments(response.data);
         } catch (error) {
             console.error('Error fetching departments:', error);
@@ -53,6 +53,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
             },
         });
     };
+
 
     if (!show) return null;
 
@@ -113,12 +114,12 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                         />
 
                         <DropdownSelect
-                            id="department_id"
-                            name="department_id"
+                            id="departments"
+                            name="departments"
                             label="Department"
-                            value={data.department_id}
-                            options={departments.map(dept => ({ value: dept.id, label: dept.name }))}
-                            onChange={(e) => setData('department_id', e.target.value)}
+                            value={data.departments}
+                            options={departmentsTB.map(dept => ({ value: dept.id, label: `${dept.name} (${dept.code})` }))}
+                            onChange={(e) => setData('departments', e.target.value)}
                             error={errors.department_id}
                         />
 

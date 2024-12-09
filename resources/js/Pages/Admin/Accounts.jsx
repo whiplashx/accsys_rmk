@@ -19,7 +19,7 @@ export default function UserManagement() {
         try {
             const [usersResponse, departmentsResponse] = await Promise.all([
                 axios.get("getUser"),
-                axios.get("/departments")
+                axios.get("/departmentsTB")
             ]);
             setUserData(usersResponse.data);
             setDepartments(departmentsResponse.data);
@@ -121,17 +121,12 @@ export default function UserManagement() {
                 >
                     <option value="" disabled>Select Department</option>
                     {departments.map(dept => (
-                        <option key={dept.id} value={dept.id}>{dept.name}</option>
+                        <option key={dept.id} value={dept.id}>{`${dept.name} (${dept.code})`}</option>
                     ))}
                 </select>
             ) : departments.find(dept => dept.id === item.department_id)?.name || "N/A",
         },
         { key: "email", label: "Email" },
-        {
-            key: "activeDate",
-            label: "Active Date",
-            render: (item) => item.activeDate || "N/A",
-        },
         {
             key: "actions",
             label: "Actions",
