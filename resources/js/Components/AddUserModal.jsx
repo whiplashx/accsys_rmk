@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 function AddUserModal({ show, handleClose, onSuccess }) {
-    const [departmentsTB, setDepartments] = useState([]);
+    const [departments, setDepartments] = useState([]);
     const { data, setData, post, processing, errors, reset } = useForm({
         name: '',
         email: '',
@@ -37,8 +37,8 @@ function AddUserModal({ show, handleClose, onSuccess }) {
 
     const submit = (e) => {
         e.preventDefault();
-        console.log(data);
-        /*
+       // console.log(data);
+        
         post(route('register'), {
             preserveState: true,
             preserveScroll: true,
@@ -52,7 +52,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                 console.error(errors);
                 toast.error('Failed to add user. Please check the form and try again.');
             },
-        });*/
+        });
     };
 
 
@@ -119,7 +119,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                             name="departments"
                             label="Department"
                             value={data.departments}
-                            options={departmentsTB.map(dept => ({ value: dept.id, label: `${dept.name} (${dept.code})` }))}
+                            options={departments.map(dept => ({ value: dept.id, label: `${dept.name} (${dept.code})` }))}
                             onChange={(e) => setData('departments', e.target.value)}
                             error={errors.departments}
                         />

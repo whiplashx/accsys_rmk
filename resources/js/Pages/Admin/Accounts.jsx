@@ -49,7 +49,7 @@ export default function UserManagement() {
         const originalData = userData.find(user => user.id === id);
         const { name, role, departments } = editedData;
 
-        if (name === originalData.name && role === originalData.role && department === originalData.departments) {
+        if (name === originalData.name && role === originalData.role && departments === originalData.departments) {
             setEditRowId(null);
             return;
         }
@@ -112,7 +112,7 @@ export default function UserManagement() {
             ) : item.role,
         },
         {
-            key: "department",
+            key: "departments",
             label: "Department",
             render: (item) => editRowId === item.id ? (
                 <select

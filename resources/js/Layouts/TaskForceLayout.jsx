@@ -117,7 +117,7 @@ export default function TaskForceLayout({ children }) {
             </div>
           </div>
         </header>
-      <Breadcrumbs></Breadcrumbs>
+   
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-white p-6">
           {children}

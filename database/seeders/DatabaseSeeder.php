@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AreaSeeder::class,
             ParameterSeeder::class,
             IndicatorSeeder::class,
+            RoleSeeder::class,
             AdminSeeder::class,
         ]);
     }

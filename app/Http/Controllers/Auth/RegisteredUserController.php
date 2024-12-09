@@ -39,7 +39,7 @@ class RegisteredUserController extends Controller
             'name' => 'required|string|max:255',
             'role' => 'required|string|max:255', // Ensure the role exists in your system
             'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
-            'departments' => 'bigint|unsigned',
+            'departments' => 'required|exists:departments,id',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -53,7 +53,7 @@ class RegisteredUserController extends Controller
 
         $role = Role::findByName($request->role);
         $user->assignRole($role);
-        $user->
+        
         event(new Registered($user));
 
         return redirect(route('accounts'));

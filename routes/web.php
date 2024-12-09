@@ -70,7 +70,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         })->name('settings');
     });
 
-Route::middleware(['auth', 'verified', 'role:localtaskforce', 'department'])
+Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     ->group(function () {
         Route::get('/accreditationLTF', function () {
             return Inertia::render('LocalTaskForce/Accreditation');
