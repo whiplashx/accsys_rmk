@@ -42,6 +42,11 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'verified', 'role:admin'])
     ->group(function () {
+        Route::get('/areas', [AreaController::class, 'index']);
+        Route::get('/areas/{area}/parameters', [ParameterController::class, 'index']);
+        Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'index']);
+        Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
+        Route::post('/assign-task', [TaskController::class, 'assignTask']);
         Route::get('/departments', function () {
             return Inertia::render('Admin/Departments');
         })->name('departments');
@@ -151,18 +156,10 @@ Route::patch('tasks/{task}', [TaskController::class, 'updateTaskStatus']);
 
 
 
-Route::middleware('auth')->group(function () {
-    Route::get('/indicators', [IndicatorController::class, 'index']);
-    Route::get('/users/localtaskforce', [AdminController::class, 'getLTF']);
-    Route::post('/assign-task', [TaskController::class, 'assignTask']);
-});
+
 
 Route::middleware('auth')->group(function () {
-    Route::get('/areas', [AreaController::class, 'index']);
-    Route::get('/areas/{area}/parameters', [ParameterController::class, 'index']);
-    Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'index']);
-    Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
-    Route::post('/assign-task', [TaskController::class, 'assignTask']);
+
 });
 
 Route::get('/select-department', [DepartmentController::class, 'selectDepartment'])->name('select-department');

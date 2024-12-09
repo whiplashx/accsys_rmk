@@ -9,16 +9,22 @@ class Task extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['title', 'description', 'assignee', 'status', 'criteria_id'];
+    protected $fillable = [
+        'title',
+        'description',
+        'assignee',
+        'status',
+        'indicator_id',
+    ];
 
-    public function criterion()
-    {
-        return $this->belongsTo(Indicator::class);
-    }
-
-    public function assignedTo()
+    public function assignedUser()
     {
         return $this->belongsTo(User::class, 'assignee');
+    }
+
+    public function indicator()
+    {
+        return $this->belongsTo(Indicator::class);
     }
 }
 

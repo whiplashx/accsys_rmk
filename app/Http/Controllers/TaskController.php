@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Indicator;
 use App\Models\Task;
 use App\Models\User;
+use DB;
 use Illuminate\Http\Request;
+use Log;
 
 class TaskController extends Controller
 {
@@ -31,18 +33,38 @@ class TaskController extends Controller
     }
     public function assignTask(Request $request)
     {
-        $request->validate([
-            'indicator_id' => 'required|exists:indicators,id',
-            'user_id' => 'required|exists:users,id',
-        ]);
+        try {
+            $request->validate([
+                'indicator_id' => 'required|exists:indicators,id',
+                'user_id' => 'required|exists:users,id',
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+            ]);
 
-        $indicator = Indicator::findOrFail($request->indicator_id);
-        $user = User::findOrFail($request->user_id);
+            $user = User::findOrFail($request->user_id);
+            $indicator = Indicator::findOrFail($request->indicator_id);
 
-        $indicator->task = 'Assigned to ' . $user->name;
-        $indicator->save();
+            DB::beginTransaction();
 
-        return response()->json(['message' => 'Task assigned successfully']);
+            $task = Task::create([
+                'title' => $request->title,
+                'description' => $request->description,
+                'assignee' => $user->id,
+                'status' => 'pending',
+                'indicator_id' => $indicator->id,
+            ]);
+
+            DB::commit();
+
+            return response()->json(['message' => 'Task assigned successfully', 'task' => $task], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollBack();
+            return response()->json(['message' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error assigning task: ' . $e->getMessage());
+            return response()->json(['message' => 'An error occurred while assigning the task'], 500);
+        }
     }
     public function fetchAssignedTasks()
     {
