@@ -2,6 +2,7 @@ import React from 'react';
 import { Book, Users, Calendar, Trophy, ChartBar, Globe } from 'lucide-react';
 import { Link , Head} from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
+import CopilotInterface from '@/Components/Chatbot';
 
 const UniversityDashboard = () => {
   return (
