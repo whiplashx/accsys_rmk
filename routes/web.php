@@ -146,11 +146,9 @@ Route::delete('/indicatorsTB/{id}', [AccreditationController::class, 'deleteIndi
 
 
 //Route::get('/team-members', [::class, 'index']);
-// Route for fetching assigned tasks
-Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
+Route::get('assigned-tasks', [TaskController::class, 'fetchAssignedTasks']);
+Route::patch('tasks/{task}', [TaskController::class, 'updateTaskStatus']);
 
-// Route for updating task status
-Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);
 
 
 Route::middleware('auth')->group(function () {

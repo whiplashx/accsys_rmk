@@ -1,54 +1,68 @@
-import React, { useState } from 'react';
-import useAccreditationData from './useAccreditationData';
+import React, { useState } from "react";
+import useAccreditationData from "./useAccreditationData";
 
 const AccreditationView = () => {
   const { areas, loading } = useAccreditationData();
   const [expandedAreas, setExpandedAreas] = useState([]);
 
-  if (loading) {
-    return <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>Loading...</div>;
-  }
-
   const toggleArea = (areaId) => {
-    setExpandedAreas(prev => 
-      prev.includes(areaId) 
-        ? prev.filter(id => id !== areaId) 
+    setExpandedAreas((prev) =>
+      prev.includes(areaId)
+        ? prev.filter((id) => id !== areaId)
         : [...prev, areaId]
     );
   };
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gray-900"></div>
+      </div>
+    );
+  }
+
+  // Handle the case where areas might be undefined or empty
+  if (!areas || areas.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-gray-500">No accreditation areas available.</p>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '20px' }}>Accreditation Areas</h1>
-      <div>
+    <div className="container mx-auto p-6 max-w-4xl">
+      <h1 className="text-3xl font-bold mb-8 text-gray-800 text-center">
+        Accreditation Areas
+      </h1>
+      <div className="space-y-4">
         {areas.map((area) => (
-          <div key={area.id} style={{ marginBottom: '20px', border: '1px solid #e0e0e0', borderRadius: '4px' }}>
+          <div
+            key={area.id}
+            className="border border-gray-300 rounded-lg shadow-sm"
+          >
             <button
-              style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '10px',
-                backgroundColor: '#f0f0f0',
-                border: 'none',
-                cursor: 'pointer',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center'
-              }}
+              className="w-full text-left px-4 py-3 bg-gray-100 hover:bg-gray-200 flex justify-between items-center rounded-t-lg"
               onClick={() => toggleArea(area.id)}
             >
-              <h2 style={{ fontSize: '18px', fontWeight: 'bold' }}>{area.name}</h2>
-              <span>{expandedAreas.includes(area.id) ? '▼' : '▶'}</span>
+              <h2 className="text-lg font-semibold text-gray-700">
+                {area.name}
+              </h2>
+              <span className="text-gray-500">
+                {expandedAreas.includes(area.id) ? "▼" : "▶"}
+              </span>
             </button>
             {expandedAreas.includes(area.id) && (
-              <div style={{ padding: '15px' }}>
+              <div className="p-4 bg-white">
                 {area.parameters.map((parameter) => (
-                  <div key={parameter.id} style={{ marginTop: '15px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '10px' }}>{parameter.name}</h3>
-                    <ul style={{ listStyleType: 'disc', paddingLeft: '20px' }}>
-                      {parameter.criteria.map((criterion) => (
-                        <li key={criterion.id} style={{ fontSize: '14px', color: '#666', marginBottom: '5px' }}>
-                          {criterion.description}
+                  <div key={parameter.id} className="mb-4">
+                    <h3 className="text-md font-medium text-gray-800 mb-2">
+                      {parameter.name}
+                    </h3>
+                    <ul className="list-disc list-inside text-sm text-gray-600">
+                      {parameter.indicators.map((indicator) => (
+                        <li key={indicator.id} className="mb-1">
+                          {indicator.description}
                         </li>
                       ))}
                     </ul>
@@ -64,4 +78,3 @@ const AccreditationView = () => {
 };
 
 export default AccreditationView;
-

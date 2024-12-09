@@ -44,11 +44,14 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Task assigned successfully']);
     }
-    public function getAssignedTasks()
+    public function fetchAssignedTasks()
     {
-        // Fetch and return assigned tasks
-        $tasks = Task::where('assigned_to', auth()->id())->get();
-        return response()->json($tasks);
+        try {
+            $tasks = Task::with('indicator')->get(); // Replace with your actual logic
+            return response()->json($tasks, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     public function updateTaskStatus(Request $request, $taskId)
