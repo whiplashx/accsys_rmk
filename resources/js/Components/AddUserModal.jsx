@@ -37,7 +37,8 @@ function AddUserModal({ show, handleClose, onSuccess }) {
 
     const submit = (e) => {
         e.preventDefault();
-
+        console.log(data);
+        /*
         post(route('register'), {
             preserveState: true,
             preserveScroll: true,
@@ -51,7 +52,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                 console.error(errors);
                 toast.error('Failed to add user. Please check the form and try again.');
             },
-        });
+        });*/
     };
 
 
@@ -120,7 +121,7 @@ function AddUserModal({ show, handleClose, onSuccess }) {
                             value={data.departments}
                             options={departmentsTB.map(dept => ({ value: dept.id, label: `${dept.name} (${dept.code})` }))}
                             onChange={(e) => setData('departments', e.target.value)}
-                            error={errors.department_id}
+                            error={errors.departments}
                         />
 
                         <div>

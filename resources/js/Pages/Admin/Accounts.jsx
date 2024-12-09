@@ -19,10 +19,11 @@ export default function UserManagement() {
         try {
             const [usersResponse, departmentsResponse] = await Promise.all([
                 axios.get("getUser"),
-                axios.get("/departmentsTB")
+                axios.get("departmentsTB")
             ]);
             setUserData(usersResponse.data);
             setDepartments(departmentsResponse.data);
+            //console.log(departmentsResponse.data);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -46,15 +47,15 @@ export default function UserManagement() {
 
     const handleSave = async (id) => {
         const originalData = userData.find(user => user.id === id);
-        const { name, role, department_id } = editedData;
+        const { name, role, departments } = editedData;
 
-        if (name === originalData.name && role === originalData.role && department_id === originalData.department_id) {
+        if (name === originalData.name && role === originalData.role && department === originalData.departments) {
             setEditRowId(null);
             return;
         }
 
         try {
-            const response = await axios.put(`/users/${id}`, { name, role, department_id });
+            const response = await axios.put(`/users/${id}`, { name, role, departments });
             setUserData(prevData =>
                 prevData.map(user =>
                     user.id === id ? { ...user, ...response.data } : user
@@ -115,8 +116,8 @@ export default function UserManagement() {
             label: "Department",
             render: (item) => editRowId === item.id ? (
                 <select
-                    value={editedData.department_id || ""}
-                    onChange={(e) => handleInputChange("department_id", e.target.value)}
+                    value={editedData.departments || ""}
+                    onChange={(e) => handleInputChange("departments", e.target.value)}
                     className="border p-1 rounded"
                 >
                     <option value="" disabled>Select Department</option>
@@ -124,7 +125,7 @@ export default function UserManagement() {
                         <option key={dept.id} value={dept.id}>{`${dept.name} (${dept.code})`}</option>
                     ))}
                 </select>
-            ) : departments.find(dept => dept.id === item.department_id)?.name || "N/A",
+            ) : departments.find(dept => dept.id === item.departments)?.name || "N/A",
         },
         { key: "email", label: "Email" },
         {
