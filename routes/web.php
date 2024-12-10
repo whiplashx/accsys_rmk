@@ -42,12 +42,12 @@ Route::middleware('auth')->group(function () {
     Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
 })->middleware(['auth', 'verified']);
 
-Route::post('/activities', [ActivityController::class, 'store']);
+Route::post('/activitiesUpdate', [ActivityController::class, 'store'])->middleware('auth', 'role:localtaskforce', 'verified');
 Route::get('/activities_log', [ActivityController::class, 'index']);
 
 Route::middleware(['auth', 'verified', 'role:admin'])
     ->group(function () {
-        Route::get('/areas', [AreaController::class, 'index']);
+        //Route::get('/areas', [AreaController::class, 'index']);
         Route::get('/areas/{area}/parameters', [ParameterController::class, 'index']);
         Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'index']);
         Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
@@ -78,8 +78,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/settings', function () {
             return Inertia::render('Admin/Settings');
         })->name('settings');
-    });
 
+    });
+    Route::get('/areas', [AreaController::class, 'index']);
 Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     ->group(function () {
         Route::get('/accreditationLTF', function () {
@@ -93,7 +94,7 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         })->name('selfsurveyLTF');
         Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
         Route::get('/self-surveys/{taskId}', [SelfSurveyController::class, 'show']);
-       Route::get('/areas', [AreaController::class, 'index']);
+       //Route::get('/areas', [AreaController::class, 'index']);
        
        //tasks
        Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
@@ -102,6 +103,8 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
        Route::post('/upload-document', [DocumentController::class, 'upload']);
        Route::get('/task-documents/{taskId}', [DocumentController::class, 'getTaskDocument']);
        Route::get('/download-document/{id}', [DocumentController::class, 'download']);
+       Route::get('/indicatorsForTask', [IndicatorController::class, 'index']);
+
       // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
       //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
        Route::post('/self-surveys', [SelfSurveyController::class, 'store']);

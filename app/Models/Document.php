@@ -9,8 +9,9 @@ class Document extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'path', 'task_id', 'user_id'];
+    protected $fillable = ['name', 'path', 'task_id', 'user_id', 'indicator_id'];
 
+    // Define inverse relationships
     public function task()
     {
         return $this->belongsTo(Task::class);
@@ -20,5 +21,9 @@ class Document extends Model
     {
         return $this->belongsTo(User::class);
     }
-}
 
+    public function indicator()
+    {
+        return $this->belongsTo(Indicator::class);
+    }
+}

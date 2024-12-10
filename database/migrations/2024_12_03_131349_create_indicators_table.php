@@ -11,6 +11,8 @@ return new class extends Migration
         Schema::create('indicators', function (Blueprint $table) {
             $table->id();
             $table->foreignId('parameter_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('documents')->nullable();
+            $table->foreign('documents')->references('id')->on('documents')->onDelete('set null')->onUpdate('set null');
             $table->text('description');
             $table->text('task')->nullable();
             $table->timestamps();

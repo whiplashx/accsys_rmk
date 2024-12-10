@@ -18,7 +18,7 @@ const SelfSurveyForm = () => {
   const fetchAreas = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/areas');
+      const response = await axios.get('/areasTB');
       if (response.data && response.data.length > 0) {
         setAreas(response.data);
         setSelectedArea(response.data[0]);

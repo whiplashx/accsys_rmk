@@ -14,8 +14,8 @@ class ActivityController extends Controller
             $activities = Activity::with('user:id,name')
                 ->orderBy('created_at', 'desc')
                 ->get();
-
-            return response()->json($activities, 200);
+        return response()->json($activities, 200);
+    
         } catch (\Exception $e) {
             // Log error and return a 500 response
             \Log::error('Failed to fetch activity logs:', ['error' => $e->getMessage()]);

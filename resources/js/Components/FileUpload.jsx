@@ -27,7 +27,7 @@ export default function FileUploadDialog({ onUpload }) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`mt-4 border-3 border-dashed rounded-lg p-8 text-center ${
+      className={`mt-4 border-3 border shadow-md border-dashed rounded-lg p-8 text-center ${
         isDragging ? "border-blue-500 bg-blue-50" : "border-gray-300"
       }`}
     >
