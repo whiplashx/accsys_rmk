@@ -9,7 +9,7 @@ const SelfSurveyForm = () => {
   const [loading, setLoading] = useState(true);
   const [selectedArea, setSelectedArea] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
-  const parametersPerPage = 2; // Adjust this value as needed
+  const parametersPerPage = 2;
 
   useEffect(() => {
     fetchAreas();
@@ -17,9 +17,12 @@ const SelfSurveyForm = () => {
 
   const fetchAreas = async () => {
     try {
-      const response = await axios.get('/areasTB');
-      setAreas(response.data);
-      setSelectedArea(response.data[0]);
+      setLoading(true);
+      const response = await axios.get('/areas');
+      if (response.data && response.data.length > 0) {
+        setAreas(response.data);
+        setSelectedArea(response.data[0]);
+      }
       setLoading(false);
     } catch (error) {
       console.error('Error fetching areas:', error);
@@ -37,8 +40,13 @@ const SelfSurveyForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!selectedArea) {
+      toast.error('Please select an area first');
+      return;
+    }
+
     try {
-      await axios.post('/api/self-survey', { ratings });
+      await axios.post('/self-surveys', { ratings });
       toast.success('Survey submitted successfully');
     } catch (error) {
       console.error('Error submitting survey:', error);
@@ -93,7 +101,7 @@ const SelfSurveyForm = () => {
     </div>
   );
 
-  const renderParameters = (parameters, startIndex) => (
+  const renderParameters = (parameters = [], startIndex) => (
     <div>
       {parameters.map((parameter, paramIndex) => (
         <div key={parameter.id} className="mb-8 bg-white p-6 rounded-lg shadow-lg">
@@ -138,7 +146,9 @@ const SelfSurveyForm = () => {
   );
 
   const renderPagination = () => {
-    const pageCount = Math.ceil(selectedArea?.parameters.length / parametersPerPage);
+    if (!selectedArea?.parameters?.length) return null;
+    
+    const pageCount = Math.ceil(selectedArea.parameters.length / parametersPerPage);
     return (
       <div className="flex justify-between items-center mt-8">
         <button
@@ -164,7 +174,7 @@ const SelfSurveyForm = () => {
     <div className="flex flex-wrap justify-center gap-2 mb-6">
       {areas.map((area, index) => (
         <button
-          key={index}
+          key={area.id}
           className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
             selectedArea?.id === area.id
               ? 'bg-slate-700 text-white'
@@ -190,7 +200,7 @@ const SelfSurveyForm = () => {
   }
 
   return (
-    <div className="bg-slate-100 min-h-screen pt-20"> {/* Added pt-20 for top bar space */}
+    <div className="bg-slate-100 min-h-screen pt-20">
       <ToastContainer />
       
       <div className="container mx-auto px-4 py-8">
@@ -208,10 +218,10 @@ const SelfSurveyForm = () => {
               </h2>
 
               {renderParameters(
-                selectedArea.parameters.slice(
+                selectedArea.parameters?.slice(
                   currentPage * parametersPerPage,
                   (currentPage + 1) * parametersPerPage
-                ),
+                ) || [],
                 currentPage * parametersPerPage
               )}
 
@@ -234,3 +244,4 @@ const SelfSurveyForm = () => {
 };
 
 export default SelfSurveyForm;
+

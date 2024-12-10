@@ -3,7 +3,9 @@ use App\Http\Controllers\AccreditationController;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\DocumentController;
 use App\Http\Controllers\IndicatorController;
+use App\Http\Controllers\SelfSurveyController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\AdminController;
@@ -89,7 +91,23 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         Route::get('/selfsurveyLTF', function () {
             return Inertia::render('LocalTaskForce/Selfsurvey');
         })->name('selfsurveyLTF');
-
+        Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
+        Route::get('/self-surveys/{taskId}', [SelfSurveyController::class, 'show']);
+       Route::get('/areas', [AreaController::class, 'index']);
+       
+       //tasks
+       Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
+       Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);
+       Route::post('/activities', [TaskController::class, 'logActivity']);
+       Route::post('/upload-document', [DocumentController::class, 'upload']);
+       Route::get('/task-documents/{taskId}', [DocumentController::class, 'getTaskDocument']);
+       Route::get('/download-document/{id}', [DocumentController::class, 'download']);
+      // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
+      //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
+       Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
+       Route::get('/user', function (Request $request) {
+           return $request->user();
+       });
     });
 Route::middleware(['auth', 'verified', 'role:localaccreditor'])
     ->group(function () {
@@ -103,7 +121,9 @@ Route::middleware(['auth', 'verified', 'role:localaccreditor'])
     });
 
 
+//get user id
 
+Route::middleware('auth')->get('/userID', [UserController::class, 'getUserId']);
 
 //DEPARTMENT API
 Route::apiResource('department', DepartmentController::class);
@@ -170,3 +190,7 @@ Route::post('/set-department', [DepartmentController::class, 'setDepartment'])->
 
 // API routes
 Route::get('/departmentsTB', [DepartmentController::class, 'index']);
+
+//selfsurvey
+    // New routes for self-surveys and areas
+
