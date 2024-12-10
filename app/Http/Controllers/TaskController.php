@@ -84,5 +84,15 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Task status updated successfully']);
     }
+
+    public function index()
+    {
+        try {
+            $tasks = Task::orderBy('created_at', 'desc')->get();
+            return response()->json($tasks, 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to fetch tasks'], 500);
+        }
+    }
 }
 

@@ -48,6 +48,7 @@ Route::get('/activities_log', [ActivityController::class, 'index']);
 Route::middleware(['auth', 'verified', 'role:admin'])
     ->group(function () {
         //Route::get('/areas', [AreaController::class, 'index']);
+        Route::get('/tasksAdmin', [TaskController::class, 'index']);
         Route::get('/areas/{area}/parameters', [ParameterController::class, 'index']);
         Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'index']);
         Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
@@ -196,4 +197,8 @@ Route::get('/departmentsTB', [DepartmentController::class, 'index']);
 
 //selfsurvey
     // New routes for self-surveys and areas
+
+
+
+
 

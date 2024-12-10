@@ -3,7 +3,7 @@ import axios from 'axios';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const TaskAssignment = () => {
+const TaskAssignment = ({ isOpen, onClose }) => {
   const [areas, setAreas] = useState([]);
   const [parameters, setParameters] = useState([]);
   const [indicators, setIndicators] = useState([]);
@@ -17,15 +17,17 @@ const TaskAssignment = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchInitialData();
-  }, []);
+    if (isOpen) {
+      fetchInitialData();
+    }
+  }, [isOpen]);
 
   const fetchInitialData = async () => {
     try {
       setLoading(true);
       const [areasResponse, usersResponse] = await Promise.all([
         axios.get('/areas'),
-        axios.get('/users/localtaskforce')
+        axios.get('/users/localtaskforce'),
       ]);
       setAreas(areasResponse.data);
       setUsers(usersResponse.data);
@@ -94,17 +96,17 @@ const TaskAssignment = () => {
         indicator_id: selectedIndicator,
         user_id: selectedUser,
         title: taskTitle,
-        description: taskDescription
+        description: taskDescription,
       });
       toast.success('Task assigned successfully!');
       setSelectedIndicator('');
       setSelectedUser('');
       setTaskTitle('');
       setTaskDescription('');
-      // Refresh the indicators list to reflect the new assignment
       if (selectedParameter) {
         fetchIndicators(selectedParameter);
       }
+      onClose(); // Close the modal after successful task assignment
     } catch (error) {
       console.error('Error assigning task:', error);
       if (error.response && error.response.data && error.response.data.message) {
@@ -115,31 +117,26 @@ const TaskAssignment = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  if (!isOpen) return null;
 
   return (
-    <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
-      <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-500 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
-        <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
-          <div className="max-w-md mx-auto">
-            <h2 className="text-2xl font-semibold text-center mb-6">Assign Task to Local Task Force</h2>
-            <form onSubmit={handleAssignment} className="space-y-6">
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-50 z-50">
+      <div className="bg-white rounded-lg shadow-lg w-11/12 sm:w-3/4 md:w-1/2">
+        <div className="p-6">
+          <h2 className="text-2xl font-semibold text-center mb-4">Assign Task</h2>
+          {loading ? (
+            <div className="flex justify-center">
+              <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : (
+            <form onSubmit={handleAssignment} className="space-y-4">
               <div>
-                <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Area
-                </label>
+                <label htmlFor="area">Select Area</label>
                 <select
                   id="area"
                   value={selectedArea}
                   onChange={handleAreaChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border rounded px-2 py-1"
                 >
                   <option value="">Choose an area</option>
                   {areas.map((area) => (
@@ -150,14 +147,12 @@ const TaskAssignment = () => {
                 </select>
               </div>
               <div>
-                <label htmlFor="parameter" className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Parameter
-                </label>
+                <label htmlFor="parameter">Select Parameter</label>
                 <select
                   id="parameter"
                   value={selectedParameter}
                   onChange={handleParameterChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border rounded px-2 py-1"
                   disabled={!selectedArea}
                 >
                   <option value="">Choose a parameter</option>
@@ -169,14 +164,12 @@ const TaskAssignment = () => {
                 </select>
               </div>
               <div>
-                <label htmlFor="indicator" className="block text-sm font-medium text-gray-700 mb-1">
-                  Select Indicator
-                </label>
+                <label htmlFor="indicator">Select Indicator</label>
                 <select
                   id="indicator"
                   value={selectedIndicator}
                   onChange={(e) => setSelectedIndicator(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border rounded px-2 py-1"
                   disabled={!selectedParameter}
                 >
                   <option value="">Choose an indicator</option>
@@ -188,14 +181,12 @@ const TaskAssignment = () => {
                 </select>
               </div>
               <div>
-                <label htmlFor="user" className="block text-sm font-medium text-gray-700 mb-1">
-                  Select User
-                </label>
+                <label htmlFor="user">Select User</label>
                 <select
                   id="user"
                   value={selectedUser}
                   onChange={(e) => setSelectedUser(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border rounded px-2 py-1"
                 >
                   <option value="">Choose a user</option>
                   {users.map((user) => (
@@ -206,41 +197,44 @@ const TaskAssignment = () => {
                 </select>
               </div>
               <div>
-                <label htmlFor="taskTitle" className="block text-sm font-medium text-gray-700 mb-1">
-                  Task Title
-                </label>
+                <label htmlFor="taskTitle">Task Title</label>
                 <input
                   type="text"
                   id="taskTitle"
                   value={taskTitle}
                   onChange={(e) => setTaskTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border rounded px-2 py-1"
                   required
                 />
               </div>
               <div>
-                <label htmlFor="taskDescription" className="block text-sm font-medium text-gray-700 mb-1">
-                  Task Description
-                </label>
+                <label htmlFor="taskDescription">Task Description</label>
                 <textarea
                   id="taskDescription"
                   value={taskDescription}
                   onChange={(e) => setTaskDescription(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="block w-full border rounded px-2 py-1"
                   rows="3"
                   required
                 ></textarea>
               </div>
-              <div>
+              <div className="flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 bg-gray-500 text-white rounded"
+                >
+                  Cancel
+                </button>
                 <button
                   type="submit"
-                  className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150 ease-in-out"
+                  className="px-4 py-2 bg-blue-600 text-white rounded"
                 >
                   Assign Task
                 </button>
               </div>
             </form>
-          </div>
+          )}
         </div>
       </div>
       <ToastContainer />
@@ -249,4 +243,3 @@ const TaskAssignment = () => {
 };
 
 export default TaskAssignment;
-
