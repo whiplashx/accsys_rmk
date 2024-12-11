@@ -6,6 +6,7 @@ use App\Models\Document;
 use App\Models\Indicator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class DocumentController extends Controller
 {
@@ -45,9 +46,24 @@ class DocumentController extends Controller
         return response()->json($document, 201);
     }
     
-    
-    
 
+    public function view($documentId)
+{
+    // Fetch the document from the database
+    $document = Document::find($documentId);
+
+    if (!$document || !Storage::disk('private')->exists($document->path)) {
+        abort(404, 'File not found.');
+    }
+
+    return new StreamedResponse(function () use ($document) {
+        $stream = Storage::disk('private')->readStream($document->path);
+        fpassthru($stream);
+    }, 200, [
+        'Content-Type' => Storage::disk('private')->mimeType($document->path),
+        'Content-Disposition' => 'inline; filename="' . $document->name . '"',
+    ]);
+}
 
     public function getTaskDocument($taskId)
     {

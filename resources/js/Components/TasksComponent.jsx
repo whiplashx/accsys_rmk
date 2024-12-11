@@ -281,6 +281,7 @@ const LocalTaskForceTaskView = () => {
         }
     };
 
+
     //console.log(tasks);
     return (
         <div className="container mx-auto p-6 max-w-5xl">
@@ -346,6 +347,7 @@ const LocalTaskForceTaskView = () => {
                                                         "View Document"}{" "}
                                                     {/* Replace `documents_name` if needed */}
                                                 </a>
+
                                             </div>
                                         ):(
                                           <p className="text-sm pt-2 font-medium text-gray-500">
@@ -361,6 +363,7 @@ const LocalTaskForceTaskView = () => {
             )}
 
 {modalOpen && selectedTask && (
+    
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
@@ -368,7 +371,7 @@ const LocalTaskForceTaskView = () => {
                     {selectedTask.title}
                 </h2>
             </div>
-            {}
+            
             <p className="text-gray-600 mb-6 text-xl">
                 {selectedTask.description || "No description provided."}
             </p>
@@ -381,14 +384,18 @@ const LocalTaskForceTaskView = () => {
                 </h3>
                 {selectedTask.indicator?.documents ? (
                     <div className="bg-gray-100 p-4 rounded-md">
-                        <a
-                            href={selectedTask.indicator.documents}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-500 hover:underline"
-                        >
-                            View Document
-                        </a>
+<FileUploadDialog
+                            onUpload={handleFileUpload}
+                            buttonText="Upload Document"
+                        />
+                        <div>
+                                                <h2>Document Viewer</h2>
+                                                <iframe
+                                                    src={'/file/view/' + selectedTask.indicator.documents}
+                                                    title="Document Viewer"
+                                                    style={{ width: '100%', height: '80vh', border: 'none' }}
+                                                ></iframe>
+                                            </div>
                     </div>
                 ) : (
                     <div className="bg-gray-100 p-4 rounded-md">

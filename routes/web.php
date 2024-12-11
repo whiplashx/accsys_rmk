@@ -12,6 +12,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
+use Illuminate\Routing\FiltersControllerMiddleware;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
@@ -98,7 +99,7 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
        // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
         Route::get('/self-surveys/{taskId}', [SelfSurveyController::class, 'show']);
        //Route::get('/areas', [AreaController::class, 'index']);
-       
+       Route::get('/file/view/{documentId}', [DocumentController::class, 'view']);
        //tasks
        Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
        Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);
