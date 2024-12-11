@@ -49,6 +49,19 @@ class TaskController extends Controller
         return response()->json(['message' => 'An error occurred while assigning the task'], 500);
     }
 }
+
+public function getRatings()
+{
+    try {
+        $tasks = Task::select('id', 'title', 'description', 'assignee', 'selfsurvey_rating', 'status', 'created_at', 'updated_at')
+            ->with('assignedUser:id,name')
+            ->get();
+
+        return response()->json($tasks);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Failed to fetch tasks'], 500);
+    }
+}
     public function fetchAssignedTasks()
     {
         try {

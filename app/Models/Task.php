@@ -22,10 +22,14 @@ class Task extends Model
     {
         return $this->belongsTo(User::class, 'assignee');
     }
+    
+
+
+    protected $table = 'tasks';
 
     public function indicator()
     {
-        return $this->belongsTo(Indicator::class);
+        return $this->hasOne(Indicator::class, 'task', 'id'); // Linking task to its related indicator
     }
 }
 

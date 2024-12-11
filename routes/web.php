@@ -48,6 +48,7 @@ Route::get('/activities_log', [ActivityController::class, 'index']);
 Route::middleware(['auth', 'verified', 'role:admin'])
     ->group(function () {
         //Route::get('/areas', [AreaController::class, 'index']);
+        Route::get('/indicatorsForAdmin', [IndicatorController::class, 'index']);
         Route::get('/tasksAdmin', [TaskController::class, 'index']);
         Route::get('/areas/{area}/parameters', [ParameterController::class, 'index']);
         Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'index']);
@@ -84,6 +85,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
     Route::get('/areas', [AreaController::class, 'index']);
 Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     ->group(function () {
+        Route::apiResource('self-surveys', SelfSurveyController::class);
         Route::get('/accreditationLTF', function () {
             return Inertia::render('LocalTaskForce/Accreditation');
         })->name('accreditationLTF');
@@ -93,7 +95,7 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         Route::get('/selfsurveyLTF', function () {
             return Inertia::render('LocalTaskForce/Selfsurvey');
         })->name('selfsurveyLTF');
-        Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
+       // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
         Route::get('/self-surveys/{taskId}', [SelfSurveyController::class, 'show']);
        //Route::get('/areas', [AreaController::class, 'index']);
        
@@ -110,7 +112,7 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
 
       // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
       //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
-       Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
+      // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
        Route::get('/user', function (Request $request) {
            return $request->user();
        });
@@ -201,7 +203,8 @@ Route::get('/departmentsTB', [DepartmentController::class, 'index']);
     // New routes for self-surveys and areas
 
 
-Route::apiResource('self-surveys', SelfSurveyController::class);
+Route::apiResource('/self-surveys', SelfSurveyController::class);
+Route::get('/ratingsView', [IndicatorController::class, 'getRatings']);
 
 
 
