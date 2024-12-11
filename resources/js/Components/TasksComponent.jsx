@@ -14,7 +14,7 @@ const LocalTaskForceTaskView = () => {
     const [taskDocument, setTaskDocument] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [userId, setUserId] = useState(null);
-    const [indicators, setIndicator] = useState(null);
+    const [indicators, setIndicator] = useState([]);
     const [documents, setDocument] = useState(null);
 
     useEffect(() => {
@@ -27,8 +27,8 @@ const LocalTaskForceTaskView = () => {
     const fetchIndicator = async () => {
         try {
             const response = await axios.get("indicatorsForTask");
-            setIndicator(response.data);
-           // console.log(response.data);
+            setIndicator(response.data || []);
+            console.log(response.data);
         } catch (e) {
             console.error("Error fetching indicators:", error);
             setError("Failed to get indicators. Please try again later.");
@@ -46,22 +46,11 @@ const LocalTaskForceTaskView = () => {
             //setLoading(false);
         }
     };
-    useEffect(() => {
-      const fetchIndicator = async () => {
-          try {
-              const response = await axios.get("indicatorsForTask");
-              setIndicator(response.data || []); // Ensure `indicators` is always an array
-          } catch (error) {
-              console.error("Error fetching indicators:", error);
-              setError("Failed to get indicators. Please try again later.");
-          }
-      };
 
-      fetchIndicator();
-  }, []);
 
   // Function to get the indicator for a task
   const getIndicatorForTask = (indicatorId) => {
+        //console.log(indicators);
       return indicators?.find(indicator => indicator.id === indicatorId) || null;
   };
 
@@ -303,8 +292,8 @@ const LocalTaskForceTaskView = () => {
                 <div className="grid gap-8 md:grid-cols-2">
                   
                     {tasks.map((task) => {
-                        const indicator = task.indicator;
-                        //console.log(task.indicator);
+                        const indicator = getIndicatorForTask(task.id);
+                        //console.log(indicator);
                         
 
                         return (
@@ -371,13 +360,13 @@ const LocalTaskForceTaskView = () => {
                             {selectedTask.description}
                         </p>
                         <p className="text-lg text-gray-500 mb-6">
-                            Indicator: {selectedTask.indicator.description}
+                            Indicator: {selectedTask.indicator}
                         </p>
                         <div className="mb-6">
                             <h3 className="text-lg font-medium text-gray-700 mb-2">
                                 Task Document
                             </h3>
-                            {selectedTask.indicator.document ? (
+                            {indicator.document ? (
                                 <div className="bg-gray-100 p-4 rounded-md">
                                     <a
                                         href={

@@ -8,8 +8,9 @@ use Illuminate\Http\Request;
 
 class IndicatorController extends Controller
 {
-    public function index(Parameter $parameter)
+    public function index()
     {
-        return $parameter->indicators()->whereNull('task')->get();
+        $indicator = Indicator::with('parameter')->get();
+        return response()->json($indicator);
     }
 }
