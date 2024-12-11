@@ -52,7 +52,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         Route::get('/indicatorsForAdmin', [IndicatorController::class, 'index']);
         Route::get('/tasksAdmin', [TaskController::class, 'index']);
         Route::get('/areas/{area}/parameters', [ParameterController::class, 'index']);
-        Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'index']);
+        Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'all']);
         Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
         Route::post('/assign-task', [TaskController::class, 'assignTask']);
         Route::get('/departments', function () {
