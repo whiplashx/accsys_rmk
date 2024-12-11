@@ -10,7 +10,7 @@ const sidebarItems = [
   { icon: 'accounts', label: 'Accounts', href: route('accounts') },
   { icon: 'accreditation', label: 'Accreditation', href: route('accreditation') },
   { icon: 'documents', label: 'Documents', href: route('documents') },
-  { icon: 'settings', label: 'Settings', href: route('settings') },
+  //{ icon: 'settings', label: 'Settings', href: route('settings') },
 ];
 
 const icons = {

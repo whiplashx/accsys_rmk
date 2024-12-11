@@ -8,7 +8,7 @@ const sidebarItems = [
   { icon: 'accreditation', label: 'Accreditation', href: '#' },
   //{ icon: 'tasks', label: 'Tasks', href: '#' },
   { icon: 'selfsurvey', label: 'Self-Survey', href: '#' },
-  { icon: 'settings', label: 'Settings', href: '#' },
+  //{ icon: 'settings', label: 'Settings', href: '#' },
 ];
 
 const icons = {

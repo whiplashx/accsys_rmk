@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             IndicatorSeeder::class,
             RoleSeeder::class,
             AdminSeeder::class,
+            DepartmentSeeder::class,
+            
         ]);
     }
 }

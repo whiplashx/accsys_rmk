@@ -96,17 +96,17 @@ const TaskAssignment = ({ isOpen, onClose }) => {
         indicator_id: selectedIndicator,
         user_id: selectedUser,
         title: taskTitle,
-        description: taskDescription,
+        description: taskDescription
       });
       toast.success('Task assigned successfully!');
       setSelectedIndicator('');
       setSelectedUser('');
       setTaskTitle('');
       setTaskDescription('');
+      // Refresh the indicators list to reflect the new assignment
       if (selectedParameter) {
         fetchIndicators(selectedParameter);
       }
-      onClose(); // Close the modal after successful task assignment
     } catch (error) {
       console.error('Error assigning task:', error);
       if (error.response && error.response.data && error.response.data.message) {

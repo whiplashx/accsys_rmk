@@ -9,11 +9,16 @@ class Indicator extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['description', 'parameter_id'];
+    protected $fillable = ['description', 'parameter_id', 'task'];
 
     public function parameter()
     {
         return $this->belongsTo(Parameter::class);
     }
+    public function task()
+{
+    return $this->belongsTo(Task::class, 'task');
+}
+
 }
 
