@@ -105,6 +105,7 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
        Route::get('/task-documents/{taskId}', [DocumentController::class, 'getTaskDocument']);
        Route::get('/download-document/{id}', [DocumentController::class, 'download']);
        Route::get('/indicatorsForTask', [IndicatorController::class, 'index']);
+       Route::get('/documentsForTask', [DocumentController::class, 'index']);
 
       // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
       //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
