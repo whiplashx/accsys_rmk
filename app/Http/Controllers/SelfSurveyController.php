@@ -33,5 +33,28 @@ class SelfSurveyController extends Controller
 
         return response()->json($selfSurvey);
     }
+
+    public function update(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'indicator_id' => 'sometimes|exists:indicators,id',
+            'document' => 'nullable|string',
+            'rating' => 'nullable|integer|min:1|max:5',
+            'assignee_id' => 'sometimes|exists:users,id',
+        ]);
+
+        $selfSurvey = SelfSurvey::findOrFail($id);
+        $selfSurvey->update($validated);
+
+        return response()->json($selfSurvey);
+    }
+
+    public function destroy($id)
+    {
+        $selfSurvey = SelfSurvey::findOrFail($id);
+        $selfSurvey->delete();
+
+        return response()->json(['message' => 'SelfSurvey deleted successfully']);
+    }
 }
 

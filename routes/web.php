@@ -201,5 +201,7 @@ Route::get('/departmentsTB', [DepartmentController::class, 'index']);
     // New routes for self-surveys and areas
 
 
+Route::apiResource('self-surveys', SelfSurveyController::class);
+
 
 
