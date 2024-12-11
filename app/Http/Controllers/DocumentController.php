@@ -15,7 +15,7 @@ class DocumentController extends Controller
             'file' => 'required|file|mimes:pdf|max:50240', // 50MB max
             'task_id' => 'required|exists:tasks,id',
             'user_id' => 'required|exists:users,id',
-            //'indicator_id' => 'required|exists:indicators,id',
+            'indicator_id' => 'required|exists:indicators,id',
         ]);
     
         $file = $request->file('file');
@@ -27,7 +27,7 @@ class DocumentController extends Controller
         $document = Document::create([
             'name' => $file->getClientOriginalName(),
             'path' => $path,
-            //'task_id' => $request->task_id, // Save the task ID
+            'task_id' => $request->task_id, // Save the task ID
             //'user_id' => $request->user_id, // Save the user ID
             //'indicator_id' => $request->indicator_id, // Save the indicator ID
             'created_at' => now(),
@@ -36,7 +36,7 @@ class DocumentController extends Controller
     
         // Retrieve the indicator using the provided indicator_id
         $indicator = Indicator::find($request->indicator_id);
-    
+        
         // Store the document ID in the `document_id` column of the `indicators` table
         $indicator->documents = $document->id; // Assuming you have a `document_id` column
         $indicator->save();

@@ -28,7 +28,7 @@ const LocalTaskForceTaskView = () => {
         try {
             const response = await axios.get("indicatorsForTask");
             setIndicator(response.data || []);
-            console.log(response.data);
+            //console.log(response.data);
         } catch (e) {
             console.error("Error fetching indicators:", error);
             setError("Failed to get indicators. Please try again later.");
@@ -39,7 +39,7 @@ const LocalTaskForceTaskView = () => {
         try {
             const response = await axios.get("documentsForTask");
             setDocument(response.data);
-           // console.log(response.data);
+           // //console.log(response.data);
         } catch (e) {
             console.error("Error documents:", error);
             setError("Failed to get documents. Please try again later.");
@@ -203,6 +203,7 @@ const LocalTaskForceTaskView = () => {
     };
 
     const handleFileUpload = async (files) => {
+        
         if (!files || files.length === 0) {
             alert("Please select a file to upload.");
             return;
@@ -224,8 +225,19 @@ const LocalTaskForceTaskView = () => {
             formData.append("file", file);
             formData.append("task_id", selectedTask.id);
             formData.append("user_id", userId);
-            formData.append("indicator_id", selectedTask.indicator.id);
+            formData.append("indicator_id", selectedTask.indicator_id);
+            
+            if (!selectedTask || !selectedTask.id) {
+                alert("No task selected. Please select a task and try again.");
+                return;
+            }
 
+            
+            if (!userId) {
+                alert("User ID is missing. Please log in and try again.");
+                return;
+            }
+            
             const response = await axios.post("/upload-document", formData, {
                 headers: { "Content-Type": "multipart/form-data" },
                 onUploadProgress: (progressEvent) => {
@@ -330,7 +342,7 @@ const LocalTaskForceTaskView = () => {
                                                     rel="noopener noreferrer"
                                                     className="text-blue-500 hover:underline text-sm"
                                                 >
-                                                    {indicator.documents ||
+                                                    {indicator.documents.name ||
                                                         "View Document"}{" "}
                                                     {/* Replace `documents_name` if needed */}
                                                 </a>
@@ -348,104 +360,89 @@ const LocalTaskForceTaskView = () => {
                 </div>
             )}
 
-            {modalOpen && selectedTask && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-semibold text-gray-700">
-                                {selectedTask.title}
-                            </h2>
-                        </div>
-                        <p className="text-gray-600 mb-6 text-xl">
-                            {selectedTask.description}
-                        </p>
-                        <p className="text-lg text-gray-500 mb-6">
-                            Indicator: {selectedTask.indicator}
-                        </p>
-                        <div className="mb-6">
-                            <h3 className="text-lg font-medium text-gray-700 mb-2">
-                                Task Document
-                            </h3>
-                            {indicator.document ? (
-                                <div className="bg-gray-100 p-4 rounded-md">
-                                    <a
-                                        href={
-                                            selectedTask.indicator.document.url
-                                        }
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-blue-500 hover:underline"
-                                    >
-                                        View Document
-                                    </a>
-                                </div>
-                            ) : taskDocument ? (
-                                <div className="bg-gray-100 p-4 rounded-md">
-                                    <p className="text-lg text-gray-800">
-                                        {taskDocument.name}
-                                    </p>
-                                    <div className="mt-2 space-x-2">
-                                        {!selectedTask.indicator
-                                            .indicatorAttachment && (
-                                            <FileUploadDialog
-                                                onUpload={handleFileUpload}
-                                                buttonText="Upload New Version"
-                                            />
-                                        )}
-                                    </div>
-                                </div>
-                            ) : (
-                                !selectedTask.indicator.indicatorAttachment && (
-                                    <FileUploadDialog
-                                        onUpload={handleFileUpload}
-                                        buttonText="Upload Document"
-                                    />
-                                )
-                            )}
-                            {isUploading && (
-                                <div className="mt-4">
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                                        <div
-                                            className="bg-blue-600 h-2.5 rounded-full"
-                                            style={{
-                                                width: `${uploadProgress}%`,
-                                            }}
-                                        ></div>
-                                    </div>
-                                    <p className="text-sm text-gray-500 mt-2">
-                                        Uploading: {uploadProgress}%
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex justify-end space-x-4">
-                            <button
-                                className="bg-gray-500 text-white px-6 py-3 rounded-md text-lg hover:bg-gray-600 transition-colors mr-4"
-                                onClick={closeModal}
-                            >
-                                Close
-                            </button>
-                            <button
-                                className="bg-green-500 text-white px-6 py-3 rounded-md text-lg hover:bg-green-600 transition-colors"
-                                onClick={() => {
-                                    handleStatusChange(
-                                        selectedTask.id,
-                                        "completed"
-                                    );
-                                    closeModal();
-                                }}
-                            >
-                                Mark as Completed
-                            </button>
-                        </div>
-                        {errorMessage && (
-                            <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                                {errorMessage}
-                            </div>
-                        )}
+{modalOpen && selectedTask && (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-semibold text-gray-700">
+                    {selectedTask.title}
+                </h2>
+            </div>
+            {}
+            <p className="text-gray-600 mb-6 text-xl">
+                {selectedTask.description || "No description provided."}
+            </p>
+            <p className="text-lg text-gray-500 mb-6">
+                Task: {selectedTask.task || "No task details available."}
+            </p>
+            <div className="mb-6">
+                <h3 className="text-lg font-medium text-gray-700 mb-2">
+                    Indicator Document
+                </h3>
+                {selectedTask.indicator?.documents ? (
+                    <div className="bg-gray-100 p-4 rounded-md">
+                        <a
+                            href={selectedTask.indicator.documents}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-500 hover:underline"
+                        >
+                            View Document
+                        </a>
                     </div>
+                ) : (
+                    <div className="bg-gray-100 p-4 rounded-md">
+                        <p className="text-gray-500">
+                            No document available for this indicator.
+                        </p>
+                        <FileUploadDialog
+                            onUpload={handleFileUpload}
+                            buttonText="Upload Document"
+                        />
+                    </div>
+                )}
+                {isUploading && (
+                    <div className="mt-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                            <div
+                                className="bg-blue-600 h-2.5 rounded-full"
+                                style={{
+                                    width: `${uploadProgress}%`,
+                                }}
+                            ></div>
+                        </div>
+                        <p className="text-sm text-gray-500 mt-2">
+                            Uploading: {uploadProgress}%
+                        </p>
+                    </div>
+                )}
+            </div>
+            <div className="flex justify-end space-x-4">
+                <button
+                    className="bg-gray-500 text-white px-6 py-3 rounded-md text-lg hover:bg-gray-600 transition-colors mr-4"
+                    onClick={closeModal}
+                >
+                    Close
+                </button>
+                <button
+                    className="bg-green-500 text-white px-6 py-3 rounded-md text-lg hover:bg-green-600 transition-colors"
+                    onClick={() => {
+                        handleStatusChange(selectedTask.id, "completed");
+                        closeModal();
+                    }}
+                >
+                    Mark as Completed
+                </button>
+            </div>
+            {errorMessage && (
+                <div className="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+                    {errorMessage}
                 </div>
             )}
+        </div>
+    </div>
+)}
+
         </div>
     );
 };
