@@ -208,6 +208,7 @@ const LocalTaskForceTaskView = () => {
     }
   };
 
+  console.log(tasks);
   return (
     <div className="container mx-auto p-6 max-w-5xl">
       <h1 className="text-4xl font-bold mb-10 text-gray-800 text-center">
@@ -242,7 +243,7 @@ const LocalTaskForceTaskView = () => {
               <p className="text-lg text-gray-500">
                 Indicator: {task.indicator.description}
               </p>
-              {console.log(task)}
+           
               {task.indicator.document && (
                 <div className="mt-2">
                   <p className="text-sm font-medium text-gray-500">Linked Document:</p>

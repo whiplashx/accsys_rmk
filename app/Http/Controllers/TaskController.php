@@ -69,13 +69,18 @@ class TaskController extends Controller
     public function fetchAssignedTasks()
     {
         try {
-            $tasks = Task::with('indicator')->get(); // Replace with your actual logic
+            // Fetch tasks where the assignee matches the authenticated user's ID
+            $userId = auth()->id(); // Get the authenticated user's ID
+            $tasks = Task::with('indicator')
+                ->where('assignee', $userId) // Adjust the column name if it's different in your database
+                ->get();
+    
             return response()->json($tasks, 200);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
+    
     public function updateTaskStatus(Request $request, $taskId)
     {
         $task = Task::findOrFail($taskId);
