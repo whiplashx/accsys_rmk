@@ -9,6 +9,7 @@ import AccreditationAdminDashboard from '@/Components/AccreditationAdminDashboar
 import LocalTaskForceDashboard from '@/Components/LocalTaskForceDashboard';
 import ActivityLog from '@/Components/ActivityLog';
 import AccreditorLayout_ from '@/Layouts/OutsideAccreditorLayout';
+import WelcomeDashboard from '@/Components/Welcome';
 
 export default function Dashboard() {
     const user = usePage().props.auth.user;
@@ -68,7 +69,7 @@ export default function Dashboard() {
                     </AccreditorLayout>
                     : (user.role === 'accreditor'?
                             <AccreditorLayout_>
-
+                                    <WelcomeDashboard></WelcomeDashboard>
                             </AccreditorLayout_>
                         :
                         <main>

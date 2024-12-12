@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ViewButton from "./ViewButton";
 
 const SelfSurveyForm = () => {
     const [areas, setAreas] = useState([]);
@@ -86,6 +87,10 @@ const SelfSurveyForm = () => {
         },
     ];
 
+    const handleViewDocument = (documentId) => {
+        // Implement your document viewing logic here
+        console.log(`Viewing document with ID: ${documentId}`);
+      };
     const toRoman = (num) => {
         const roman = [
             "I",
@@ -159,48 +164,51 @@ const SelfSurveyForm = () => {
                   </h3>
 
                   <table className="w-full border-collapse border border-slate-300">
-                      <thead>
-                          <tr className="bg-slate-100">
-                              <th className="border border-slate-300 p-2 text-left text-slate-700">
-                                  Indicator
-                              </th>
-                              <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
-                                  Rating
-                              </th>
-                          </tr>
-                      </thead>
-                      <tbody>
-                          {parameter.indicators.map((indicator, indIndex) => (
-                              <tr
-                                  key={indicator.id}
-                                  className="even:bg-slate-50"
-                              >
-                                  <td className="border border-slate-300 p-2 text-slate-600">
-                                      {indIndex + 1}. {indicator.description}
-                                  </td>
-                                  <td className="border border-slate-300 p-2 text-center">
-                                      {indicator.task?.selfsurvey_rating ? (
-                                          <span className="text-slate-700 font-semibold">
-                                              {indicator.task.selfsurvey_rating} -{" "}
-                                              {ratingScale.find(
-                                                  ({ value }) =>
-                                                      value ===
-                                                      String(
-                                                          indicator.task
-                                                              .selfsurvey_rating
-                                                      )
-                                              )?.label || "No Label"}
-                                          </span>
-                                      ) : (
-                                          <span className="text-slate-500 italic">
-                                              No Rating
-                                          </span>
-                                      )}
-                                  </td>
-                              </tr>
-                          ))}
-                      </tbody>
-                  </table>
+      <thead>
+        <tr className="bg-slate-100">
+          <th className="border border-slate-300 p-2 text-left text-slate-700">
+            Indicator
+          </th>
+          <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
+            Rating
+          </th>
+          <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
+            Document
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        {parameter.indicators.map((indicator, indIndex) => (
+          <tr key={indicator.id} className="even:bg-slate-50">
+            <td className="border border-slate-300 p-2 text-slate-600">
+              {indIndex + 1}. {indicator.description}
+            </td>
+            <td className="border border-slate-300 p-2 text-center">
+              {indicator.task?.selfsurvey_rating ? (
+                <span className="text-slate-700 font-semibold">
+                  {indicator.task.selfsurvey_rating} -{" "}
+                  {ratingScale.find(
+                    ({ value }) => value === String(indicator.task.selfsurvey_rating)
+                  )?.label || "No Label"}
+                </span>
+              ) : (
+                <span className="text-slate-500 italic">No Rating</span>
+              )}
+            </td>
+            
+            <td className="border border-slate-300 p-2 text-slate-600 text-center">
+              
+              {indicator.documents ? (
+                
+                <ViewButton task={indicator.task} documents={indicator.documents}></ViewButton>
+              ) : (
+                <span className="text-slate-500 italic">No Document</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
               </div>
           ))}
       </div>
@@ -270,7 +278,7 @@ const SelfSurveyForm = () => {
         );
     }
 
-    console.log(tasks);
+   // console.log(tasks);
 
     return (
         <div className="bg-slate-100 min-h-screen pt-20">

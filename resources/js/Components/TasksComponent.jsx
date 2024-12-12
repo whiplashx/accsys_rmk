@@ -399,6 +399,7 @@ const LocalTaskForceTaskView = () => {
                                                     title="Document Viewer"
                                                     style={{ width: '100%', height: '80vh', border: 'none' }}
                                                 ></iframe>
+                                                {console.log(selectedTask.indicator.documents)}
                                             </div>
                     </div>
                 ) : (
