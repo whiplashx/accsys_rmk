@@ -80,11 +80,7 @@ class DocumentController extends Controller
     }
     
 
-    public function download($id)
-    {
-        $document = Document::findOrFail($id);
-        return Storage::disk('private')->download($document->path, $document->name);
-    }
+
 
     public function index()
 {

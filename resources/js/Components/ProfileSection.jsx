@@ -30,7 +30,7 @@ const ProfileSection = ({ data }) => {
         >
           <div className="relative">
             <img 
-              src="/api/placeholder/32/32" 
+              src="/images/account.png" 
               alt={`${data?.name}'s profile`} 
               className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-100"
             />
@@ -59,25 +59,7 @@ const ProfileSection = ({ data }) => {
 
             {/* Menu Items */}
             <div className="py-1">
-              <a 
-                href={route('profile.edit')}
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-              >
-                <span className="flex-grow">Profile Settings</span>
-              </a>
-              <a 
-                href="#account"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-              >
-                <span className="flex-grow">Account Preferences</span>
-              </a>
-              <div className="h-px bg-gray-200 my-1"></div>
-              <a 
-                href="#help"
-                className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors duration-200"
-              >
-                <span className="flex-grow">Help & Support</span>
-              </a>
+              
               <div className="h-px bg-gray-200 my-1"></div>
               <ResponsiveNavLink 
                 href={route('logout')}

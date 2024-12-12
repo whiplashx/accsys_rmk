@@ -5,61 +5,55 @@ namespace App\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Mail\Mailables\Content;
-use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Auth\Notifications\VerifyEmail;
-use Illuminate\Notifications\Messages\MailMessage;
-class AuthMail extends Mailable
+use Illuminate\Support\Facades\View;
+use App\Services\Content;
+use Illuminate\Mail\Mailables\Content as MailablesContent;
+
+class VerifyEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    public $url;
+    public $password;
+
     /**
      * Create a new message instance.
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
-    {
-        return new Envelope(
-            subject: 'Auth Mail',
-        );
-    }
-
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'view.name',
-        );
-    }
-
-    /**
-     * Get the attachments for the message.
      *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * @return void
      */
-    public function attachments(): array
+    public function __construct(string $url, string $password = null)
     {
-        return [];
+        $this->url = $url;
+        $this->password = $password;
     }
-    public function boot(): void
+
+    /**
+     * Build the message.
+     *
+     * @return $this
+     */
+    public function build()
     {
-        // ...
-    
-        VerifyEmail::toMailUsing(function (object $notifiable, string $url) {
-            return (new MailMessage)
-                ->subject('Verify Email Address')
-                ->line('Click the button below to verify your email address.')
-                ->action('Verify Email Address', $url);
-        });
+        return $this->subject('Verify Your Email Address')->view('emails.auth.verify');
+    }
+
+    public function content(): MailablesContent
+    {
+        $reactHtml = View::make('emails.auth.verify', [
+            'url' => $this->url,
+            'title' => 'Verify Your Email Address',
+            'message' => 'Thank you for registering! Please click the button below to verify your email address:',
+            'logo' => asset('images/logo.png'), // Adjust this path to your actual logo path
+            'password' => $this->password,
+        ])->render();
+
+        return new MailablesContent(
+            view: 'emails.layout',
+            with: [
+                'reactHtml' => $reactHtml,
+            ],
+        );
     }
 }
+

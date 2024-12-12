@@ -225,7 +225,8 @@ const LocalTaskForceTaskView = () => {
             formData.append("file", file);
             formData.append("task_id", selectedTask.id);
             formData.append("user_id", userId);
-            formData.append("indicator_id", selectedTask.indicator_id);
+            formData.append("indicator_id", selectedTask.indicator.id);
+            console.log(selectedTask);
             
             if (!selectedTask || !selectedTask.id) {
                 alert("No task selected. Please select a task and try again.");
@@ -384,7 +385,7 @@ const LocalTaskForceTaskView = () => {
                 </h3>
                 {selectedTask.indicator?.documents ? (
                     <div className="bg-gray-100 p-4 rounded-md">
-<FileUploadDialog
+                        <FileUploadDialog
                             onUpload={handleFileUpload}
                             buttonText="Upload Document"
                         />
