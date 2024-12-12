@@ -106,7 +106,7 @@ const UniversityDashboard = () => {
           <div>
             <h3 className="text-lg font-semibold">Contact Us</h3>
             <p className="mt-2">Mindoro State University - Bongabong Campus</p>
-            <p>Mindoro, Philippines</p>
+            <p>Oriental Mindoro, Philippines</p>
           </div>
           <div>
             <h3 className="text-lg font-semibold">Email</h3>

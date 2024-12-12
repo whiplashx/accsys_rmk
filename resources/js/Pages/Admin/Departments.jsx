@@ -95,19 +95,7 @@ export default function Departments() {
                 </span>
             );
         }},
-        { key: 'actions', label: 'Actions', render: (item) => (
-            <>
-                <button className="text-indigo-600 hover:text-indigo-900 mr-2">
-                    <Edit size={18} />
-                </button>
-                <button className="text-red-600 hover:text-red-900 mr-2">
-                    <Trash size={18} />
-                </button>
-                <button className="text-green-600 hover:text-green-900">
-                    <Check size={18} />
-                </button>
-            </>
-        )},
+
     ];
 
     return (

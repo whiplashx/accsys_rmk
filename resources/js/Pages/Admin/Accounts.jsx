@@ -128,41 +128,7 @@ export default function UserManagement() {
             ) : departments.find(dept => dept.id === item.departments)?.name || "N/A",
         },
         { key: "email", label: "Email" },
-        {
-            key: "actions",
-            label: "Actions",
-            render: (item) => (
-                <>
-                    {editRowId === item.id ? (
-                        <button
-                            className="text-green-600 hover:text-green-900 mr-2"
-                            onClick={() => handleSave(item.id)}
-                        >
-                            <Save size={18} />
-                        </button>
-                    ) : (
-                        <button
-                            className="text-indigo-600 hover:text-indigo-900 mr-2"
-                            onClick={() => handleEditClick(item.id, item)}
-                        >
-                            <Edit size={18} />
-                        </button>
-                    )}
-                    <button
-                        className="text-red-600 hover:text-red-900 mr-2"
-                        onClick={() => handleDelete(item.id)}
-                    >
-                        <Trash size={18} />
-                    </button>
-                    <button
-                        className="text-green-600 hover:text-green-900"
-                        onClick={() => console.log("Approve action")}
-                    >
-                        <Check size={18} />
-                    </button>
-                </>
-            ),
-        },
+        
     ];
 
     return (
