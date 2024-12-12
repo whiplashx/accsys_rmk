@@ -2,6 +2,7 @@ import React from "react";
 import SelfSurveyForm from "@/Components/SelfSurveyForm";
 import AccreditationLayout from "@/Layouts/AccreditorLayout";
 import Documentation_ from "@/Components/Documentation";
+import AccreditationChatbot from "@/Components/AccreditationChatbot";
 
 export default function Documentation(){
     return(
@@ -13,6 +14,7 @@ export default function Documentation(){
           <Documentation_>
             
           </Documentation_>
+          <AccreditationChatbot></AccreditationChatbot>
         </div>
       </main>
       </div>

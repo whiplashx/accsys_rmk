@@ -15,7 +15,9 @@ const ViewButton = ({ task, documents }) => {
       >
         View
       </button>
-      {isModalOpen && <UpdateTaskModal docID={documents} task={task} onClose={closeModal} />}
+      {isModalOpen && <UpdateTaskModal docID={documents} task={task} onClose={closeModal} />
+      }
+      
     </>
   );
 };
