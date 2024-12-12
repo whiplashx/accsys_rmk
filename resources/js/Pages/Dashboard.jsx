@@ -8,11 +8,12 @@ import Progress from '@/Components/DataVisualization/Progress';
 import AccreditationAdminDashboard from '@/Components/AccreditationAdminDashboard';
 import LocalTaskForceDashboard from '@/Components/LocalTaskForceDashboard';
 import ActivityLog from '@/Components/ActivityLog';
+import AccreditorLayout_ from '@/Layouts/OutsideAccreditorLayout';
 
 export default function Dashboard() {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-    console.log(user);
+    //console.log(user);
     return (<>
         {user.role === 'admin'
             ?
@@ -66,9 +67,9 @@ export default function Dashboard() {
                         </div>
                     </AccreditorLayout>
                     : (user.role === 'accreditor'?
-                            <AccreditorLayout>
-                                
-                            </AccreditorLayout>
+                            <AccreditorLayout_>
+
+                            </AccreditorLayout_>
                         :
                         <main>
                             <h1>

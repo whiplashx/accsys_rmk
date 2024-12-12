@@ -7,7 +7,7 @@ const sidebarItems = [
   { icon: 'dashboard', label: 'Dashboard', href: 'dashboard' },
   //{ icon: 'accreditation', label: 'Accreditation', href: 'accreditationAcc' },
   //{ icon: 'tasks', label: 'Tasks', href: '#' },
-  { icon: 'selfsurvey', label: 'Self-Survey', href: 'selfsurveyAcc' },
+  { icon: 'selfsurvey', label: 'Accreditation', href: route('documentation') },
   //{ icon: 'settings', label: 'Settings', href: '#' },
 ];
 
@@ -55,7 +55,7 @@ const icons = {
   ),
 };
 
-export default function AccreditorLayout({ children }) {
+export default function AccreditorLayout_({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const toggleSidebar = () => {
