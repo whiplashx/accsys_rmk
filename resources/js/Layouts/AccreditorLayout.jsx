@@ -4,10 +4,10 @@ import React, { useState } from 'react';
 
 
 const sidebarItems = [
-  { icon: 'dashboard', label: 'Dashboard', href: '#' },
-  { icon: 'accreditation', label: 'Accreditation', href: '#' },
+  { icon: 'dashboard', label: 'Dashboard', href: 'dashboard' },
+  { icon: 'accreditation', label: 'Accreditation', href: 'accreditationAcc' },
   //{ icon: 'tasks', label: 'Tasks', href: '#' },
-  { icon: 'selfsurvey', label: 'Self-Survey', href: '#' },
+  { icon: 'selfsurvey', label: 'Self-Survey', href: 'selfsurveyAcc' },
   //{ icon: 'settings', label: 'Settings', href: '#' },
 ];
 

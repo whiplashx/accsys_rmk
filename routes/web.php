@@ -32,7 +32,6 @@ Route::get('/', function () {
     ]);
 });
 
-
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
@@ -123,9 +122,9 @@ Route::middleware(['auth', 'verified', 'role:localaccreditor'])
         Route::get('/accreditationAcc', function () {
             return Inertia::render('LocalAccreditor/Accreditation');
         })->name('accreditationAcc');
-        Route::get('/selfsurvey', function () {
+        Route::get('/selfsurveyAcc', function () {
             return Inertia::render('LocalAccreditor/Selfsurvey');
-        })->name('selfsuvey');
+        })->name('selfsuveyAcc');
 
     });
 
