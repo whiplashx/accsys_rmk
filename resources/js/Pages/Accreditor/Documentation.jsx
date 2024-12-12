@@ -1,6 +1,7 @@
 import React from "react";
 import SelfSurveyForm from "@/Components/SelfSurveyForm";
 import AccreditationLayout from "@/Layouts/AccreditorLayout";
+import Documentation_ from "@/Components/Documentation";
 
 export default function Documentation(){
     return(
@@ -9,7 +10,7 @@ export default function Documentation(){
 
       <main>
         <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-          <SelfSurveyForm></SelfSurveyForm>
+          <Documentation_></Documentation_>
         </div>
       </main>
       </div>

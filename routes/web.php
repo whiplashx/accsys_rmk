@@ -117,7 +117,7 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
            return $request->user();
        });
     });
-Route::middleware(['auth', 'verified', 'role:localaccreditor'])
+    Route::middleware(['auth', 'verified', 'role:localaccreditor'])
     ->group(function () {
         Route::get('/accreditationAcc', function () {
             return Inertia::render('LocalAccreditor/Accreditation');
@@ -125,6 +125,14 @@ Route::middleware(['auth', 'verified', 'role:localaccreditor'])
         Route::get('/selfsurveyAcc', function () {
             return Inertia::render('LocalAccreditor/Selfsurvey');
         })->name('selfsuveyAcc');
+
+    });
+
+    Route::middleware(['auth', 'verified', 'role:accreditor'])
+    ->group(function () {
+        Route::get('/documentation', function () {
+            return Inertia::render('Accreditor/Documentation');
+        })->name('documentation');
 
     });
     use App\Http\Controllers\DashboardController;
