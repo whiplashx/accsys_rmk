@@ -31,7 +31,7 @@ export default function Dashboard() {
                             <AccreditationAdminDashboard>
 
                             </AccreditationAdminDashboard>
-                            <ActivityLog></ActivityLog>
+                            <ActivityLog ></ActivityLog>
                         </div>
                     </div>
                 </div>

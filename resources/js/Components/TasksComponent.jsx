@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import FileUploadDialog from "./FileUpload";
 import { X } from "lucide-react";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const LocalTaskForceTaskView = () => {
     const [tasks, setTasks] = useState([]);
@@ -96,7 +98,7 @@ const LocalTaskForceTaskView = () => {
             );
         } catch (error) {
             console.error("Error updating task status:", error);
-            alert("Failed to update task status. Please try again.");
+            toast.error('Error updating status.');
         }
     };
 
@@ -121,7 +123,7 @@ const LocalTaskForceTaskView = () => {
     const openModal = async (task) => {
         if (!task || !task.id) {
             console.error("Invalid task object passed to openModal:", task);
-            alert("Failed to open task details. Invalid task data.");
+            toast.error('Invalid task.');
             return;
         }
 
@@ -158,7 +160,7 @@ const LocalTaskForceTaskView = () => {
                     "Error updating task status to in-progress:",
                     error
                 );
-                alert("Failed to update task status. Please try again.");
+                toast.error('Failed to update task status.');
             }
         }
     };
@@ -184,10 +186,10 @@ const LocalTaskForceTaskView = () => {
                 "Task",
                 selectedTask.id
             );
-            alert("Document reference removed successfully");
+            toast.success('Document removed successfully.');
         } catch (error) {
             console.error("Error removing document reference:", error);
-            alert("Failed to remove document reference. Please try again.");
+            toast.error('Failed to remove document. ');
         }
     };
 
@@ -205,14 +207,14 @@ const LocalTaskForceTaskView = () => {
     const handleFileUpload = async (files) => {
         
         if (!files || files.length === 0) {
-            alert("Please select a file to upload.");
+            toast.error('Selct file to upload');
             return;
         }
 
         const file = files[0];
 
         if (!selectedTask || !userId) {
-            alert("Invalid task or user information. Please try again.");
+            toast.error('Invalid task or User.');
             return;
         }
 
@@ -229,13 +231,13 @@ const LocalTaskForceTaskView = () => {
             console.log(selectedTask);
             
             if (!selectedTask || !selectedTask.id) {
-                alert("No task selected. Please select a task and try again.");
+                toast.error('Invalid selected task.');
                 return;
             }
 
             
             if (!userId) {
-                alert("User ID is missing. Please log in and try again.");
+                toast.error('User not verified or authenticated.');
                 return;
             }
             
@@ -256,7 +258,8 @@ const LocalTaskForceTaskView = () => {
                 "TaskDocument",
                 selectedTask.id
             );
-            alert(`Document uploaded successfully`);
+            toast.error('Document Uploaded successfully.');
+            location.reload(true);
         } catch (error) {
             console.error("Error uploading document:", error);
             let errorMessage = "Failed to upload document. Please try again.";
