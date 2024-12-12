@@ -163,47 +163,47 @@ const AccreditationAreasPage = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center min-h-screen bg-slate-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen">
+    <div className="bg-slate-100 min-h-screen">
       <ToastContainer />
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold mb-8 text-gray-800">Accreditation Areas</h1>
+        <h1 className="text-3xl font-semibold mb-8 text-slate-800">Accreditation Areas</h1>
         
         <button
           onClick={() => openModal('area')}
-          className="mb-8 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
+          className="mb-8 bg-slate-700 text-white px-4 py-2 rounded hover:bg-slate-600 transition-colors"
         >
           Add Area
         </button>
 
         {/* Areas List */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           {areas.map((area, index) => (
-            <details key={area.id} className="bg-white rounded-lg shadow-lg overflow-hidden">
-              <summary className="p-6 cursor-pointer focus:outline-none">
+            <div key={area.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+              <div className="p-4 cursor-pointer focus:outline-none" onClick={() => openModal('parameter', area)}>
                 <div className="flex justify-between items-center">
-                  <h3 className="text-2xl font-semibold text-gray-800">
+                  <h3 className="text-xl font-medium text-slate-800">
                     Area {toRoman(index + 1)}. {area.name}
                   </h3>
-                  <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
                     <button
                       onClick={(e) => {
-                        e.preventDefault();
+                        e.stopPropagation();
                         openModal('parameter', area);
                       }}
-                      className="bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600 transition-colors shadow-md"
+                      className="text-slate-600 hover:text-slate-800 transition-colors"
                     >
                       Add Parameter
                     </button>
                     <button
                       onClick={(e) => {
-                        e.preventDefault();
+                        e.stopPropagation();
                         deleteArea(area.id);
                       }}
                       className="text-red-500 hover:text-red-700 transition-colors"
@@ -212,44 +212,36 @@ const AccreditationAreasPage = () => {
                     </button>
                   </div>
                 </div>
-              </summary>
+              </div>
 
               {/* Parameters List */}
-              <div className="p-6 space-y-4 bg-gray-50">
+              <div className="bg-slate-50 p-4 space-y-2">
                 {(area.parameters || []).map((parameter, paramIndex) => (
-                  <details key={parameter.id} className="bg-white rounded-lg shadow">
-                    <summary className="p-4 cursor-pointer focus:outline-none">
-                      <div className="flex justify-between items-center">
-                        <h4 className="text-xl font-medium text-gray-800">
-                          Parameter {toLetter(paramIndex + 1)}. {parameter.name}
-                        </h4>
-                        <div className="flex items-center space-x-4">
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              openModal('indicator', area, parameter);
-                            }}
-                            className="bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-yellow-600 transition-colors shadow-md"
-                          >
-                            Add Indicator
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              deleteParameter(area.id, parameter.id);
-                            }}
-                            className="text-red-500 hover:text-red-700 transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                  <div key={parameter.id} className="bg-white rounded p-3 shadow-sm">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-lg font-medium text-slate-700">
+                        {toLetter(paramIndex + 1)}. {parameter.name}
+                      </h4>
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => openModal('indicator', area, parameter)}
+                          className="text-slate-600 hover:text-slate-800 transition-colors text-sm"
+                        >
+                          Add Indicator
+                        </button>
+                        <button
+                          onClick={() => deleteParameter(area.id, parameter.id)}
+                          className="text-red-500 hover:text-red-700 transition-colors text-sm"
+                        >
+                          Delete
+                        </button>
                       </div>
-                    </summary>
+                    </div>
 
                     {/* Indicators List */}
-                    <ul className="list-disc list-inside ml-6 p-4 space-y-2">
+                    <ul className="mt-2 space-y-1">
                       {(parameter.indicators || []).map((indicator, indIndex) => (
-                        <li key={indicator.id} className="flex justify-between items-center text-gray-800 py-2">
+                        <li key={indicator.id} className="flex justify-between items-center text-slate-600 text-sm">
                           <span>{indIndex + 1}. {indicator.description}</span>
                           <button
                             onClick={() => deleteIndicator(area.id, parameter.id, indicator.id)}
@@ -260,10 +252,10 @@ const AccreditationAreasPage = () => {
                         </li>
                       ))}
                     </ul>
-                  </details>
+                  </div>
                 ))}
               </div>
-            </details>
+            </div>
           ))}
         </div>
 
@@ -286,11 +278,11 @@ const AccreditationAreasPage = () => {
                 value={newAreaName}
                 onChange={(e) => setNewAreaName(e.target.value)}
                 placeholder="Enter area name"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
               <button
                 onClick={addArea}
-                className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full shadow-md"
+                className="mt-4 bg-slate-700 text-white px-4 py-2 rounded hover:bg-slate-600 transition-colors w-full"
               >
                 Add Area
               </button>
@@ -303,11 +295,11 @@ const AccreditationAreasPage = () => {
                 value={newParameterName}
                 onChange={(e) => setNewParameterName(e.target.value)}
                 placeholder="Enter parameter name"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-slate-500"
               />
               <button
                 onClick={addParameter}
-                className="mt-4 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors w-full shadow-md"
+                className="mt-4 bg-slate-700 text-white px-4 py-2 rounded hover:bg-slate-600 transition-colors w-full"
               >
                 Add Parameter
               </button>
@@ -319,12 +311,12 @@ const AccreditationAreasPage = () => {
                 value={newIndicatorDescription}
                 onChange={(e) => setNewIndicatorDescription(e.target.value)}
                 placeholder="Enter indicator description"
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500"
+                className="w-full p-2 border border-slate-300 rounded focus:outline-none focus:ring-2 focus:ring-slate-500"
                 rows="3"
               />
               <button
                 onClick={addIndicator}
-                className="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors w-full shadow-md"
+                className="mt-4 bg-slate-700 text-white px-4 py-2 rounded hover:bg-slate-600 transition-colors w-full"
               >
                 Add Indicator
               </button>
@@ -337,3 +329,4 @@ const AccreditationAreasPage = () => {
 };
 
 export default AccreditationAreasPage;
+
