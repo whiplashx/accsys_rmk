@@ -54,15 +54,7 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
       <div className="bg-slate-600 text-white p-8 rounded-lg mb-8">
         <h1 className="text-3xl font-bold mb-4">Accreditation Dashboard</h1>
         <div className="flex space-x-4">
-          {dashboardData.departments.map((dept, index) => (
-            <button
-              key={index}
-              className={`px-4 py-2 rounded-full ${selectedDepartment?.name === dept.name ? 'bg-white text-slate-600' : 'bg-slate-500 hover:bg-slate-400'}`}
-              onClick={() => setSelectedDepartment(dept)}
-            >
-              {dept.name}
-            </button>
-          ))}
+
         </div>
       </div>
 
@@ -73,23 +65,19 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
               <h2 className="text-2xl font-bold text-slate-800">{selectedDepartment.name}</h2>
               <p className="text-slate-600">Accreditation Progress</p>
             </div>
-            <div className="text-4xl font-bold text-slate-600">{selectedDepartment.progress}%</div>
+            <div className="text-4xl font-bold text-slate-600">{dashboardData.overallProgress}%</div>
           </div>
           <div className="w-full bg-slate-200 rounded-full h-4 mt-4">
             <div 
               className="bg-slate-500 h-4 rounded-full" 
-              style={{ width: `${selectedDepartment.progress}%` }}
+              style={{ width: `${dashboardData.overallProgress}%` }}
             ></div>
           </div>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <StatCard 
-          title="Overall Progress" 
-          value={`${dashboardData.overallProgress}%`} 
-          icon={ChartPieIcon} 
-        />
+
         <StatCard 
           title="Team Members" 
           value={dashboardData.teamMembers} 
@@ -132,78 +120,11 @@ const [selectedDepartment, setSelectedDepartment] = useState(null);
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-slate-50 rounded-lg p-6 shadow-md">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">Progress Trend</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart
-              data={dashboardData.progressTrendData}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line type="monotone" dataKey="progress" stroke="#8884d8" activeDot={{ r: 8 }} />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
+        
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-slate-50 rounded-lg p-6 shadow-md">
-          <h2 className="text-xl font-semibold text-slate-800 mb-4">Accreditation Areas</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart
-              data={dashboardData.areas}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="progress" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        <div className="space-y-8">
-          <div className="bg-slate-50 rounded-lg p-6 shadow-md">
-            <h2 className="text-xl font-semibold text-slate-800 mb-4">Recent Activities</h2>
-            <ul className="space-y-2">
-              {dashboardData.recentActivities.map((activity, index) => (
-                <li key={index} className="flex items-center text-slate-700">
-                  <ClockIcon className="h-5 w-5 mr-2 text-slate-600" />
-                  <span>{activity.description} - {activity.date}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="bg-slate-50 rounded-lg p-6 shadow-md">
-            <h2 className="text-xl font-semibold text-slate-800 mb-4">Upcoming Deadlines</h2>
-            <ul className="space-y-2">
-              {dashboardData.upcomingDeadlines.map((deadline, index) => (
-                <li key={index} className="flex items-center text-slate-700">
-                  <ExclamationCircleIcon className="h-5 w-5 mr-2 text-slate-600" />
-                  <span>{deadline.task} - Due: {deadline.date}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+      
+        
     </div>
   );
 };
