@@ -11,82 +11,30 @@ import {
   AcademicCapIcon
 } from '@heroicons/react/24/outline';
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
-
+//const [selectedDepartment, setSelectedDepartment] = useState(null);
 const AccreditationAdminDashboard = () => {
-  const [dashboardData, setDashboardData] = useState({
-    departments: [
-      { name: 'BSIT', progress: 75 },
-      { name: 'BSFi', progress: 60 },
-      { name: 'BSCpE', progress: 80 }
-    ],
-    areas: [],
-    recentActivities: [],
-    upcomingDeadlines: [],
-    overallProgress: 0,
-    teamMembers: 0,
-    completedCriteria: 0,
-    totalCriteria: 0,
-    criteriaCompletionData: [],
-    progressTrendData: []
-  });
+ 
+const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
 
-  const [selectedDepartment, setSelectedDepartment] = useState(null);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        // Simulated API call
-        const response = {
-          data: {
-            departments: [
-              { name: 'BSIT', progress: 75 },
-              { name: 'BSFi', progress: 60 },
-              { name: 'BSCpE', progress: 80 }
-            ],
-            areas: [
-              { name: 'Curriculum', progress: 85 },
-              { name: 'Faculty', progress: 70 },
-              { name: 'Facilities', progress: 65 },
-              { name: 'Research', progress: 55 },
-              { name: 'Extension', progress: 75 }
-            ],
-            recentActivities: [
-              { description: 'Updated curriculum for BSIT', date: '2023-06-01' },
-              { description: 'Conducted faculty evaluation', date: '2023-05-28' },
-              { description: 'Submitted research papers', date: '2023-05-25' }
-            ],
-            upcomingDeadlines: [
-              { task: 'Complete self-survey report', date: '2023-06-15' },
-              { task: 'Prepare for mock visit', date: '2023-06-20' },
-              { task: 'Submit final documentation', date: '2023-06-25' }
-            ],
-            overallProgress: 72,
-            teamMembers: 45,
-            completedCriteria: 128,
-            totalCriteria: 180,
-            criteriaCompletionData: [
-              { name: 'Completed', value: 128 },
-              { name: 'Remaining', value: 52 }
-            ],
-            progressTrendData: [
-              { month: 'Jan', progress: 20 },
-              { month: 'Feb', progress: 35 },
-              { month: 'Mar', progress: 45 },
-              { month: 'Apr', progress: 60 },
-              { month: 'May', progress: 72 }
-            ]
+      const fetchDashboardData = async () => {
+          try {
+              const response = await axios.get('/dashboard-data');
+              setDashboardData(response.data);
+              setSelectedDepartment(response.data.departments[0]);
+          } catch (error) {
+              console.error('Error fetching dashboard data:', error);
           }
-        };
-        setDashboardData(response.data);
-        setSelectedDepartment(response.data.departments[0]);
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-      }
-    };
+      };
 
-    fetchDashboardData();
+      fetchDashboardData();
   }, []);
 
+  if (!dashboardData) {
+      return <div>Loading...</div>;
+  }
   const StatCard = ({ title, value, icon: Icon }) => (
     <div className="bg-slate-50 rounded-lg p-6 shadow-md">
       <div className="flex items-center justify-between">
@@ -148,7 +96,7 @@ const AccreditationAdminDashboard = () => {
           icon={UserGroupIcon} 
         />
         <StatCard 
-          title="Completed Criteria" 
+          title="Completed Parameter" 
           value={`${dashboardData.completedCriteria}/${dashboardData.totalCriteria}`} 
           icon={CheckCircleIcon} 
         />

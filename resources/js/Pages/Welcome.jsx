@@ -35,7 +35,7 @@ const UniversityDashboard = () => {
       <div className="px-6 py-12 text-center">
         <h2 className="text-5xl font-bold text-white mb-6">Shaping Tomorrow's Leaders</h2>
         <p className="text-xl text-emerald-100 max-w-3xl mx-auto">
-          Discover world-class education and research opportunities in a vibrant academic community committed to excellence and innovation.
+          Discover high-class education and research opportunities in a vibrant academic community committed to excellence and innovation.
         </p>
       </div>
       <div className="px-6 py-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -45,7 +45,7 @@ const UniversityDashboard = () => {
             <h3 className="text-xl font-semibold">Academic Excellence</h3>
           </div>
           <div className="space-y-4">
-            <p className="text-gray-600">Over 100 undergraduate and graduate programs across diverse disciplines</p>
+            <p className="text-gray-600">Over 20 undergraduate and graduate programs across diverse disciplines</p>
             <div className="flex justify-between text-sm text-gray-500">
               <span>Research Output</span>
               <span className="font-semibold">98%</span>
@@ -61,14 +61,12 @@ const UniversityDashboard = () => {
             <h3 className="text-xl font-semibold">Vibrant Community</h3>
           </div>
           <div className="space-y-4">
-            <p className="text-gray-600">Join a diverse community of scholars from around the world</p>
+            <p className="text-gray-600">Join a diverse community of scholars.</p>
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-600">120+</div>
-                <div className="text-sm text-gray-500">Countries</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-emerald-600">25k+</div>
+                <div className="text-2xl font-bold text-emerald-600">10k+</div>
                 <div className="text-sm text-gray-500">Students</div>
               </div>
             </div>
@@ -96,49 +94,10 @@ const UniversityDashboard = () => {
       </div>
       <div className="px-6 py-8 bg-white/5 backdrop-blur-lg mt-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-5xl mx-auto">
-          <div className="text-center">
-            <ChartBar className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-            <div className="text-3xl font-bold text-white">95%</div>
-            <div className="text-sm text-emerald-100">Graduate Employment</div>
-          </div>
-          <div className="text-center">
-            <Globe className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-            <div className="text-3xl font-bold text-white">50+</div>
-            <div className="text-sm text-emerald-100">Research Centers</div>
-          </div>
-          <div className="text-center">
-            <Trophy className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-            <div className="text-3xl font-bold text-white">Top 1%</div>
-            <div className="text-sm text-emerald-100">Global Rankings</div>
-          </div>
-          <div className="text-center">
-            <Book className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
-            <div className="text-3xl font-bold text-white">300+</div>
-            <div className="text-sm text-emerald-100">Published Papers</div>
-          </div>
+          
         </div>
       </div>
-      {/* Additional Section */}
-      <div className="px-6 py-12 bg-white/10 backdrop-blur-lg mt-8">
-          <h2 className="text-4xl font-bold text-white text-center mb-6">Why Choose MinSU?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="bg-white/95 rounded-lg p-6 text-center hover:shadow-lg transition-shadow">
-              <Trophy className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800">Recognized Excellence</h3>
-              <p className="text-gray-600 mt-2">Ranked among the top universities in Asia for innovation and quality education.</p>
-            </div>
-            <div className="bg-white/95 rounded-lg p-6 text-center hover:shadow-lg transition-shadow">
-              <Users className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800">Global Diversity</h3>
-              <p className="text-gray-600 mt-2">Students and faculty from over 120 countries create a multicultural learning experience.</p>
-            </div>
-            <div className="bg-white/95 rounded-lg p-6 text-center hover:shadow-lg transition-shadow">
-              <ChartBar className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-800">Career Success</h3>
-              <p className="text-gray-600 mt-2">95% of our graduates secure employment or higher education opportunities within 6 months.</p>
-            </div>
-          </div>
-        </div>
+      
       </div>
 
       {/* Footer */}
@@ -156,13 +115,7 @@ const UniversityDashboard = () => {
             </p>
           </div>
           <div>
-            <h3 className="text-lg font-semibold">Quick Links</h3>
-            <ul className="mt-2 space-y-1">
-              <li><a href="#" className="hover:underline">About Us</a></li>
-              <li><a href="#" className="hover:underline">Admissions</a></li>
-              <li><a href="#" className="hover:underline">Programs</a></li>
-              <li><a href="#" className="hover:underline">Research</a></li>
-            </ul>
+
           </div>
         </div>
         <div className="mt-6 text-center text-sm border-t border-gray-800 pt-4">

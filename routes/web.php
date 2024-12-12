@@ -127,7 +127,9 @@ Route::middleware(['auth', 'verified', 'role:localaccreditor'])
         })->name('selfsuveyAcc');
 
     });
+    use App\Http\Controllers\DashboardController;
 
+    Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
 
 //get user id
 

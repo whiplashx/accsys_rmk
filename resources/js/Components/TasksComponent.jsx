@@ -4,7 +4,6 @@ import FileUploadDialog from "./FileUpload";
 import { X } from "lucide-react";
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import PDFViewer from "./PDFViewer";
 
 const LocalTaskForceTaskView = () => {
     const [tasks, setTasks] = useState([]);
@@ -395,8 +394,11 @@ const LocalTaskForceTaskView = () => {
                         />
                         <div>
                                                 <h2>Document Viewer</h2>
-                                                <div style={{ width: '100%', height: '80vh' }}> <PDFViewer pdfUrl={'/file/view/' + selectedTask.indicator.documents} /></div>
-
+                                                <iframe
+                                                    src={'/file/view/' + selectedTask.indicator.documents}
+                                                    title="Document Viewer"
+                                                    style={{ width: '100%', height: '80vh', border: 'none' }}
+                                                ></iframe>
                                             </div>
                     </div>
                 ) : (
