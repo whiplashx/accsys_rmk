@@ -119,7 +119,7 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     });
     Route::middleware(['auth', 'verified', 'role:localaccreditor'])
     ->group(function () {
-        Route::get('/file/views/{documentId}', [DocumentController::class, 'view']);
+      
         Route::get('/accreditationAcc', function () {
             return Inertia::render('LocalAccreditor/Accreditation');
         })->name('accreditationAcc');
@@ -128,13 +128,14 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         })->name('selfsuveyAcc');
 
     });
+    Route::get('/file/views/{documentId}', [DocumentController::class, 'view']);
 
     Route::middleware(['auth', 'verified', 'role:accreditor'])
     ->group(function () {
         Route::get('/documentation', function () {
             return Inertia::render('Accreditor/Documentation');
         })->name('documentation');
-        Route::get('/file/views/{documentId}', [DocumentController::class, 'view']);
+        
 
     });
     use App\Http\Controllers\DashboardController;

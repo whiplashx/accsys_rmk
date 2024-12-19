@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import PdfViewer from "./PDFViewer";
+import AccreditationChatbot from "./AccreditationChatbot";
 
 const UpdateTaskModal = ({ task, onClose, docID }) => {
     const [formData, setFormData] = useState({
@@ -11,7 +13,7 @@ const UpdateTaskModal = ({ task, onClose, docID }) => {
         const iframe = document.getElementById("secure-iframe");
 
         console.log("Iframe element:", iframe);
-
+<AccreditationChatbot></AccreditationChatbot>
         if (iframe) {
             iframe.onload = () => {
                 console.log("Iframe loaded:", iframe);
@@ -28,6 +30,13 @@ const UpdateTaskModal = ({ task, onClose, docID }) => {
         }
     }, []);
 
+    useEffect(() => {
+        const disableRightClick = (e) => e.preventDefault();
+        window.addEventListener('contextmenu', disableRightClick);
+        return () => {
+            window.removeEventListener('contextmenu', disableRightClick);
+        };
+    }, []);
     return (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full" onClick={onClose}>
             <div
@@ -41,7 +50,9 @@ const UpdateTaskModal = ({ task, onClose, docID }) => {
                         src={`/file/views/${docID}`}
                         title="Document Viewer"
                         className="w-full h-[calc(100vh-200px)] border-none"
+                        
                     ></iframe>
+                   
                 </div>
             </div>
         </div>

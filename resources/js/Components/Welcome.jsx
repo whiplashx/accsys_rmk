@@ -20,12 +20,12 @@ const WelcomeDashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h flex items-center justify-center bg-slate-50">
       <div className="bg-white rounded-lg shadow-lg p-12 w-full max-w-xl text-center">
         <UserCircleIcon className="h-20 w-20 text-slate-500 mx-auto mb-6" />
         <h1 className="text-3xl font-bold text-slate-800">Welcome, {accreditorName}!</h1>
         <p className="text-lg text-slate-600 mt-4">
-          We're excited to have you onboard. Explore your tasks and review progress seamlessly.
+          We're excited to have you onboard. 
         </p>
       </div>
     </div>

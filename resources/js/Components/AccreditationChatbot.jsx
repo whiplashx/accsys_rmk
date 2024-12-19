@@ -68,7 +68,7 @@ const AccreditationChatbot = () => {
       {isVisible && (
         <div className="bg-white shadow-lg rounded-lg overflow-hidden w-80 h-96 flex flex-col">
           <div className="bg-slate-600 text-white p-4 flex justify-between items-center">
-            <h2 className="text-lg font-bold">AccSys Assisst Chatbot</h2>
+            <h2 className="text-lg font-bold">AccSys Assisst</h2>
             <button
               onClick={toggleChat}
               className="text-white hover:text-gray-200 focus:outline-none"

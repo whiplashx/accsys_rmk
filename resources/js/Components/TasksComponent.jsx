@@ -337,24 +337,15 @@ const LocalTaskForceTaskView = () => {
                                         </p>
                                         {indicator.documents ? (
                                             <div className="mt-2">
-                                                <p className="text-sm font-medium text-gray-500">
-                                                    Linked Document:
+                                                <p className="text-sm font-medium text-green-500">
+                                                   Has Linked Document.
                                                 </p>
 
-                                                <a
-                                                    href={indicator.documents} // `documents` is assumed to be a URL
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="text-blue-500 hover:underline text-sm"
-                                                >
-                                                    {indicator.documents.name ||
-                                                        "View Document"}{" "}
-                                                    {/* Replace `documents_name` if needed */}
-                                                </a>
+                                                
 
                                             </div>
                                         ):(
-                                          <p className="text-sm pt-2 font-medium text-gray-500">
+                                          <p className="text-sm pt-2  font-medium text-red-500">
                                                     No document.
                                                 </p>
                                         )}

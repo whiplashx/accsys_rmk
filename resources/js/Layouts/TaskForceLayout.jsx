@@ -1,6 +1,8 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Breadcrumbs from '@/Components/Breadcrumbs';
+import NavLink from '@/Components/NavLink';
 import ProfileSection from '@/Components/ProfileSection';
+import { Link } from '@inertiajs/react';
 import React, { useState } from 'react';
 
 
@@ -19,13 +21,13 @@ const icons = {
   ),
   tasks: (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-  </svg>
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+    </svg>
   ),
   selfsurvey: (
-<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
-  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-</svg>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
   ),
   programs: (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
@@ -60,9 +62,8 @@ export default function TaskForceLayout({ children }) {
     <div className="flex h-screen overflow-hidden">
       {/* Sidebar */}
       <aside
-        className={`bg-gray-800 text-white transition-all duration-300 ${
-          isSidebarOpen ? 'w-64' : 'w-0'
-        } overflow-hidden`}
+        className={`bg-gray-800 text-white transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-0'
+          } overflow-hidden`}
       >
         <div className="p-4">
           <h2 className="text-xl font-bold mb-4">Accreditation System</h2>
@@ -101,16 +102,27 @@ export default function TaskForceLayout({ children }) {
               </button>
               <ApplicationLogo />
               <div className="ml-4 relative">
-                <h3>Mindoro State University</h3>
+                <Link
+                  href={'/'}
+
+                  className="flex items-center space-x-2 text-white mr-10 relative group"
+                >
+                  <span className="relative">
+                    Mindoro State University
+                    <span
+                      className="absolute inset-x-0 -bottom-1 h-0.5 bg-white scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-in-out"
+                    ></span>
+                  </span>
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              
+
               <ProfileSection />
             </div>
           </div>
         </header>
-   
+
         {/* Main content */}
         <main className="flex-1 overflow-y-auto bg-white p-6">
           {children}

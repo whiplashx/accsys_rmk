@@ -1,14 +1,43 @@
-import { Worker } from '@react-pdf-viewer/core';
-import { Viewer } from '@react-pdf-viewer/default-layout';
-import '@react-pdf-viewer/core/lib/styles/index.css';
-import '@react-pdf-viewer/default-layout/lib/styles/index.css';
+import React, { useState, useEffect } from 'react';
+import { Document, Page } from 'react-pdf';
 
-const PdfViewer = (docID) => (
-  <Worker workerUrl="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.14.305/pdf.worker.min.js">
-    <div style={{ height: '600px', border: '1px solid rgba(0, 0, 0, 0.3)' }}>
-      <Viewer fileUrl='file/views/3' />
-    </div>
-  </Worker>
-);
+const PDFViewer = ({ docID }) => {
+    const [numPages, setNumPages] = useState(null);
+    const [pageNumber, setPageNumber] = useState(1);
 
-export default PdfViewer;
+    const onLoadSuccess = ({ numPages }) => {
+        setNumPages(numPages);
+    };
+
+    return (
+        <div className="pdf-viewer">
+            <Document
+                file={`/file/views/${docID}`} // PDF file URL or path
+                onLoadSuccess={onLoadSuccess}
+            >
+                {/* Render each page one by one */}
+                <div className="pdf-page-container">
+                    <Page pageNumber={pageNumber} />
+                </div>
+            </Document>
+
+            <div className="navigation">
+                <button 
+                    onClick={() => setPageNumber(prev => Math.max(prev - 1, 1))}
+                    disabled={pageNumber === 1}
+                >
+                    Previous
+                </button>
+                <span>{`Page ${pageNumber} of ${numPages}`}</span>
+                <button 
+                    onClick={() => setPageNumber(prev => Math.min(prev + 1, numPages))}
+                    disabled={pageNumber === numPages}
+                >
+                    Next
+                </button>
+            </div>
+        </div>
+    );
+};
+
+export default PDFViewer;

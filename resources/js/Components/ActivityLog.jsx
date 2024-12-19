@@ -23,7 +23,7 @@ const ActivityLog = () => {
         }
       });
       
-      console.log("API Response:", response.data); // Log the response for debugging
+     // console.log("API Response:", response.data); // Log the response for debugging
 
       if (response.data && typeof response.data === 'object') {
         let activitiesData, lastPage, currentPageData;

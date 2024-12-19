@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import ProfileSection from './ProfileSection';
 import ApplicationLogo from './ApplicationLogo';
 import departments from '@/Pages/Admin/Departments';
+import { Link } from '@inertiajs/react';
 
 const sidebarItems = [
   { icon: 'dashboard', label: 'Dashboard', href: route('dashboard') },
@@ -110,7 +111,18 @@ export default function AccreditationLayout({ children }) {
               </button>
               <ApplicationLogo />
               <div className="ml-4 relative">
-                <h3>Mindoro State University</h3>
+              <Link
+                  href={'/'}
+
+                  className="flex items-center space-x-2 text-white mr-10 relative group"
+                >
+                  <span className="relative">
+                    Mindoro State University
+                    <span
+                      className="absolute inset-x-0 -bottom-1 h-0.5 bg-white scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-in-out"
+                    ></span>
+                  </span>
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">
