@@ -300,15 +300,11 @@ const LocalTaskForceTaskView = () => {
                 <div className="text-center mt-8 text-red-600 text-xl">
                     {error}
                 </div>
-            ) : tasks.length === 0 ? (
-                <p className="text-center mt-8 text-gray-600 text-xl">
-                    No tasks assigned to you at the moment.
-                </p>
             ) : (
                 <div className="grid gap-8 md:grid-cols-2">
                     {tasks.map((task) => {
                         //console.log(task);
-                        if (task.status == "in-progress") {
+                        if (task.status == "in-progress" || task.status == "pending") {
                             const indicator = getIndicatorForTask(task.id);
                             //console.log(indicator);
 
@@ -349,6 +345,12 @@ const LocalTaskForceTaskView = () => {
                                         </>
                                     )}
                                 </div>
+                            );
+                        }else{
+                            return(
+                                <p className="text-center mt-8 text-gray-600 text-xl">
+                                No tasks assigned to you at the moment.
+                            </p>
                             );
                         }
                     })}
