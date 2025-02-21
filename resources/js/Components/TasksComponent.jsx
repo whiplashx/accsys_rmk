@@ -82,6 +82,7 @@ const LocalTaskForceTaskView = () => {
 
     const handleStatusChange = async (taskId, newStatus) => {
         const task = tasks.find((t) => t.id === taskId);
+        
         if (task && task.status === newStatus) {
             return; // Don't update if the status is the same
         }
@@ -140,7 +141,7 @@ const LocalTaskForceTaskView = () => {
             setTaskDocument(null);
         }
 
-        if (task.status !== "in-progress") {
+        if (task.status !== "in-progress"  && task.status !== "completed") {
             try {
                 await axios.patch(`/tasks/${task.id}`, {
                     status: "in-progress",
