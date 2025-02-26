@@ -27,7 +27,7 @@ const TasksTable = () => {
       </div>
     );
   }
-
+  console.log(tasks);
   return (
     <div className="container mx-auto mt-8">
       <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
@@ -54,7 +54,8 @@ const TasksTable = () => {
               </tr>
             </thead>
             <tbody>
-              {tasks.map((task) => (
+              {
+              tasks.map((task) => (
                 <tr key={task.id} className="hover:bg-slate-50">
                   <td className="border border-slate-300 p-2 text-sm text-slate-600 text-center">
                     {task.id}
