@@ -6,7 +6,6 @@ import ViewButton from "./ViewButton";
 
 const SelfSurveyForm = () => {
     const [areas, setAreas] = useState([]);
-    const [tasks, setRatings] = useState({});
     const [loading, setLoading] = useState(true);
     const [selectedArea, setSelectedArea] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
@@ -14,7 +13,7 @@ const SelfSurveyForm = () => {
 
     useEffect(() => {
         fetchAreas();
-        fetchRatings();
+
     }, []);
 
     const fetchAreas = async () => {
@@ -33,20 +32,7 @@ const SelfSurveyForm = () => {
         }
     };
 
-    const fetchRatings = async () => {
-        try {
-            setLoading(true);
-            const response = await axios.get("/ratingsView");
-            if (response.data && response.data.length > 0) {
-                setRatings(response.data || []);
-            }
-            setLoading(false);
-        } catch (error) {
-            console.error("Error fetching ratings:", error);
-            toast.error("Failed to fetch ratings");
-            setLoading(false);
-        }
-    };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();

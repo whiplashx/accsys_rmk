@@ -50,6 +50,7 @@ class TaskController extends Controller
             return response()->json(['error' => 'Failed to update rating'], 500);
         }
     }
+
     public function assignTask(Request $request)
     {
         try {

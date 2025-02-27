@@ -115,6 +115,8 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         Route::post('/tasks/{taskId}/rating', [TaskController::class, 'updateSelfSurveyRating']);
         Route::get('/tasks/ratings', [TaskController::class, 'getRatings']);
 
+//Route::post('/tasks/{taskId}/rating', [TaskController::class, 'updateSelfSurveyRatings']);
+
         // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
         //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
         // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
