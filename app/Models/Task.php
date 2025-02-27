@@ -18,18 +18,16 @@ class Task extends Model
         'created_at', 
         'updated_at'
     ];
-    public function assignedUser()  
+
+    protected $table = 'tasks';
+
+    public function assignedUser()
     {
         return $this->belongsTo(User::class, 'assignee');
     }
-    
-
-
-    protected $table = 'tasks';
 
     public function indicator()
     {
         return $this->hasOne(Indicator::class, 'task', 'id'); // Linking task to its related indicator
     }
 }
-

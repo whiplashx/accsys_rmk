@@ -82,7 +82,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
         })->name('settings');
 
     });
-    Route::get('/areas', [AreaController::class, 'index']);
+Route::get('/areas', [AreaController::class, 'index']);
 Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     ->group(function () {
         Route::apiResource('self-surveys', SelfSurveyController::class);
@@ -95,31 +95,31 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         Route::get('/selfsurveyLTF', function () {
             return Inertia::render('LocalTaskForce/Selfsurvey');
         })->name('selfsurveyLTF');
-       // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
+        // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
         Route::get('/self-surveys/{taskId}', [SelfSurveyController::class, 'show']);
-       //Route::get('/areas', [AreaController::class, 'index']);
-       Route::get('/file/view/{documentId}', [DocumentController::class, 'view']);
-       //tasks
-       Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
-       Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);
-       Route::post('/activities', [TaskController::class, 'logActivity']);
-       Route::post('/upload-document', [DocumentController::class, 'upload']);
-       Route::get('/task-documents/{taskId}', [DocumentController::class, 'getTaskDocument']);
-       Route::get('/download-document/{id}', [DocumentController::class, 'download']);
-       Route::get('/indicatorsForTask', [IndicatorController::class, 'index']);
-       Route::get('/documentsForTask', [DocumentController::class, 'index']);
-   
+        //Route::get('/areas', [AreaController::class, 'index']);
+        Route::get('/file/view/{documentId}', [DocumentController::class, 'view']);
+        //tasks
+        Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
+        Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);
+        Route::post('/activities', [TaskController::class, 'logActivity']);
+        Route::post('/upload-document', [DocumentController::class, 'upload']);
+        Route::get('/task-documents/{taskId}', [DocumentController::class, 'getTaskDocument']);
+        Route::get('/download-document/{id}', [DocumentController::class, 'download']);
+        Route::get('/indicatorsForTask', [IndicatorController::class, 'index']);
+        Route::get('/documentsForTask', [DocumentController::class, 'index']);
 
-      // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
-      //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
-      // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
-       Route::get('/user', function (Request $request) {
-           return $request->user();
-       });
+
+        // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
+        //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
+        // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
+        Route::get('/user', function (Request $request) {
+            return $request->user();
+        });
     });
-    Route::middleware(['auth', 'verified', 'role:localaccreditor'])
+Route::middleware(['auth', 'verified', 'role:localaccreditor'])
     ->group(function () {
-      
+
         Route::get('/accreditationAcc', function () {
             return Inertia::render('LocalAccreditor/Accreditation');
         })->name('accreditationAcc');
@@ -128,19 +128,19 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         })->name('selfsuveyAcc');
 
     });
-    Route::get('/file/views/{documentId}', [DocumentController::class, 'view']);
+Route::get('/file/views/{documentId}', [DocumentController::class, 'view']);
 
-    Route::middleware(['auth', 'verified', 'role:accreditor'])
+Route::middleware(['auth', 'verified', 'role:accreditor'])
     ->group(function () {
         Route::get('/documentation', function () {
             return Inertia::render('Accreditor/Documentation');
         })->name('documentation');
-        
+
 
     });
-    use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DashboardController;
 
-    Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
+Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
 
 //get user id
 
@@ -213,7 +213,7 @@ Route::post('/set-department', [DepartmentController::class, 'setDepartment'])->
 Route::get('/departmentsTB', [DepartmentController::class, 'index']);
 
 //selfsurvey
-    // New routes for self-surveys and areas
+// New routes for self-surveys and areas
 
 
 Route::apiResource('/self-surveys', SelfSurveyController::class);

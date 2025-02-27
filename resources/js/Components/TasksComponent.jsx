@@ -147,6 +147,7 @@ const LocalTaskForceTaskView = () => {
                     status: "in-progress",
                 });
                 setTasks((tasks) =>
+                    
                     tasks.map((t) =>
                         t.id === task.id ? { ...t, status: "in-progress" } : t
                     )
@@ -365,7 +366,7 @@ const LocalTaskForceTaskView = () => {
                 </h1>
                 <div className="grid gap-8 md:grid-cols-2">
                     {tasks.map((task) => {
-                        //console.log(task);
+                        console.log(task);
                         if (task.status == "completed") {
                             const indicator = getIndicatorForTask(task.id);
                             //console.log(indicator);

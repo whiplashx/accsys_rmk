@@ -12,6 +12,7 @@ const TasksTable = () => {
   const fetchTasks = async () => {
     try {
       const response = await axios.get('/tasksAdmin'); // Adjust your API endpoint as needed
+     // console.log(response.data);
       setTasks(response.data);
       setLoading(false);
     } catch (error) {
@@ -27,7 +28,22 @@ const TasksTable = () => {
       </div>
     );
   }
-  console.log(tasks);
+
+  const getStatusClass = (status) => {
+    switch (status) {
+      case 'pending':
+        return 'text-orange-500 font-bold';
+      case 'completed':
+        return 'text-green-500 font-bold';
+      case 'in-progress':
+        return 'text-blue-500 font-bold';
+      case 'cancelled':
+        return 'text-red-500 font-bold';
+      default:
+        return '';
+    }
+  };
+
   return (
     <div className="container mx-auto mt-8">
       <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
@@ -54,8 +70,7 @@ const TasksTable = () => {
               </tr>
             </thead>
             <tbody>
-              {
-              tasks.map((task) => (
+              {tasks.map((task) => (
                 <tr key={task.id} className="hover:bg-slate-50">
                   <td className="border border-slate-300 p-2 text-sm text-slate-600 text-center">
                     {task.id}
@@ -64,9 +79,9 @@ const TasksTable = () => {
                     {task.title}
                   </td>
                   <td className="border border-slate-300 p-2 text-sm text-slate-600">
-                    {task.assignee}
+                    {task.assigned_user.name}
                   </td>
-                  <td className="border border-slate-300 p-2 text-sm text-slate-600 text-center">
+                  <td className={`border border-slate-300 p-2 text-sm text-center ${getStatusClass(task.status)}`}>
                     {task.status}
                   </td>
                   <td className="border border-slate-300 p-2 text-sm text-slate-600 text-center">
