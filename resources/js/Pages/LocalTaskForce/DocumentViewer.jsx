@@ -1,8 +1,9 @@
 import React, { useEffect } from 'react';
 import TaskForceLayout from "@/Layouts/TaskForceLayout";
 
-const DocumentViewer = () => {
+export default function DocumentViewer() {
     useEffect(() => {
+        // Disable right click
         const handleContextMenu = (e) => {
             e.preventDefault();
         };
@@ -27,20 +28,20 @@ const DocumentViewer = () => {
 
     return (
         <TaskForceLayout>
-            <div className="flex-1 bg-gray-100">
-                <iframe
-                    src={`/file/view/${documentPath}#toolbar=0&scrollbar=1`}
-                    title="Document Viewer"
-                    className="w-full h-[calc(100vh-4rem)]"
-                    style={{
-                        border: 'none',
-                        display: 'block'
-                    }}
-                />
+            <div className="min-h-screen bg-gray-100">
+                <div className="h-[calc(100vh-4rem)] overflow-auto">
+                    <iframe
+                        src={`/file/view/${documentPath}#toolbar=0&scrollbar=1`}
+                        title="Document Viewer"
+                        className="w-full h-full border-none"
+                        style={{
+                            pointerEvents: 'auto',
+                            touchAction: 'auto',
+                            overflow: 'auto'
+                        }}
+                    />
+                </div>
             </div>
         </TaskForceLayout>
     );
-};
-
-export default DocumentViewer;
-
+}

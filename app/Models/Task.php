@@ -13,7 +13,8 @@ class Task extends Model
         'title', 
         'description', 
         'assignee', 
-        'status', 
+        'status',
+        'selfsurvey_rating',
         'indicator_id', 
         'created_at', 
         'updated_at'
@@ -28,6 +29,6 @@ class Task extends Model
 
     public function indicator()
     {
-        return $this->hasOne(Indicator::class, 'task', 'id'); // Linking task to its related indicator
+        return $this->hasOne(Indicator::class, 'task', 'id');
     }
 }

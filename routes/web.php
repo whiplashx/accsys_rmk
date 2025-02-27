@@ -108,7 +108,12 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
         Route::get('/download-document/{id}', [DocumentController::class, 'download']);
         Route::get('/indicatorsForTask', [IndicatorController::class, 'index']);
         Route::get('/documentsForTask', [DocumentController::class, 'index']);
+        Route::put('/tasks/{taskId}/rating', [TaskController::class, 'updateSelfSurveyRating']);
 
+        // Task rating routes
+        Route::get('/tasks/{taskId}/rating', [TaskController::class, 'getTaskRating']);
+        Route::post('/tasks/{taskId}/rating', [TaskController::class, 'updateSelfSurveyRating']);
+        Route::get('/tasks/ratings', [TaskController::class, 'getRatings']);
 
         // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
         //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
@@ -217,7 +222,12 @@ Route::get('/departmentsTB', [DepartmentController::class, 'index']);
 
 
 Route::apiResource('/self-surveys', SelfSurveyController::class);
-Route::get('/ratingsView', [IndicatorController::class, 'getRatings']);
+
+// Add this with your other routes
+Route::get('/document-viewer', function () {
+    return inertia('LocalTaskForce/DocumentViewer');
+})->middleware(['auth', 'verified']);
+
 
 
 
