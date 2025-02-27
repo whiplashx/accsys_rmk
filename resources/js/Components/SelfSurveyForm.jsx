@@ -13,7 +13,6 @@ const SelfSurveyForm = () => {
 
     useEffect(() => {
         fetchAreas();
-
     }, []);
 
     const fetchAreas = async () => {
@@ -31,8 +30,6 @@ const SelfSurveyForm = () => {
             setLoading(false);
         }
     };
-
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -76,7 +73,7 @@ const SelfSurveyForm = () => {
     const handleViewDocument = (documentId) => {
         // Implement your document viewing logic here
         console.log(`Viewing document with ID: ${documentId}`);
-      };
+    };
     const toRoman = (num) => {
         const roman = [
             "I",
@@ -138,67 +135,124 @@ const SelfSurveyForm = () => {
     );
 
     const renderParameters = (parameters = [], startIndex) => (
-      <div>
-          {parameters.map((parameter, paramIndex) => (
-              <div
-                  key={parameter.id}
-                  className="mb-8 bg-white p-6 rounded-lg shadow-lg"
-              >
-                  <h3 className="text-xl font-semibold mb-4 text-slate-700">
-                      Parameter {toLetter(startIndex + paramIndex + 1)}:{" "}
-                      {parameter.name}
-                  </h3>
+        <div>
+            {parameters.map((parameter, paramIndex) => (
+                <div
+                    key={parameter.id}
+                    className="mb-8 bg-white p-6 rounded-lg shadow-lg"
+                >
+                    <h3 className="text-xl font-semibold mb-4 text-slate-700">
+                        Parameter {toLetter(startIndex + paramIndex + 1)}:{" "}
+                        {parameter.name}
+                    </h3>
 
-                  <table className="w-full border-collapse border border-slate-300">
-      <thead>
-        <tr className="bg-slate-100">
-          <th className="border border-slate-300 p-2 text-left text-slate-700">
-            Indicator
-          </th>
-          <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
-            Rating
-          </th>
-          <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
-            Document
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        {parameter.indicators.map((indicator, indIndex) => (
-          <tr key={indicator.id} className="even:bg-slate-50">
-            <td className="border border-slate-300 p-2 text-slate-600">
-              {indIndex + 1}. {indicator.description}
-            </td>
-            <td className="border border-slate-300 p-2 text-center">
-              {indicator.task?.selfsurvey_rating ? (
-                <span className="text-slate-700 font-semibold">
-                  {indicator.task.selfsurvey_rating} -{" "}
-                  {ratingScale.find(
-                    ({ value }) => value === String(indicator.task.selfsurvey_rating)
-                  )?.label || "No Label"}
-                </span>
-              ) : (
-                <span className="text-slate-500 italic">No Rating</span>
-              )}
-            </td>
-            
-            <td className="border border-slate-300 p-2 text-slate-600 text-center">
-              
-              {indicator.documents ? (
-                
-                <ViewButton task={indicator.task} documents={indicator.documents}></ViewButton>
-              ) : (
-                <span className="text-slate-500 italic">No Document</span>
-              )}
-            </td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
-              </div>
-          ))}
-      </div>
-  );
+                    <table className="w-full border-collapse border border-slate-300">
+                        <thead>
+                            <tr className="bg-slate-100">
+                                <th className="border border-slate-300 p-2 text-left text-slate-700">
+                                    Indicator
+                                </th>
+                                <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
+                                    Rating
+                                </th>
+                                <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
+                                    Document
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {parameter.indicators.map((indicator, indIndex) => (
+                                <tr
+                                    key={indicator.id}
+                                    className="even:bg-slate-50"
+                                >
+                                    <td className="border border-slate-300 p-2 text-slate-600">
+                                        {indIndex + 1}. {indicator.description}
+                                    </td>
+                                    <td className="border border-slate-300 p-2 text-center">
+                                        {indicator.task?.selfsurvey_rating ? (
+                                            <span className="text-slate-700 font-semibold">
+                                                {
+                                                    indicator.task
+                                                        .selfsurvey_rating
+                                                }{" "}
+                                                -{" "}
+                                                {ratingScale.find(
+                                                    ({ value }) =>
+                                                        value ===
+                                                        String(
+                                                            indicator.task
+                                                                .selfsurvey_rating
+                                                        )
+                                                )?.label || "No Label"}
+                                            </span>
+                                        ) : (
+                                            <span className="text-slate-500 italic">
+                                                No Rating
+                                            </span>
+                                        )}
+                                    </td>
+
+                                    <td className="border border-slate-300 p-2 text-slate-600 text-center">
+                                        {indicator.documents ? (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    const width = 1024;
+                                                    const height = 768;
+                                                    const left =
+                                                        (window.screen.width -
+                                                            width) /
+                                                        2;
+                                                    const top =
+                                                        (window.screen.height -
+                                                            height) /
+                                                        2;
+                                                    window.open(
+                                                        `/document-viewer?path=${indicator.documents}`,
+                                                        "DocumentViewer",
+                                                        `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`
+                                                    );
+                                                }}
+                                                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-150 ease-in-out shadow-sm group"
+                                            >
+                                                <svg
+                                                    className="w-5 h-5 mr-2 transition-transform group-hover:scale-110"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                    />
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                                    />
+                                                </svg>
+                                                <span className="group-hover:underline">
+                                                    View Document
+                                                </span>
+                                            </button>
+                                        ) : (
+                                            <span className="text-slate-500 italic">
+                                                No Document
+                                            </span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            ))}
+        </div>
+    );
 
     const renderPagination = () => {
         if (!selectedArea?.parameters?.length) return null;
@@ -264,7 +318,7 @@ const SelfSurveyForm = () => {
         );
     }
 
-   // console.log(tasks);
+    // console.log(tasks);
 
     return (
         <div className="bg-slate-100 min-h-screen pt-20">
