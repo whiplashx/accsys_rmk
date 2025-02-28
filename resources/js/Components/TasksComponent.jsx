@@ -555,20 +555,11 @@ const LocalTaskForceTaskView = () => {
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                const width = 1024;
-                                                const height = 768;
-                                                const left =
-                                                    (window.screen.width -
-                                                        width) /
-                                                    2;
-                                                const top =
-                                                    (window.screen.height -
-                                                        height) /
-                                                    2;
+                                                // Open in new tab/window
                                                 window.open(
                                                     `/document-viewer?path=${selectedTask.indicator.documents}`,
-                                                    "DocumentViewer",
-                                                    `width=${width},height=${height},top=${top},left=${left},resizable=yes,scrollbars=yes,toolbar=no,menubar=no,location=no,status=no`
+                                                    "_blank",
+                                                    "noopener,noreferrer"
                                                 );
                                             }}
                                             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-150 ease-in-out shadow-sm group"
