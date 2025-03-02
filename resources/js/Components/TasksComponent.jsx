@@ -222,7 +222,7 @@ const LocalTaskForceTaskView = () => {
 
     const handleFileUpload = async (files) => {
         if (!files || files.length === 0) {
-            toast.error("Selct file to upload");
+            toast.error("Select file to upload");
             return;
         }
 
@@ -243,7 +243,6 @@ const LocalTaskForceTaskView = () => {
             formData.append("task_id", selectedTask.id);
             formData.append("user_id", userId);
             formData.append("indicator_id", selectedTask.indicator.id);
-            console.log(selectedTask);
 
             if (!selectedTask || !selectedTask.id) {
                 toast.error("Invalid selected task.");
@@ -266,14 +265,32 @@ const LocalTaskForceTaskView = () => {
             });
 
             setTaskDocument(response.data);
+            
+            // Update the indicators state to reflect the new document
+            setIndicator(prevIndicators => 
+                prevIndicators.map(indicator => 
+                    indicator.id === selectedTask.indicator.id
+                        ? { ...indicator, documents: response.data.file_path }
+                        : indicator
+                )
+            );
+
+            // Update the selected task's indicator documents
+            setSelectedTask(prevTask => ({
+                ...prevTask,
+                indicator: {
+                    ...prevTask.indicator,
+                    documents: response.data.file_path
+                }
+            }));
+
             await logActivity(
                 "create",
                 `Document uploaded for task`,
                 "TaskDocument",
                 selectedTask.id
             );
-            toast.error("Document Uploaded successfully.");
-            location.reload(true);
+            toast.success("Document Uploaded successfully.");
         } catch (error) {
             console.error("Error uploading document:", error);
             let errorMessage = "Failed to upload document. Please try again.";
@@ -356,173 +373,149 @@ const LocalTaskForceTaskView = () => {
                     {error}
                 </div>
             ) : (
-                <div className="grid gap-8 md:grid-cols-2">
-                    {tasks.map((task) => {
-                        //console.log(task);
-                        if (
-                            task.status == "in-progress" ||
-                            task.status == "pending"
-                        ) {
-                            const indicator = getIndicatorForTask(task.id);
-                            //console.log(indicator);
-
-                            return (
-                                <div
-                                    key={task.id}
-                                    className="bg-slate-100 p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => openModal(task)}
-                                >
-                                    <div className="flex justify-between items-start mb-6">
-                                        <h2 className="text-2xl font-semibold text-gray-700 pr-4">
-                                            {task.title}
-                                        </h2>
-                                        <span className="text-2xl">
-                                            {getStatusIcon(task.status)}
-                                        </span>
-                                    </div>
-                                    <p className="text-gray-600 mb-6 text-2xl">
-                                        {task.description}
-                                    </p>
-                                    {indicator && (
-                                        <>
-                                            <p className="text-lg text-gray-500">
-                                                Indicator:{" "}
-                                                {indicator.description}
-                                            </p>
-                                            {indicator.documents ? (
-                                                <div className="mt-2">
-                                                    <p className="text-sm font-medium text-green-500">
-                                                        Has Linked Document.
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <p className="text-sm pt-2  font-medium text-red-500">
-                                                    No document.
-                                                </p>
-                                            )}
-                                        </>
-                                    )}
-                                    {taskRatings[task.id] && (
-                                        <div className="mt-3">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-sm text-gray-600">
-                                                    Self-rated:{" "}
-                                                    {taskRatings[task.id]}/5
+                <>
+                    {/* Active Tasks Section */}
+                    {tasks.some(task => task.status === 'in-progress' || task.status === 'pending') ? (
+                        <div className="grid gap-8 md:grid-cols-2">
+                            {tasks.map((task) => {
+                                if (task.status === 'in-progress' || task.status === 'pending') {
+                                    const indicator = getIndicatorForTask(task.id);
+                                    return (
+                                        <div
+                                            key={task.id}
+                                            className="bg-slate-100 p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                                            onClick={() => openModal(task)}
+                                        >
+                                            <div className="flex justify-between items-start mb-6">
+                                                <h2 className="text-2xl font-semibold text-gray-700 pr-4">
+                                                    {task.title}
+                                                </h2>
+                                                <span className="text-2xl">
+                                                    {getStatusIcon(task.status)}
                                                 </span>
                                             </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                                <div
-                                                    className="bg-blue-600 h-2.5 rounded-full"
-                                                    style={{
-                                                        width: `${
-                                                            (taskRatings[
-                                                                task.id
-                                                            ] /
-                                                                5) *
-                                                            100
-                                                        }%`,
-                                                    }}
-                                                ></div>
-                                            </div>
+                                            <p className="text-gray-600 mb-6 text-2xl">
+                                                {task.description}
+                                            </p>
+                                            {indicator && (
+                                                <>
+                                                    <p className="text-lg text-gray-500">
+                                                        Indicator:{" "}
+                                                        {indicator.description}
+                                                    </p>
+                                                    {indicator.documents ? (
+                                                        <div className="mt-2">
+                                                            <p className="text-sm font-medium text-green-500">
+                                                                Has Linked Document.
+                                                            </p>
+                                                        </div>
+                                                    ) : (
+                                                        <p className="text-sm pt-2  font-medium text-red-500">
+                                                            No document.
+                                                        </p>
+                                                    )}
+                                                </>
+                                            )}
+                                            {taskRatings[task.id] && (
+                                                <div className="mt-3">
+                                                    <div className="flex items-center justify-between mb-1">
+                                                        <span className="text-sm text-gray-600">
+                                                            Self-rated:{" "}
+                                                            {taskRatings[task.id]}/5
+                                                        </span>
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                                        <div
+                                                            className="bg-blue-600 h-2.5 rounded-full"
+                                                            style={{
+                                                                width: `${(taskRatings[task.id] / 5) * 100}%`,
+                                                            }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                            );
-                        } else {
-                            return (
-                                <p className="text-center mt-8 text-gray-600 text-xl">
-                                    No tasks assigned to you at the moment.
-                                </p>
-                            );
-                        }
-                    })}
-                </div>
+                                    );
+                                }
+                                return null;
+                            })}
+                        </div>
+                    ) : (
+                        <div className="text-center mt-8 text-gray-600 text-xl mb-16">
+                            No active tasks assigned to you at the moment.
+                        </div>
+                    )}
+
+                    {/* Completed Tasks Section */}
+                    <div>
+                        <br />
+                        <br />
+                        <h1 className="text-4xl font-bold mb-10 text-gray-800 text-center">
+                            Completed Tasks
+                        </h1>
+                        {tasks.some(task => task.status === 'completed') ? (
+                            <div className="grid gap-8 md:grid-cols-2">
+                                {tasks.map((task) => {
+                                    if (task.status === 'completed') {
+                                        const indicator = getIndicatorForTask(task.id);
+                                        return (
+                                            <div
+                                                key={task.id}
+                                                className="bg-slate-100 p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
+                                                onClick={() => openModal(task)}
+                                            >
+                                                <div className="flex justify-between items-start mb-6">
+                                                    <h2 className="text-2xl font-semibold text-gray-700 pr-4">
+                                                        {task.title}
+                                                    </h2>
+                                                    <span className="text-2xl">
+                                                        {getStatusIcon(task.status)}
+                                                    </span>
+                                                </div>
+                                                <p className="text-gray-600 mb-6 text-2xl">
+                                                    {task.description}
+                                                </p>
+                                                {indicator && (
+                                                    <>
+                                                        <p className="text-lg text-gray-500">
+                                                            Indicator:{" "}
+                                                            {indicator.description}
+                                                        </p>
+                                                        
+                                                    </>
+                                                )}
+                                                {taskRatings[task.id] && (
+                                                    <div className="mt-3">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="text-sm text-gray-600">
+                                                                Self-rated:{" "}
+                                                                {taskRatings[task.id]}/5
+                                                            </span>
+                                                        </div>
+                                                        <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                                            <div
+                                                                className="bg-blue-600 h-2.5 rounded-full"
+                                                                style={{
+                                                                    width: `${(taskRatings[task.id] / 5) * 100}%`,
+                                                                }}
+                                                            ></div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    }
+                                    return null;
+                                })}
+                            </div>
+                        ) : (
+                            <div className="text-center mt-8 text-gray-600 text-xl">
+                                No completed tasks yet.
+                            </div>
+                        )}
+                    </div>
+                </>
             )}
-            <div>
-                <br />
-                <br />
-                <h1 className="text-4xl font-bold mb-10 text-gray-800 text-center">
-                    Completed Tasks
-                </h1>
-                <div className="grid gap-8 md:grid-cols-2">
-                    {tasks.map((task) => {
-                        console.log(task);
-                        if (task.status == "completed") {
-                            const indicator = getIndicatorForTask(task.id);
-                            //console.log(indicator);
-
-                            return (
-                                <div
-                                    key={task.id}
-                                    className="bg-slate-100 p-8 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 cursor-pointer"
-                                    onClick={() => openModal(task)}
-                                >
-                                    <div className="flex justify-between items-start mb-6">
-                                        <h2 className="text-2xl font-semibold text-gray-700 pr-4">
-                                            {task.title}
-                                        </h2>
-                                        <span className="text-2xl">
-                                            {getStatusIcon(task.status)}
-                                        </span>
-                                    </div>
-                                    <p className="text-gray-600 mb-6 text-2xl">
-                                        {task.description}
-                                    </p>
-                                    {indicator && (
-                                        <>
-                                            <p className="text-lg text-gray-500">
-                                                Indicator:{" "}
-                                                {indicator.description}
-                                            </p>
-                                            {indicator.documents ? (
-                                                <div className="mt-2">
-                                                    <p className="text-sm font-medium text-green-500">
-                                                        Has Linked Document.
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <p className="text-sm pt-2  font-medium text-red-500">
-                                                    No document.
-                                                </p>
-                                            )}
-                                        </>
-                                    )}
-                                    {taskRatings[task.id] && (
-                                        <div className="mt-3">
-                                            <div className="flex items-center justify-between mb-1">
-                                                <span className="text-sm text-gray-600">
-                                                    Self-rated:{" "}
-                                                    {taskRatings[task.id]}/5
-                                                </span>
-                                            </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                                <div
-                                                    className="bg-blue-600 h-2.5 rounded-full"
-                                                    style={{
-                                                        width: `${
-                                                            (taskRatings[
-                                                                task.id
-                                                            ] /
-                                                                5) *
-                                                            100
-                                                        }%`,
-                                                    }}
-                                                ></div>
-                                            </div>
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        } else {
-                            return (
-                                <p className="text-center mt-8 text-gray-600 text-xl">
-                                    No completed task yet.
-                                </p>
-                            );
-                        }
-                    })}
-                </div>
-            </div>
 
             {modalOpen && selectedTask && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -541,82 +534,89 @@ const LocalTaskForceTaskView = () => {
                             Task:{" "}
                             {selectedTask.task || "No task details available."}
                         </p>
-                        <div className="mb-6">
-                            <h3 className="text-lg font-medium text-gray-700 mb-2">
+                        <div className="mb-8 bg-gray-50 rounded-xl p-6 shadow-sm border border-gray-100">
+                            <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+                                <svg className="w-6 h-6 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
                                 Indicator Document
                             </h3>
                             {selectedTask.indicator?.documents ? (
-                                <div className="bg-gray-100 p-4 rounded-md">
-                                    <div className="flex justify-between items-center mb-4">
-                                        <FileUploadDialog
-                                            onUpload={handleFileUpload}
-                                            buttonText="Upload Document"
-                                        />
+                                <div className="space-y-4">
+                                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <div className="flex-1">
+                                            <FileUploadDialog
+                                                onUpload={handleFileUpload}
+                                                buttonText={
+                                                    <span className="flex items-center">
+                                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                        </svg>
+                                                        Replace Document
+                                                    </span>
+                                                }
+                                            />
+                                        </div>
                                         <button
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                // Open in new tab/window
                                                 window.open(
                                                     `/document-viewer?path=${selectedTask.indicator.documents}`,
                                                     "_blank",
                                                     "noopener,noreferrer"
                                                 );
                                             }}
-                                            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-150 ease-in-out shadow-sm group"
+                                            className="flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                                         >
-                                            <svg
-                                                className="w-5 h-5 mr-2 transition-transform group-hover:scale-110"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                />
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                                />
+                                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                             </svg>
-                                            <span className="group-hover:underline">
-                                                View Document
-                                            </span>
+                                            View Document
                                         </button>
                                     </div>
-                                    <div className="mt-2">
-                                        <p className="text-sm font-medium text-green-500">
-                                            Document has been uploaded
-                                        </p>
+                                    <div className="flex items-center bg-green-50 text-green-700 px-4 py-3 rounded-lg">
+                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <p className="text-sm font-medium">Document has been uploaded successfully</p>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="bg-gray-100 p-4 rounded-md">
-                                    <p className="text-gray-500">
-                                        No document available for this
-                                        indicator.
-                                    </p>
+                                <div className="space-y-4">
+                                    <div className="bg-yellow-50 text-yellow-700 px-4 py-3 rounded-lg flex items-center">
+                                        <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                        </svg>
+                                        <p className="text-sm font-medium">No document available for this indicator</p>
+                                    </div>
                                     <FileUploadDialog
                                         onUpload={handleFileUpload}
-                                        buttonText="Upload Document"
+                                        buttonText={
+                                            <span className="flex items-center">
+                                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                                </svg>
+                                                Upload Document
+                                            </span>
+                                        }
                                     />
                                 </div>
                             )}
                             {isUploading && (
-                                <div className="mt-4">
-                                    <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                                <div className="mt-4 space-y-2">
+                                    <div className="w-full bg-gray-200 rounded-full h-2">
                                         <div
-                                            className="bg-blue-600 h-2.5 rounded-full"
+                                            className="bg-blue-600 h-2 rounded-full transition-all duration-300 ease-in-out"
                                             style={{
                                                 width: `${uploadProgress}%`,
                                             }}
-                                        ></div>
+                                        />
                                     </div>
-                                    <p className="text-sm text-gray-500 mt-2">
+                                    <p className="text-sm text-gray-600 flex items-center">
+                                        <svg className="w-4 h-4 mr-2 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                        </svg>
                                         Uploading: {uploadProgress}%
                                     </p>
                                 </div>
@@ -633,9 +633,7 @@ const LocalTaskForceTaskView = () => {
                                     </span>
                                     <span className="text-sm font-medium text-gray-700">
                                         {taskRatings[selectedTask.id]
-                                            ? `${
-                                                  taskRatings[selectedTask.id]
-                                              }/5`
+                                            ? `${taskRatings[selectedTask.id]}/5`
                                             : "Not rated yet"}
                                     </span>
                                     <span className="text-sm text-gray-500">

@@ -228,7 +228,7 @@ const SelfSurveyForm = () => {
                                                 />
                                             </svg>
                                             <span className="group-hover:underline">
-                                                View Document
+                                                View
                                             </span>
                                         </button>
                                         ) : (
