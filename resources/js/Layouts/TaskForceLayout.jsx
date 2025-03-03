@@ -124,7 +124,7 @@ export default function TaskForceLayout({ children }) {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto bg-white p-6">
+        <main className="flex-1 overflow-y-auto bg-white w-full p-2">
           {children}
         </main>
       </div>
