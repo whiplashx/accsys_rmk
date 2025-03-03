@@ -17,6 +17,9 @@ use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use App\Mail\LoginCredentials;
+use Illuminate\Support\Str;
+
 class RegisteredUserController extends Controller
 {
     /**
@@ -43,17 +46,22 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        $password = Str::random(10); // Generate a random password
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role,
-            'password' => Hash::make($request->password),
+            'password' => Hash::make($password),
             'departments' => $request->departments,
         ]);
 
         $role = Role::findByName($request->role);
         $user->assignRole($role);
         
+        // Send the login credentials email using the LoginCredentials mailable
+        Mail::to($user->email)->send(new LoginCredentials($user->name, $user->email, $password));
+
         event(new Registered($user));
 
         return redirect(route('accounts'));
