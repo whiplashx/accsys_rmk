@@ -13,22 +13,22 @@ const TasksPage = () => {
                 <h1 className="text-3xl font-semibold mb-8 text-slate-800">Task Management</h1>
                 
                 <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                    <h2 className="text-xl font-medium text-slate-700 mb-4">Task Assignment</h2>
-                    <button
+                <div>
+                <button
                         onClick={() => setIsModalOpen(true)}
                         className="px-4 py-2 bg-slate-700 text-white rounded hover:bg-slate-600 transition-colors"
                     >
-                        Open Task Assignment
+                         Assign Task
                     </button>
+                    </div>
+                <TasksTable />
+                    
                     <TaskAssignment
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
                     />
-                </div>
-                
-                <div className="bg-white rounded-lg shadow-sm p-6">
-                    <h2 className="text-xl font-medium text-slate-700 mb-4">Tasks Overview</h2>
-                    <TasksTable />
+      
+                    
                 </div>
             </div>
         </div>
