@@ -16,11 +16,26 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 
 const AccreditationAdminDashboard = () => {
   const [selectedDepartment, setSelectedDepartment] = useState(null);
-  const [dashboardData, setDashboardData] = useState(null);
+  const [dashboardData, setDashboardData] = useState({
+    averageRatings: {
+      overall: 4.5,
+      usability: 4.2,
+      performance: 4.7,
+      reliability: 4.4,
+      support: 4.3
+    }
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [departmentDropdownOpen, setDepartmentDropdownOpen] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState('monthly');
+  const [taskRatings, setTaskRatings] = useState({
+    overall: 0,
+    complexity: 0,
+    completion: 0,
+    quality: 0,
+    timeliness: 0
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -29,6 +44,13 @@ const AccreditationAdminDashboard = () => {
         const response = await axios.get('/dashboard-data');
         setDashboardData(response.data);
         setSelectedDepartment(response.data.departments[0]);
+
+        // Calculate ratings from tasks
+        if (response.data.tasks) {
+          const ratings = calculateTaskRatings(response.data.tasks);
+          setTaskRatings(ratings);
+        }
+
         setLoading(false);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -72,6 +94,35 @@ const AccreditationAdminDashboard = () => {
           </span>
         );
     }
+  };
+
+  const calculateTaskRatings = (tasks) => {
+    const ratings = {
+      complexity: 0,
+      completion: 0,
+      quality: 0,
+      timeliness: 0
+    };
+
+    if (!tasks.length) return { ...ratings, overall: 0 };
+
+    tasks.forEach(task => {
+      ratings.complexity += task.complexity || 0;
+      ratings.completion += task.completionRate || 0;
+      ratings.quality += task.qualityScore || 0;
+      ratings.timeliness += task.onTime ? 5 : 0;
+    });
+
+    // Calculate averages
+    const taskCount = tasks.length;
+    Object.keys(ratings).forEach(key => {
+      ratings[key] = +(ratings[key] / taskCount).toFixed(1);
+    });
+
+    // Calculate overall rating (average of all metrics)
+    ratings.overall = +((ratings.complexity + ratings.completion + ratings.quality + ratings.timeliness) / 4).toFixed(1);
+
+    return ratings;
   };
 
   if (loading) {
@@ -260,6 +311,63 @@ const AccreditationAdminDashboard = () => {
                   className='bg-blue-500 h-1.5 rounded-full'
                   style={{ width: `${(dashboardData.inProgressCriteria / dashboardData.totalCriteria) * 100}%` }}
                 ></div>
+              </div>
+            </div>
+          </div>
+
+          {/* After stat cards, before charts section */}
+          <div className="mb-6">
+            <div className="bg-white border border-gray-100 rounded-lg shadow-sm p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">Task Performance Metrics</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                {/* Overall Rating */}
+                <div className="flex flex-col items-center p-4 bg-blue-50 rounded-lg">
+                  <span className="text-blue-600 font-bold text-2xl">{taskRatings.overall}</span>
+                  <div className="flex items-center mt-1">
+                    {[...Array(5)].map((_, i) => (
+                      <svg key={i} className={`w-4 h-4 ${i < Math.floor(taskRatings.overall) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                    ))}
+                  </div>
+                  <span className="text-sm text-gray-600 mt-2">Overall Performance</span>
+                </div>
+
+                {/* Task Complexity */}
+                <div className="flex flex-col items-center p-4 bg-purple-50 rounded-lg">
+                  <span className="text-purple-600 font-bold text-2xl">{taskRatings.complexity}</span>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(taskRatings.complexity / 5) * 100}%` }}></div>
+                  </div>
+                  <span className="text-sm text-gray-600 mt-2">Task Complexity</span>
+                </div>
+
+                {/* Completion Rate */}
+                <div className="flex flex-col items-center p-4 bg-green-50 rounded-lg">
+                  <span className="text-green-600 font-bold text-2xl">{taskRatings.completion}</span>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${(taskRatings.completion / 5) * 100}%` }}></div>
+                  </div>
+                  <span className="text-sm text-gray-600 mt-2">Completion Rate</span>
+                </div>
+
+                {/* Quality Score */}
+                <div className="flex flex-col items-center p-4 bg-yellow-50 rounded-lg">
+                  <span className="text-yellow-600 font-bold text-2xl">{taskRatings.quality}</span>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${(taskRatings.quality / 5) * 100}%` }}></div>
+                  </div>
+                  <span className="text-sm text-gray-600 mt-2">Quality Score</span>
+                </div>
+
+                {/* Timeliness */}
+                <div className="flex flex-col items-center p-4 bg-red-50 rounded-lg">
+                  <span className="text-red-600 font-bold text-2xl">{taskRatings.timeliness}</span>
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div className="bg-red-500 h-2 rounded-full" style={{ width: `${(taskRatings.timeliness / 5) * 100}%` }}></div>
+                  </div>
+                  <span className="text-sm text-gray-600 mt-2">Timeliness</span>
+                </div>
               </div>
             </div>
           </div>
