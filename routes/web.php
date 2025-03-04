@@ -230,6 +230,20 @@ Route::get('/document-viewer', function () {
     return inertia('LocalTaskForce/DocumentViewer');
 })->middleware(['auth', 'verified']);
 
+// Add these routes after your existing user-related routes
+// User Management API Routes - for the Accounts.jsx
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/api/user-management/users', [UserController::class, 'getUsers']);
+    Route::put('/api/user-management/users/{id}', [UserController::class, 'updateUser']);
+    Route::post('/api/user-management/users', [UserController::class, 'createUser']);
+    Route::post('/api/user-management/users/{id}/delete', [UserController::class, 'deleteUser']);
+});
+
+// This route is used by both admin and non-admin pages
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/departments/list', [DepartmentController::class, 'listAll']);
+});
+
 
 
 

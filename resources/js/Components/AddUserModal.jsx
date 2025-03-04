@@ -35,6 +35,16 @@ function AddUserModal({ show, handleClose, onSuccess }) {
         }
     };
 
+    const handleSubmit = async (formData) => {
+        try {
+            const response = await axios.post("/api/user-management/users", formData);
+            // Rest of your success handling...
+            onSuccess(); // This will call fetchUsers() in the parent component
+        } catch (error) {
+            // Error handling...
+        }
+    };
+
     const submit = (e) => {
         e.preventDefault();
        // console.log(data);

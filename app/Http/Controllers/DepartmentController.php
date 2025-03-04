@@ -95,4 +95,12 @@ class DepartmentController extends Controller
         return redirect()->intended('/dashboard');
     }
     
+    /**
+     * Get a simple list of all departments for dropdowns
+     */
+    public function listAll()
+    {
+        $departments = Department::all(['id', 'name', 'code']);
+        return response()->json($departments);
+    }
 }

@@ -22,10 +22,11 @@ class User extends Authenticatable implements MustVerifyEmail
     
     protected $fillable = [
         'name',
-        'department', 
         'email',
-        'role',
         'password',
+        'role',
+        'departments',
+        'status',
     ];
 
     /**
@@ -39,17 +40,14 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        // Remove the empty cast for status since it's a varchar(255)
+    ];
     
     public function tasks()
     {
@@ -58,7 +56,13 @@ class User extends Authenticatable implements MustVerifyEmail
     
     public function department()
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Department::class, 'departments', 'id');
+    }
+
+    // Add a helper method to check if the user is active
+    public function isActive()
+    {
+        return $this->status === 'active';
     }
 }
 

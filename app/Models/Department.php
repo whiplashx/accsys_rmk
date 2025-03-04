@@ -12,9 +12,13 @@ class Department extends Model
     protected $fillable = [
         'name',
         'code',
-        'areaID',
-        'schedule',
+        'description',
     ];
+
+    public function users()
+    {
+        return $this->hasMany(User::class, 'departments', 'id');
+    }
 
     // If you have a relationship with an Area model, you can define it here
     public function area()
