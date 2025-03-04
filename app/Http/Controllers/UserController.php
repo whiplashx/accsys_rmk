@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\LoginCredentials;
 use App\Models\User;
 use App\Models\Department;
+use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Mail;
+use Spatie\Permission\Models\Role;
+use Str;
 
 class UserController extends Controller
 {
@@ -110,41 +116,37 @@ class UserController extends Controller
     /**
      * Create a new user (for AddUserModal)
      */
-    public function createUser(Request $request)
+    
+    public function createUser(Request $request): RedirectResponse//|JsonResponse
     {
-        try {
-            $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:8|confirmed',
-                'role' => 'required|string',
-                'departments' => 'required',
-            ]);
-            
-            if ($validator->fails()) {
-                return response()->json([
-                    'message' => 'Validation error',
-                    'errors' => $validator->errors()
-                ], 422);
-            }
-            
-            $user = User::create([
-                'name' => $request->name,
-                'email' => $request->email,
-                'password' => Hash::make($request->password),
-                'role' => $request->role,
-                'departments' => $request->departments,
-                'is_active' => true,
-            ]);
-            
-            return response()->json($user, 201);
-            
-        } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Error creating user',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'role' => 'required|string|in:admin,localtaskforce,localaccreditor',
+            'departments' => 'required|exists:departments,id',
+        ]);
+        
+        // Generate a random password
+        $password = Str::random(10);
+        
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'role' => $validated['role'],
+            'departments' => $validated['departments'],
+            'password' => Hash::make($password),
+            'status' => 'active',
+        ]);
+
+        $role = Role::findByName($request->role);
+        $user->assignRole($role);
+        
+        // Send the login credentials email using the LoginCredentials mailable
+        Mail::to($user->email)->send(new LoginCredentials($user->name, $user->email, $password));
+
+        event(new Registered($user));
+
+        return redirect(route('accounts'));
     }
 }
 

@@ -1,180 +1,235 @@
-import React, { useEffect, useState } from "react";
-import InputLabel from "./InputLabel";
-import TextInput from "./TextInput";
-import InputError from "./InputError";
-import DropdownSelect from "./DropdownSelect";
-import PrimaryButton from "./PrimaryButton";
-import { useForm } from "@inertiajs/react";
-import { toast } from 'react-toastify';
-import axios from 'axios';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { X, Loader } from 'lucide-react';
+import { toast } from "react-toastify";
 
-function AddUserModal({ show, handleClose, onSuccess }) {
-    const [departments, setDepartments] = useState([]);
-    const { data, setData, post, processing, errors, reset } = useForm({
-        name: '',
-        email: '',
-        role: '',
-        departments: '',
-        password: '',
-        password_confirmation: '',
+export default function AddUserModal({ show, handleClose, onSuccess }) {
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        role: "",
+        departments: "",
     });
+    const [departments, setDepartments] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [dataLoading, setDataLoading] = useState(false);
+    const [errors, setErrors] = useState({});
 
     useEffect(() => {
+        const fetchDepartments = async () => {
+            if (!show) return;
+            
+            try {
+                setDataLoading(true);
+                const response = await axios.get("/api/departments/list");
+                setDepartments(response.data);
+            } catch (error) {
+                console.error("Error fetching departments:", error);
+                toast.error("Failed to load departments");
+            } finally {
+                setDataLoading(false);
+            }
+        };
+
         if (show) {
             fetchDepartments();
+            setFormData({
+                name: "",
+                email: "",
+                role: "",
+                departments: "",
+            });
+            setErrors({});
         }
     }, [show]);
 
-    const fetchDepartments = async () => {
-        try {
-            const response = await axios.get('/departmentsTB');
-            setDepartments(response.data);
-        } catch (error) {
-            console.error('Error fetching departments:', error);
-            toast.error('Failed to load departments');
-        }
-    };
-
-    const handleSubmit = async (formData) => {
-        try {
-            const response = await axios.post("/api/user-management/users", formData);
-            // Rest of your success handling...
-            onSuccess(); // This will call fetchUsers() in the parent component
-        } catch (error) {
-            // Error handling...
-        }
-    };
-
-    const submit = (e) => {
-        e.preventDefault();
-       // console.log(data);
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
         
-        post(route('register'), {
-            preserveState: true,
-            preserveScroll: true,
-            onSuccess: (page) => {
-                reset('password', 'password_confirmation');
-                handleClose();
-                toast.success('User added successfully!');
-                onSuccess(page.props.flash.success);
-            },
-            onError: (errors) => {
-                console.error(errors);
-                toast.error('Failed to add user. Please check the form and try again.');
-            },
-        });
+        // Clear the specific error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => ({ ...prev, [name]: null }));
+        }
     };
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        // Basic validation
+        const newErrors = {};
+        if (!formData.name.trim()) newErrors.name = "Name is required";
+        if (!formData.email.trim()) {
+            newErrors.email = "Email is required";
+        } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+            newErrors.email = "Valid email is required";
+        }
+        if (!formData.role) newErrors.role = "Role is required";
+        if (!formData.departments) newErrors.departments = "Department is required";
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            setLoading(false);
+            return;
+        }
+
+        try {
+            // Add CSRF token to the request headers
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+            if (csrfToken) {
+                axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+            }
+            
+            // Make the API call with proper data formatting
+            await axios.post("/api/user-management/users", {
+                name: formData.name,
+                email: formData.email,
+                role: formData.role,
+                password: "password", // dummy password
+                password_confirmation: "password", // dummy password
+                departments: formData.departments,
+            });
+            
+            toast.success("User created successfully! Login credentials have been sent to the user's email.");
+            handleClose();
+            onSuccess();
+        } catch (error) {
+            console.error("Error creating user:", error);
+            
+            if (error.response?.data?.errors) {
+                setErrors(error.response.data.errors);
+                
+                // Extract error messages for toast notification
+                const errorMessages = Object.values(error.response.data.errors)
+                    .flat()
+                    .join(", ");
+                toast.error(errorMessages || "Failed to create user");
+            } else {
+                toast.error(error.response?.data?.message || "Failed to create user");
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (!show) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-6">
-                <div className="flex justify-between items-center border-b pb-2 mb-4">
-                    <h3 className="text-lg font-medium leading-6 text-gray-900">Add User</h3>
-                    <button className="text-gray-400 hover:text-gray-600" onClick={handleClose}>
-                        <span className="sr-only">Close</span>
-                        ✖
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold">Add New User</h2>
+                    <button onClick={handleClose} className="text-gray-500 hover:text-gray-700" disabled={loading}>
+                        <X size={24} />
                     </button>
                 </div>
-                <form onSubmit={submit}>
-                    <div className="space-y-4">
-                        <div>
-                            <InputLabel htmlFor="name" value="Name" />
-                            <TextInput
+                
+                {dataLoading ? (
+                    <div className="flex justify-center items-center py-8">
+                        <Loader size={36} className="animate-spin text-blue-500" />
+                    </div>
+                ) : (
+                    <form onSubmit={handleSubmit}>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                                Full Name*
+                            </label>
+                            <input
+                                type="text"
                                 id="name"
                                 name="name"
-                                value={data.name}
-                                className="mt-1 block w-full"
-                                autoComplete="name"
-                                isFocused={true}
-                                onChange={(e) => setData('name', e.target.value)}
-                                required
+                                value={formData.name}
+                                onChange={handleChange}
+                                className={`w-full border p-2 rounded ${errors.name ? 'border-red-500' : 'border-gray-300'}`}
+                                disabled={loading}
                             />
-                            <InputError message={errors.name} className="mt-2" />
+                            {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                         </div>
-
-                        <div>
-                            <InputLabel htmlFor="email" value="Email" />
-                            <TextInput
-                                id="email"
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                                Email Address*
+                            </label>
+                            <input
                                 type="email"
+                                id="email"
                                 name="email"
-                                value={data.email}
-                                className="mt-1 block w-full"
-                                autoComplete="username"
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
+                                value={formData.email}
+                                onChange={handleChange}
+                                className={`w-full border p-2 rounded ${errors.email ? 'border-red-500' : 'border-gray-300'}`}
+                                disabled={loading}
                             />
-                            <InputError message={errors.email} className="mt-2" />
+                            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                         </div>
-
-                        <DropdownSelect
-                            id="role"
-                            name="role"
-                            label="Role"
-                            value={data.role}
-                            options={[
-                                { value: 'admin', label: 'Admin' },
-                                { value: 'localtaskforce', label: 'Task Force' },
-                                { value: 'localaccreditor', label: 'Accreditor' },
-                            ]}
-                            onChange={(e) => setData('role', e.target.value)}
-                            error={errors.role}
-                        />
-
-                        <DropdownSelect
-                            id="departments"
-                            name="departments"
-                            label="Department"
-                            value={data.departments}
-                            options={departments.map(dept => ({ value: dept.id, label: `${dept.name} (${dept.code})` }))}
-                            onChange={(e) => setData('departments', e.target.value)}
-                            error={errors.departments}
-                        />
-
-                        <div>
-                            <InputLabel htmlFor="password" value="Password" />
-                            <TextInput
-                                id="password"
-                                type="password"
-                                name="password"
-                                value={data.password}
-                                className="mt-1 block w-full"
-                                autoComplete="new-password"
-                                onChange={(e) => setData('password', e.target.value)}
-                                required
-                            />
-                            <InputError message={errors.password} className="mt-2" />
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="role">
+                                Role*
+                            </label>
+                            <select
+                                id="role"
+                                name="role"
+                                value={formData.role}
+                                onChange={handleChange}
+                                className={`w-full border p-2 rounded ${errors.role ? 'border-red-500' : 'border-gray-300'}`}
+                                disabled={loading}
+                            >
+                                <option value="">Select a role</option>
+                                <option value="admin">Admin</option>
+                                <option value="localtaskforce">Task Force</option>
+                                <option value="localaccreditor">Accreditor</option>
+                            </select>
+                            {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
                         </div>
-
-                        <div>
-                            <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
-                            <TextInput
-                                id="password_confirmation"
-                                type="password"
-                                name="password_confirmation"
-                                value={data.password_confirmation}
-                                className="mt-1 block w-full"
-                                autoComplete="new-password"
-                                onChange={(e) => setData('password_confirmation', e.target.value)}
-                                required
-                            />
-                            <InputError message={errors.password_confirmation} className="mt-2" />
+                        <div className="mb-4">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="departments">
+                                Department*
+                            </label>
+                            <select
+                                id="departments"
+                                name="departments"
+                                value={formData.departments}
+                                onChange={handleChange}
+                                className={`w-full border p-2 rounded ${errors.departments ? 'border-red-500' : 'border-gray-300'}`}
+                                disabled={loading}
+                            >
+                                <option value="">Select a department</option>
+                                {departments.map((dept) => (
+                                    <option key={dept.id} value={dept.id}>
+                                        {dept.name} ({dept.code})
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.departments && <p className="text-red-500 text-xs mt-1">{errors.departments}</p>}
                         </div>
-                    </div>
-
-                    <div className="mt-6 flex justify-end">
-                        <PrimaryButton className="ms-4" disabled={processing}>
-                            Register
-                        </PrimaryButton>
-                    </div>
-                </form>
+                        <div className="flex justify-end mt-6">
+                            <button
+                                type="button"
+                                onClick={handleClose}
+                                className="px-4 py-2 mr-2 border rounded-lg hover:bg-gray-100 disabled:bg-gray-200 disabled:cursor-not-allowed"
+                                disabled={loading}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
+                                disabled={loading}
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader size={16} className="animate-spin mr-2" />
+                                        Creating...
+                                    </>
+                                ) : "Create User"}
+                            </button>
+                        </div>
+                        <p className="mt-4 text-sm text-gray-600">
+                            * Login credentials will be automatically generated and sent to the user's email address.
+                        </p>
+                    </form>
+                )}
             </div>
         </div>
     );
 }
-
-export default AddUserModal;
 

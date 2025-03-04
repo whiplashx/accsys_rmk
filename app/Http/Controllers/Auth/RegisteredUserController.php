@@ -36,34 +36,35 @@ class RegisteredUserController extends Controller
      * @throws \Illuminate\Validation\ValidationException
      */
 
-    public function store(Request $request): RedirectResponse//|JsonResponse
-    {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'role' => 'required|string|max:255', // Ensure the role exists in your system
-            'email' => 'required|string|lowercase|email|max:255|unique:' . User::class,
-            'departments' => 'required|exists:departments,id',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $password = Str::random(10); // Generate a random password
-
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'role' => $request->role,
-            'password' => Hash::make($password),
-            'departments' => $request->departments,
-        ]);
-
-        $role = Role::findByName($request->role);
-        $user->assignRole($role);
-        
-        // Send the login credentials email using the LoginCredentials mailable
-        Mail::to($user->email)->send(new LoginCredentials($user->name, $user->email, $password));
-
-        event(new Registered($user));
-
-        return redirect(route('accounts'));
-    }
+     public function store(Request $request): RedirectResponse//|JsonResponse
+     {
+         $validated = $request->validate([
+             'name' => 'required|string|max:255',
+             'email' => 'required|string|email|max:255|unique:users',
+             'role' => 'required|string|in:admin,localtaskforce,localaccreditor',
+             'departments' => 'required|exists:departments,id',
+         ]);
+         
+         // Generate a random password
+         $password = Str::random(10);
+         
+         $user = User::create([
+             'name' => $validated['name'],
+             'email' => $validated['email'],
+             'role' => $validated['role'],
+             'departments' => $validated['departments'],
+             'password' => Hash::make($password),
+             'status' => 'active',
+         ]);
+ 
+         $role = Role::findByName($request->role);
+         $user->assignRole($role);
+         
+         // Send the login credentials email using the LoginCredentials mailable
+         Mail::to($user->email)->send(new LoginCredentials($user->name, $user->email, $password));
+ 
+         event(new Registered($user));
+ 
+         return redirect(route('accounts'));
+     }
 }
