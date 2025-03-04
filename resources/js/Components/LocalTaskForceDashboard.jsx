@@ -117,7 +117,7 @@ const LocalTaskForceDashboard = () => {
       default:
         return (
           <span className='inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800'>
-            Pending
+            Pendings
           </span>
         );
     }
@@ -125,7 +125,7 @@ const LocalTaskForceDashboard = () => {
 
   if (loading) {
     return (
-      <div className='flex justify-center items-center h-screen bg-gray-50'>
+      <div className='flex justify-center items-center min-h-screen'>
         <div className='relative w-20 h-20'>
           <div className='absolute top-0 left-0 w-full h-full border-4 border-gray-200 rounded-full'></div>
           <div className='absolute top-0 left-0 w-full h-full border-4 border-blue-500 rounded-full border-t-transparent animate-spin'></div>
@@ -136,8 +136,8 @@ const LocalTaskForceDashboard = () => {
 
   if (error) {
     return (
-      <div className='bg-gray-50 min-h-screen py-8'>
-        <div className='container mx-auto px-4 max-w-6xl'>
+      <div className='min-h-screen'>
+        <div className='mx-auto max-w-full'>
           <div className='bg-red-50 border-l-4 border-red-500 p-4 rounded-md'>
             <div className='flex'>
               <div className='flex-shrink-0'>
@@ -154,10 +154,10 @@ const LocalTaskForceDashboard = () => {
   }
 
   return (
-    <div className='bg-gray-50 min-h-screen py-8'>
-      <div className='container mx-auto px-4 max-w-6xl'>
-        <div className='bg-white rounded-xl shadow-sm p-8 mb-8'>
-          <h1 className='text-3xl font-bold text-gray-800 mb-2 text-center'>
+    <div className='min-h-screen'>
+      <div className='max-w-full'>
+        <div className='bg-white rounded-xl shadow-sm p-4 sm:p-6'>
+          <h1 className='text-2xl sm:text-3xl font-bold text-gray-800 mb-2 text-center'>
             Accreditation Dashboard
           </h1>
           <p className='text-gray-500 text-center mb-8'>
@@ -165,7 +165,7 @@ const LocalTaskForceDashboard = () => {
           </p>
 
           {/* Department Selector */}
-          <div className='mb-8 flex flex-col md:flex-row justify-between items-center gap-4'>
+          <div className='mb-6 flex flex-col md:flex-row justify-between items-center gap-4'>
             <div className='relative w-full md:w-auto'>
               <button 
                 onClick={() => setDepartmentDropdownOpen(!departmentDropdownOpen)}
@@ -228,7 +228,7 @@ const LocalTaskForceDashboard = () => {
 
           {/* Progress Overview */}
           {selectedDepartment && (
-            <div className='bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl mb-8 shadow-md'>
+            <div className='bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 sm:p-6 rounded-xl mb-6 shadow-md'>
               <div className='flex flex-col md:flex-row items-start md:items-center justify-between mb-4'>
                 <div>
                   <h2 className='text-2xl font-bold'>{selectedDepartment.name}</h2>
@@ -249,7 +249,7 @@ const LocalTaskForceDashboard = () => {
           )}
 
           {/* Stat Cards */}
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6'>
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
@@ -321,7 +321,7 @@ const LocalTaskForceDashboard = () => {
           </div>
 
           {/* Charts Section */}
-          <div className='grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8'>
+          <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6'>
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'>
               <div className='p-6 border-b border-gray-100'>
                 <h2 className='text-lg font-semibold text-gray-800'>Criteria Completion</h2>
@@ -389,8 +389,8 @@ const LocalTaskForceDashboard = () => {
           </div>
 
           {/* Criteria List */}
-          <div className='bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden mb-8'>
-            <div className='p-6 border-b border-gray-100'>
+          <div className='bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden'>
+            <div className='p-4 border-b border-gray-100'>
               <h2 className='text-lg font-semibold text-gray-800 flex items-center'>
                 <ChartPieIcon className='h-5 w-5 mr-2 text-blue-500' />
                 Criteria Breakdown
@@ -457,8 +457,8 @@ const LocalTaskForceDashboard = () => {
 
       {/* Criteria Detail Modal */}
       {showDetailModal && selectedCriteria && (
-        <div className='fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
-          <div className='bg-white rounded-xl shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto'>
+        <div className='fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50 p-2'>
+          <div className='bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[95vh] overflow-y-auto'>
             <div className='p-6 border-b border-gray-100'>
               <div className='flex justify-between items-center'>
                 <div className='flex items-center'>

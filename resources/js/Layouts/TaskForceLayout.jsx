@@ -5,7 +5,6 @@ import ProfileSection from '@/Components/ProfileSection';
 import { Link } from '@inertiajs/react';
 import React, { useState } from 'react';
 
-
 const sidebarItems = [
   { icon: 'dashboard', label: 'Dashboard', href: route('dashboard') },
   //{ icon: 'accreditation', label: 'Accreditation', href: route('accreditationLTF') },
@@ -52,31 +51,32 @@ const icons = {
 };
 
 export default function TaskForceLayout({ children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen bg-gray-50">
       {/* Sidebar */}
       <aside
-        className={`bg-gray-800 text-white transition-all duration-300 ${isSidebarOpen ? 'w-64' : 'w-0'
-          } overflow-hidden`}
+        className={`bg-gray-800 text-white transition-all duration-300 ease-in-out ${
+          isSidebarOpen ? 'w-64' : 'w-0'
+        } overflow-hidden shadow-lg`}
       >
-        <div className="p-4">
-          <h2 className="text-xl font-bold mb-4">Accreditation System</h2>
+        <div className="p-6">
+          <h2 className="text-2xl font-bold mb-6 text-green-400">Accreditation System</h2>
           <nav>
-            <ul className="space-y-2">
+            <ul className="space-y-3">
               {sidebarItems.map((item) => (
                 <li key={item.label}>
                   <a
                     href={item.href}
-                    className="flex items-center p-2 rounded hover:bg-gray-700 transition-colors duration-200"
+                    className="flex items-center p-3 rounded-lg hover:bg-gray-700 hover:text-green-400 transition-all duration-200 group"
                   >
-                    <span className="mr-3">{icons[item.icon]}</span>
-                    {item.label}
+                    <span className="mr-4 group-hover:text-green-400">{icons[item.icon]}</span>
+                    <span className="font-medium">{item.label}</span>
                   </a>
                 </li>
               ))}
@@ -86,14 +86,14 @@ export default function TaskForceLayout({ children }) {
       </aside>
 
       {/* Main content area */}
-      <div className="flex flex-col flex-1 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-screen overflow-hidden">
         {/* App Bar */}
-        <header className="bg-green-900 text-white shadow-md">
-          <div className="flex justify-between items-center p-4">
-            <div className="flex items-center">
+        <header className="bg-green-900 text-white shadow-lg">
+          <div className="flex justify-between items-center px-6 py-4">
+            <div className="flex items-center space-x-4">
               <button
                 onClick={toggleSidebar}
-                className="p-1 rounded-md hover:bg-green-800 transition-colors duration-200"
+                className="p-2 rounded-lg hover:bg-green-800 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-green-600"
                 aria-label="Toggle Sidebar"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
@@ -101,31 +101,27 @@ export default function TaskForceLayout({ children }) {
                 </svg>
               </button>
               <ApplicationLogo />
-              <div className="ml-4 relative">
+              <div className="relative">
                 <Link
                   href={'/'}
-
-                  className="flex items-center space-x-2 text-white mr-10 relative group"
+                  className="flex items-center space-x-2 text-white relative group"
                 >
-                  <span className="relative">
+                  <span className="relative text-lg font-semibold">
                     Mindoro State University
-                    <span
-                      className="absolute inset-x-0 -bottom-1 h-0.5 bg-white scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-in-out"
-                    ></span>
+                    <span className="absolute inset-x-0 -bottom-1 h-0.5 bg-white scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300 ease-in-out"></span>
                   </span>
                 </Link>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-
-              <ProfileSection />
-            </div>
+            <ProfileSection />
           </div>
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto bg-white w-full p-2">
-          {children}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50">
+          <div className="container mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

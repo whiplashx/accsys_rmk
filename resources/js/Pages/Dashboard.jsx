@@ -14,26 +14,18 @@ import WelcomeDashboard from '@/Components/Welcome';
 export default function Dashboard() {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-    //console.log(user);
+
     return (<>
         {user.role === 'admin'
             ?
-            <AdminLayout
-                header={
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                        Dashboard
-                    </h2>
-                }
-            >
+            <AdminLayout>
                 <Head title="Dashboard" />
-                <div className="py-12">
-                    <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                        <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                            <div className="p-6 text-gray-900">
-                                <AccreditationAdminDashboard>
-
-                                </AccreditationAdminDashboard>
-                                <ActivityLog ></ActivityLog>
+                <div className="w-full">
+                    <div className="mx-auto">
+                        <div className="bg-white shadow-sm rounded-lg">
+                            <div className="p-6">
+                                <AccreditationAdminDashboard />
+                                <ActivityLog />
                             </div>
                         </div>
                     </div>
@@ -42,39 +34,35 @@ export default function Dashboard() {
             : (user.role === 'localtaskforce' ?
                 <TaskForceLayout>
                     <Head title="Dashboard" />
-                    <div className="py-12">
-                        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                            <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                                <div className="p-6 text-gray-900">
-
-                                    <LocalTaskForceDashboard></LocalTaskForceDashboard>
-                                </div>
+                    <div className="w-full">
+                        <div className="bg-white shadow-sm rounded-lg">
+                            <div className="p-6">
+                                <LocalTaskForceDashboard />
                             </div>
                         </div>
                     </div>
                 </TaskForceLayout>
                 : (user.role === 'localaccreditor' ?
                     <AccreditorLayout>
-                        <div className="py-12">
-                            <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                                <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                                    <div className="p-6 text-gray-900">
-                                        <AccreditationAdminDashboard>
-
-                                        </AccreditationAdminDashboard>
-                                    </div>
+                        <Head title="Dashboard" />
+                        <div className="w-full">
+                            <div className="bg-white shadow-sm rounded-lg">
+                                <div className="p-6">
+                                    <AccreditationAdminDashboard />
                                 </div>
                             </div>
                         </div>
                     </AccreditorLayout>
-                    : (user.role === 'accreditor'?
-                            <AccreditorLayout_>
-                                    <WelcomeDashboard></WelcomeDashboard>
-                            </AccreditorLayout_>
+                    : (user.role === 'accreditor' ?
+                        <AccreditorLayout_>
+                            <div className="w-full">
+                                <WelcomeDashboard />
+                            </div>
+                        </AccreditorLayout_>
                         :
-                        <main>
-                            <h1>
-                                no role
+                        <main className="w-full p-6">
+                            <h1 className="text-xl font-semibold">
+                                No role assigned
                             </h1>
                         </main>
                     )))}
