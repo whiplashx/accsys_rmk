@@ -47,18 +47,19 @@ export default function UserManagement() {
 
     const handleSave = async (id) => {
         const originalData = userData.find(user => user.id === id);
-        const { name, role, departments, is_active } = editedData;
+        const { name, role, departments, status } = editedData;
 
         if (!name || !role || !departments) {
             toast.error("Name, role, and department are required fields.");
             return;
         }
 
+        // Check if anything has changed, including status
         if (
             name === originalData.name && 
             role === originalData.role && 
             departments === originalData.departments &&
-            is_active === originalData.is_active
+            status === originalData.status
         ) {
             setEditRowId(null);
             return;
@@ -67,13 +68,11 @@ export default function UserManagement() {
         try {
             setLoading(true);
             
-            // Log the data being sent for debugging
-            
             const response = await axios.put(`/api/user-management/users/${id}`, { 
                 name, 
                 role, 
                 departments: departments.toString(),
-                status: editedData.status // Send the string status value
+                status: status // Send the string status value
             });
             
             setUserData(prevData =>
@@ -146,7 +145,7 @@ export default function UserManagement() {
                 <select
                     value={editedData.role || ""}
                     onChange={(e) => handleInputChange("role", e.target.value)}
-                    className="border p-1 rounded"
+                    className="w-full border p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                     <option value="" disabled>Select Role</option>
                     <option value="admin">Admin</option>
@@ -162,7 +161,7 @@ export default function UserManagement() {
                 <select
                     value={editedData.departments || ""}
                     onChange={(e) => handleInputChange("departments", e.target.value)}
-                    className="border p-1 rounded"
+                    className="w-full border p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                     <option value="" disabled>Select Department</option>
                     {departments.map(dept => (
@@ -179,7 +178,7 @@ export default function UserManagement() {
                 <select
                     value={editedData.status || item.status}
                     onChange={(e) => handleInputChange("status", e.target.value)}
-                    className="border p-1 rounded"
+                    className="w-full border p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>

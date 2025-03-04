@@ -40,12 +40,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
-})->middleware(['auth', 'verified']);
+})->middleware(['auth']);
 
 Route::post('/activitiesUpdate', [ActivityController::class, 'store'])->middleware('auth', 'role:localtaskforce', 'verified');
 Route::get('/activities_log', [ActivityController::class, 'index']);
 
-Route::middleware(['auth', 'verified', 'role:admin'])
+Route::middleware(['auth', 'role:admin'])
     ->group(function () {
         //Route::get('/areas', [AreaController::class, 'index']);
         Route::get('/indicatorsForAdmin', [IndicatorController::class, 'index']);
@@ -83,7 +83,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])
 
     });
 Route::get('/areas', [AreaController::class, 'index']);
-Route::middleware(['auth', 'verified', 'role:localtaskforce'])
+Route::middleware(['auth', 'role:localtaskforce'])
     ->group(function () {
         Route::apiResource('self-surveys', SelfSurveyController::class);
         Route::get('/accreditationLTF', function () {
@@ -124,7 +124,7 @@ Route::middleware(['auth', 'verified', 'role:localtaskforce'])
             return $request->user();
         });
     });
-Route::middleware(['auth', 'verified', 'role:localaccreditor'])
+Route::middleware(['auth', 'role:localaccreditor'])
     ->group(function () {
 
         Route::get('/accreditationAcc', function () {
@@ -137,7 +137,7 @@ Route::middleware(['auth', 'verified', 'role:localaccreditor'])
     });
 Route::get('/file/views/{documentId}', [DocumentController::class, 'view']);
 
-Route::middleware(['auth', 'verified', 'role:accreditor'])
+Route::middleware(['auth', 'role:accreditor'])
     ->group(function () {
         Route::get('/documentation', function () {
             return Inertia::render('Accreditor/Documentation');
@@ -185,7 +185,7 @@ require __DIR__ . '/auth.php';
 
 Route::middleware('auth')->group(function () {
     Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
-})->middleware(['auth', 'verified']);
+})->middleware(['auth']);
 
 
 Route::get('/accreditation-areas', [AccreditationController::class, 'index']);
