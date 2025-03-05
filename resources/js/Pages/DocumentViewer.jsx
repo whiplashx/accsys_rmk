@@ -133,24 +133,24 @@ export default function DocumentViewerPage() {
     const renderDocumentContent = () => {
         if (loading) {
             return (
-                <div className="flex justify-center items-center h-[calc(100vh-250px)]">
-                    <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+                <div className="flex justify-center items-center h-[calc(100vh-220px)] md:h-[calc(100vh-250px)]">
+                    <div className="animate-spin rounded-full h-12 w-12 md:h-16 md:w-16 border-t-4 border-b-4 border-blue-500"></div>
                 </div>
             );
         }
 
         if (error) {
             return (
-                <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
-                    <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 max-w-lg">
+                <div className="flex flex-col items-center justify-center h-[calc(100vh-220px)] md:h-[calc(100vh-250px)] px-4">
+                    <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-3 md:p-4 w-full max-w-lg">
                         <p className="font-bold">Error</p>
-                        <p>{error}</p>
+                        <p className="text-sm md:text-base">{error}</p>
                         
                         {blockedByClient && (
-                            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded-md">
-                                <p className="font-bold">Content Blocked By Browser</p>
-                                <p>Your browser (possibly Opera) or an extension like an ad blocker appears to be blocking the document from loading.</p>
-                                <ul className="list-disc ml-5 mt-2 text-sm">
+                            <div className="mt-3 md:mt-4 p-2 md:p-3 bg-yellow-50 border border-yellow-300 rounded-md">
+                                <p className="font-bold text-sm md:text-base">Content Blocked By Browser</p>
+                                <p className="text-xs md:text-sm">Your browser or an extension like an ad blocker appears to be blocking the document from loading.</p>
+                                <ul className="list-disc ml-4 md:ml-5 mt-1 md:mt-2 text-xs md:text-sm">
                                     <li>Try disabling your ad blocker for this site</li>
                                     <li>Check your browser's security settings</li>
                                     <li>Try using the alternative viewer link below</li>
@@ -172,10 +172,10 @@ export default function DocumentViewerPage() {
                         )}
                     </div>
                     
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-wrap justify-center gap-2">
                         <button 
                             onClick={() => window.history.back()}
-                            className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded mr-2"
+                            className="px-3 py-1.5 md:px-4 md:py-2 bg-gray-500 hover:bg-gray-600 text-white rounded text-sm"
                         >
                             Go Back
                         </button>
@@ -183,7 +183,7 @@ export default function DocumentViewerPage() {
                         {blockedByClient && (
                             <a 
                                 href={alternativeDocumentUrl}
-                                className="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded mr-2"
+                                className="px-3 py-1.5 md:px-4 md:py-2 bg-green-500 hover:bg-green-600 text-white rounded text-sm"
                             >
                                 Use Alternative Viewer
                             </a>
@@ -193,7 +193,7 @@ export default function DocumentViewerPage() {
                             href={`/debug-file-view/${documentId}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded"
+                            className="px-3 py-1.5 md:px-4 md:py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm"
                         >
                             Try Direct Access
                         </a>
@@ -228,15 +228,15 @@ export default function DocumentViewerPage() {
         // Image viewer with watermark
         if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(documentType)) {
             return (
-                <div className="flex items-center justify-center h-[calc(100vh-250px)] bg-gray-800">
-                    <div className="relative">
+                <div className="flex items-center justify-center h-[calc(100vh-220px)] md:h-[calc(100vh-250px)] bg-gray-800">
+                    <div className="relative max-w-full max-h-full px-2">
                         <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
-                            <span className="text-white text-5xl font-bold transform rotate-45">VIEW ONLY</span>
+                            <span className="text-white text-3xl md:text-5xl font-bold transform rotate-45">VIEW ONLY</span>
                         </div>
                         <img 
                             src={secureDocumentUrl} 
                             alt="Document" 
-                            className="max-w-full max-h-[calc(100vh-250px)] object-contain pointer-events-none"
+                            className="max-w-full max-h-[calc(100vh-220px)] md:max-h-[calc(100vh-250px)] object-contain pointer-events-none"
                             style={{userSelect: 'none'}}
                             onDragStart={(e) => e.preventDefault()}
                             onError={(e) => {
@@ -252,21 +252,17 @@ export default function DocumentViewerPage() {
         
         // For PDFs and other documents
         return (
-            <div className="h-[calc(100vh-250px)] relative border border-gray-300">
+            <div className="h-[calc(100vh-220px)] md:h-[calc(100vh-250px)] relative border border-gray-300">
                 {/* Watermark overlay - positioned above the iframe */}
-                <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between items-center p-8">
-                    <div className="w-full flex justify-end">
-                        <div className="bg-slate-800 bg-opacity-20 text-white p-2 rounded shadow">
-                            CONFIDENTIAL
-                        </div>
-                    </div>
+                <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between items-center p-4 md:p-8">
+                    
                     
                     {/* Center watermark - repeating pattern */}
                     <div className="flex-grow w-full flex items-center justify-center">
                         <div className="transform rotate-30 opacity-10 pointer-events-none select-none">
-                            <div className="grid grid-cols-3 gap-20">
-                                {[...Array(9)].map((_, i) => (
-                                    <div key={i} className="text-3xl font-bold text-slate-900">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-10 md:gap-20">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="text-xl md:text-3xl font-bold text-slate-900">
                                         MinSU Accreditation
                                     </div>
                                 ))}
@@ -275,11 +271,11 @@ export default function DocumentViewerPage() {
                     </div>
                     
                     {/* Bottom watermark with user info */}
-                    <div className="w-full flex justify-between">
-                        <div className="bg-slate-800 bg-opacity-20 text-white text-xs p-2 rounded shadow">
+                    <div className="w-full flex justify-between text-xs">
+                        <div className="bg-slate-800 bg-opacity-20 text-white p-1 md:p-2 rounded shadow truncate max-w-[45%]">
                             Viewed by: {uploader}
                         </div>
-                        <div className="bg-slate-800 bg-opacity-20 text-white text-xs p-2 rounded shadow">
+                        <div className="bg-slate-800 bg-opacity-20 text-white p-1 md:p-2 rounded shadow">
                             {new Date().toLocaleDateString()}
                         </div>
                     </div>
@@ -327,11 +323,11 @@ export default function DocumentViewerPage() {
                 />
                 
                 {document && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-80 text-white text-xs p-2 text-center z-20">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-80 text-white text-xs p-1 md:p-2 text-center z-20">
                         If the document doesn't load, it may be blocked by your browser. 
                         <a 
                             href={alternativeDocumentUrl}
-                            className="ml-2 underline text-blue-300 hover:text-blue-100"
+                            className="ml-1 md:ml-2 underline text-blue-300 hover:text-blue-100"
                         >
                             Try alternative viewer
                         </a>
@@ -363,45 +359,45 @@ export default function DocumentViewerPage() {
                 </div>
             )}
             
-            <div className="space-y-6">
+            <div className="space-y-4 md:space-y-6">
                 {/* Document info header */}
-                <div className="bg-white shadow rounded-lg p-6">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-3">
+                <div className="bg-white shadow rounded-lg p-4 md:p-6">
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-2 md:mb-3">
                         {taskName || "Document Viewer"}
                     </h1>
                     
                     {document && (
-                        <p className="text-sm text-gray-500 mb-4">
+                        <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4 truncate">
                             Filename: <span className="font-medium">{document.name}</span>
                         </p>
                     )}
                     
-                    <div className="flex flex-wrap gap-3">
-                        <div className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                    <div className="flex flex-wrap gap-2 md:gap-3">
+                        <div className="px-2 md:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs md:text-sm">
                             <span className="font-medium">Task:</span> {taskName || "N/A"}
                         </div>
-                        <div className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm">
+                        <div className="px-2 md:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs md:text-sm">
                             <span className="font-medium">Uploaded by:</span> {uploader}
                         </div>
-                        <div className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                        <div className="px-2 md:px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs md:text-sm">
                             <span className="font-medium">Self-Rating:</span> {rating}
                         </div>
                     </div>
                     
                     {blockedByClient && (
-                        <div className="mt-4 bg-red-50 border-l-4 border-red-400 p-4 text-sm text-red-700">
+                        <div className="mt-3 md:mt-4 bg-red-50 border-l-4 border-red-400 p-3 md:p-4 text-xs md:text-sm text-red-700">
                             <p className="font-bold">Content Blocked Warning</p>
-                            <p>Your browser appears to be blocking content from loading. This is common with ad blockers or certain browsers like Opera.</p>
+                            <p>Your browser appears to be blocking content from loading.</p>
                             <a 
                                 href={alternativeDocumentUrl}
-                                className="mt-2 inline-block px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700"
+                                className="mt-1 md:mt-2 inline-block px-2 md:px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs"
                             >
                                 Use Alternative Viewer
                             </a>
                         </div>
                     )}
                     
-                    <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 text-sm text-yellow-700">
+                    <div className="mt-3 md:mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-3 md:p-4 text-xs md:text-sm text-yellow-700">
                         <p className="font-bold">Viewing Restrictions</p>
                         <p>This document is for viewing purposes only. Downloads, printing and copying are restricted.</p>
                     </div>
@@ -416,7 +412,7 @@ export default function DocumentViewerPage() {
                 <div className="flex justify-center mt-4">
                     <button
                         onClick={() => window.history.back()}
-                        className="px-6 py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-md shadow transition-colors"
+                        className="px-4 md:px-6 py-1.5 md:py-2 bg-slate-600 hover:bg-slate-700 text-white font-medium rounded-md shadow transition-colors text-sm md:text-base"
                     >
                         Back to Survey
                     </button>
