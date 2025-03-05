@@ -47,17 +47,16 @@ export default function UserManagement() {
 
     const handleSave = async (id) => {
         const originalData = userData.find(user => user.id === id);
-        const { name, role, departments, status } = editedData;
+        const { name, departments, status } = editedData;
 
-        if (!name || !role || !departments) {
-            toast.error("Name, role, and department are required fields.");
+        if (!name || !departments) {
+            toast.error("Name and department are required fields.");
             return;
         }
 
         // Check if anything has changed, including status
         if (
             name === originalData.name && 
-            role === originalData.role && 
             departments === originalData.departments &&
             status === originalData.status
         ) {
@@ -70,7 +69,6 @@ export default function UserManagement() {
             
             const response = await axios.put(`/api/user-management/users/${id}`, { 
                 name, 
-                role, 
                 departments: departments.toString(),
                 status: status // Send the string status value
             });
@@ -141,18 +139,7 @@ export default function UserManagement() {
         {
             key: "role",
             label: "Role",
-            render: (item) => editRowId === item.id ? (
-                <select
-                    value={editedData.role || ""}
-                    onChange={(e) => handleInputChange("role", e.target.value)}
-                    className="w-full border p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="" disabled>Select Role</option>
-                    <option value="admin">Admin</option>
-                    <option value="localtaskforce">Task Force</option>
-                    <option value="localaccreditor">Accreditor</option>
-                </select>
-            ) : item.role,
+            render: (item) => item.role, // Role is now read-only even in edit mode
         },
         {
             key: "departments",
