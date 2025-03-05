@@ -6,7 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Indicator extends Model
 {
-    protected $fillable = ['parameter_id', 'documents', 'description', 'task'];
+    protected $fillable = [
+        'parameter_id',
+        'description',
+        'documents',
+        'task'
+    ];
+
+    // Ensure these fields can be null
+    protected $attributes = [
+        'documents' => null,
+        'task' => null
+    ];
 
     protected $table = 'indicators';
 
@@ -39,10 +50,6 @@ class Indicator extends Model
     {
         return $this->task()->first();
     }
-    // In your controller
-public function index()
-{
-    return Area::with(['parameters.indicators.task'])->get();
-}
+
 }
 

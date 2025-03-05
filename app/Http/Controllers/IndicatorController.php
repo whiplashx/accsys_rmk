@@ -25,6 +25,7 @@ class IndicatorController extends Controller
             return response()->json(['error' => 'Failed to fetch selfsurvey ratings'], 500);
         }
     }
+    
     public function all(Parameter $parameter)
     {
         return $parameter->indicators;

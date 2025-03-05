@@ -40,12 +40,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
-})->middleware(['auth']);
+})->middleware(['auth', 'verified']);
 
 Route::post('/activitiesUpdate', [ActivityController::class, 'store'])->middleware('auth', 'role:localtaskforce', 'verified');
 Route::get('/activities_log', [ActivityController::class, 'index']);
 
-Route::middleware(['auth', 'role:admin'])
+Route::middleware(['auth', 'verified', 'role:admin'])
     ->group(function () {
         //Route::get('/areas', [AreaController::class, 'index']);
         Route::get('/indicatorsForAdmin', [IndicatorController::class, 'index']);
@@ -83,7 +83,7 @@ Route::middleware(['auth', 'role:admin'])
 
     });
 Route::get('/areas', [AreaController::class, 'index']);
-Route::middleware(['auth', 'role:localtaskforce'])
+Route::middleware(['auth', 'verified', 'role:localtaskforce'])
     ->group(function () {
         Route::apiResource('self-surveys', SelfSurveyController::class);
         Route::get('/accreditationLTF', function () {
@@ -124,7 +124,7 @@ Route::middleware(['auth', 'role:localtaskforce'])
             return $request->user();
         });
     });
-Route::middleware(['auth', 'role:localaccreditor'])
+Route::middleware(['auth', 'verified', 'role:localaccreditor'])
     ->group(function () {
 
         Route::get('/accreditationAcc', function () {
@@ -137,7 +137,7 @@ Route::middleware(['auth', 'role:localaccreditor'])
     });
 Route::get('/file/views/{documentId}', [DocumentController::class, 'view']);
 
-Route::middleware(['auth', 'role:accreditor'])
+Route::middleware(['auth', 'verified', 'role:accreditor'])
     ->group(function () {
         Route::get('/documentation', function () {
             return Inertia::render('Accreditor/Documentation');
@@ -185,7 +185,7 @@ require __DIR__ . '/auth.php';
 
 Route::middleware('auth')->group(function () {
     Route::post('/updateUser/{id}', [AdminController::class, 'updateUser'])->name('admin.updateUser');
-})->middleware(['auth']);
+})->middleware(['auth', 'verified']);
 
 
 Route::get('/accreditation-areas', [AccreditationController::class, 'index']);
@@ -229,20 +229,6 @@ Route::apiResource('/self-surveys', SelfSurveyController::class);
 Route::get('/document-viewer', function () {
     return inertia('LocalTaskForce/DocumentViewer');
 })->middleware(['auth', 'verified']);
-
-// Add these routes after your existing user-related routes
-// User Management API Routes - for the Accounts.jsx
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/api/user-management/users', [UserController::class, 'getUsers']);
-    Route::put('/api/user-management/users/{id}', [UserController::class, 'updateUser']);
-    Route::post('/api/user-management/users', [UserController::class, 'createUser']);
-    Route::post('/api/user-management/users/{id}/delete', [UserController::class, 'deleteUser']);
-});
-
-// This route is used by both admin and non-admin pages
-Route::middleware(['auth'])->group(function () {
-    Route::get('/api/departments/list', [DepartmentController::class, 'listAll']);
-});
 
 
 

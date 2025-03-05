@@ -89,20 +89,25 @@ const AccreditationAreasPage = () => {
     }
     
     try {
+      setLoading(true);
       const response = await axios.post('/indicatorsTB', { 
         parameter_id: selectedParameter.id, 
-        description: newIndicatorDescription 
+        description: newIndicatorDescription,
+        documents: null,  // Add default null value
+        task: null       // Add default null value
       });
-      
-      // Instead of trying to update the state directly, refetch all data
-      await fetchAreas();
-      
-      setNewIndicatorDescription('');
-      toast.success('Indicator added successfully');
-      setModalOpen(false);
+
+      if (response.data) {
+        toast.success('Indicator added successfully');
+        await fetchAreas();
+        setNewIndicatorDescription('');
+        setModalOpen(false);
+      }
     } catch (error) {
       console.error('Error adding indicator:', error.response?.data || error.message);
-      toast.error('Failed to add indicator');
+      toast.error(error.response?.data?.message || 'Failed to add indicator');
+    } finally {
+      setLoading(false);
     }
   };
 
