@@ -19,13 +19,14 @@ export default function DocumentViewerPage() {
     const rating = queryParams.get('rating') || 'Not rated';
     
     // Add a console.log to help debug what parameters are being received
-    console.log("Document viewer loaded with parameters:", {
+   /* console.log("Document viewer loaded with parameters:", {
         documentId,
         taskName,
         uploader,
         rating,
         fullUrl: window.location.href
     });
+    */
     
     // Generate secure document URL using document ID
     const secureDocumentUrl = documentId ? 
@@ -37,7 +38,7 @@ export default function DocumentViewerPage() {
         `/alt-document-viewer/${encodeURIComponent(documentId)}` : 
         null;
     
-    console.log("Secure document URL:", secureDocumentUrl);
+    //console.log("Secure document URL:", secureDocumentUrl);
 
     useEffect(() => {
         if (!documentId) {
@@ -52,10 +53,10 @@ export default function DocumentViewerPage() {
         // Fetch document details
         const fetchDocument = async () => {
             try {
-                console.log("Fetching document details for ID:", documentId);
+                //console.log("Fetching document details for ID:", documentId);
                 const response = await axios.get(`/api/documents/${documentId}`);
                 
-                console.log("API response:", response.data);
+                //console.log("API response:", response.data);
                 
                 if (response.data && !response.data.error) {
                     setDocument(response.data);
@@ -64,7 +65,7 @@ export default function DocumentViewerPage() {
                     try {
                         const debugResponse = await axios.get(`/debug-document/${documentId}`);
                         setDebugInfo(debugResponse.data);
-                        console.log("Debug info:", debugResponse.data);
+                       // console.log("Debug info:", debugResponse.data);
                     } catch (debugErr) {
                         console.error("Error fetching debug info:", debugErr);
                     }
@@ -73,7 +74,7 @@ export default function DocumentViewerPage() {
                     const filename = response.data.name || '';
                     const extension = filename.split('.').pop().toLowerCase();
                     setDocumentType(extension);
-                    console.log("Document type detected:", extension);
+                   // console.log("Document type detected:", extension);
                 } else {
                     throw new Error(response.data.error || "Document not found");
                 }
@@ -98,7 +99,7 @@ export default function DocumentViewerPage() {
                 try {
                     const debugResponse = await axios.get(`/debug-document/${documentId}`);
                     setDebugInfo(debugResponse.data);
-                    console.log("Debug info after error:", debugResponse.data);
+                   // console.log("Debug info after error:", debugResponse.data);
                 } catch (debugErr) {
                     console.error("Error fetching debug info:", debugErr);
                 }
@@ -217,11 +218,12 @@ export default function DocumentViewerPage() {
                 </div>
             );
         }
-        
+        /*
         console.log("Rendering document content:", {
             type: documentType,
             url: secureDocumentUrl
         });
+        */
         
         // Image viewer with watermark
         if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(documentType)) {
@@ -251,21 +253,81 @@ export default function DocumentViewerPage() {
         // For PDFs and other documents
         return (
             <div className="h-[calc(100vh-250px)] relative border border-gray-300">
+                {/* Watermark overlay - positioned above the iframe */}
+                <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between items-center p-8">
+                    <div className="w-full flex justify-end">
+                        <div className="bg-slate-800 bg-opacity-20 text-white p-2 rounded shadow">
+                            CONFIDENTIAL
+                        </div>
+                    </div>
+                    
+                    {/* Center watermark - repeating pattern */}
+                    <div className="flex-grow w-full flex items-center justify-center">
+                        <div className="transform rotate-30 opacity-10 pointer-events-none select-none">
+                            <div className="grid grid-cols-3 gap-20">
+                                {[...Array(9)].map((_, i) => (
+                                    <div key={i} className="text-3xl font-bold text-slate-900">
+                                        MinSU Accreditation
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {/* Bottom watermark with user info */}
+                    <div className="w-full flex justify-between">
+                        <div className="bg-slate-800 bg-opacity-20 text-white text-xs p-2 rounded shadow">
+                            Viewed by: {uploader}
+                        </div>
+                        <div className="bg-slate-800 bg-opacity-20 text-white text-xs p-2 rounded shadow">
+                            {new Date().toLocaleDateString()}
+                        </div>
+                    </div>
+                </div>
+                
                 <iframe
                     ref={iframeRef}
-                    src={secureDocumentUrl}
+                    // For PDFs, add parameters to disable toolbar and downloads
+                    src={documentType === 'pdf' 
+                        ? `${secureDocumentUrl}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&download=0` 
+                        : secureDocumentUrl}
                     className="w-full h-full border-0"
                     title="Document Viewer"
-                    sandbox="allow-scripts allow-same-origin"
-                    onLoad={() => console.log("Document iframe loaded successfully")}
+                    // Add minimal sandbox restrictions to prevent downloads but allow viewing
+                    // Disable context menu to prevent right-click save
+                    onContextMenu={(e) => e.preventDefault()}
+                    // Disable keyboard shortcuts that could enable download
+                    onKeyDown={(e) => {
+                        if ((e.ctrlKey && e.key === 's') || 
+                            (e.ctrlKey && e.key === 'p')) {
+                            e.preventDefault();
+                        }
+                    }}
+                    //onLoad={() => console.log("Document iframe loaded successfully")}
                     onError={(e) => {
                         console.error("Document iframe failed to load");
                         setBlockedByClient(true);
                         setError("Failed to load document. This may be blocked by your browser or the file may be corrupted.");
                     }}
                 />
+                
+                {/* Add an invisible overlay to catch and prevent keyboard shortcuts for the entire viewer */}
+                <div 
+                    className="absolute inset-0 z-5"
+                    onContextMenu={(e) => e.preventDefault()}
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => {
+                        if ((e.ctrlKey && e.key === 's') || 
+                            (e.ctrlKey && e.key === 'p')) {
+                            e.preventDefault();
+                            return false;
+                        }
+                    }}
+                    style={{ pointerEvents: 'none' }}
+                />
+                
                 {document && (
-                    <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-80 text-white text-xs p-2 text-center">
+                    <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-80 text-white text-xs p-2 text-center z-20">
                         If the document doesn't load, it may be blocked by your browser. 
                         <a 
                             href={alternativeDocumentUrl}

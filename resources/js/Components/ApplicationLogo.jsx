@@ -1,9 +1,12 @@
-import { Link } from "@inertiajs/react";
+import React from 'react';
 
-export default function ApplicationLogo(props) {
+export default function ApplicationLogo({ className }) {
+    // Remove any <a> tags if they exist in this component
+    // Just return the logo SVG or image without any anchor tags
     return (
-        <Link href={route('dashboard')}>
-            <img  src="/images/logo.png" className="block h-12  m-auto object-fill " alt="MinSU" />
-        </Link>
+        <svg className={className} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+            {/* This is just a placeholder SVG. Keep your actual logo SVG here */}
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+        </svg>
     );
 }
