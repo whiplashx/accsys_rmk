@@ -4,7 +4,6 @@ import './bootstrap';
 import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
-import DocumentViewer from './Components/DocumentViewer';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
@@ -24,9 +23,3 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
-
-if (document.getElementById('document-viewer')) {
-    createRoot(document.getElementById('document-viewer')).render(
-        <DocumentViewer />
-    );
-}

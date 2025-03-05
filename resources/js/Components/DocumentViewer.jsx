@@ -1,14 +1,34 @@
-import React, { useEffect } from 'react';
-import TaskForceLayout from "@/Layouts/TaskForceLayout";
+import DocumentViewerLayout from '@/Layouts/DocumentViewerLayout';
+import React, { useState, useEffect } from 'react';
 
 const DocumentViewer = () => {
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    // Implement security measures
     useEffect(() => {
+        // Prevent right-clicking
         const handleContextMenu = (e) => {
             e.preventDefault();
+            return false;
         };
+        
+        // Prevent keyboard shortcuts
+        const handleKeyDown = (e) => {
+            // Prevent Ctrl+S, Ctrl+P, etc.
+            if ((e.ctrlKey || e.metaKey) && 
+                (e.key === 's' || e.key === 'p' || e.key === 'a')) {
+                e.preventDefault();
+                return false;
+            }
+        };
+        
         document.addEventListener('contextmenu', handleContextMenu);
+        document.addEventListener('keydown', handleKeyDown);
+        
         return () => {
             document.removeEventListener('contextmenu', handleContextMenu);
+            document.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
 
@@ -18,47 +38,107 @@ const DocumentViewer = () => {
     const uploader = queryParams.get('uploader') || 'Unknown';
     const rating = queryParams.get('rating') || 'Not rated';
 
-    if (!documentPath) {
+    useEffect(() => {
+        if (documentPath) {
+            setLoading(true);
+            setError(null);
+            
+            setTimeout(() => {
+                setLoading(false);
+            }, 1000);
+        }
+    }, [documentPath]);
+
+    if (loading) return (
+        <DocumentViewerLayout>
+            <div className="flex items-center justify-center h-full">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        </DocumentViewerLayout>
+    );
+
+    if (error) return (
+        <DocumentViewerLayout>
+            <div className="flex items-center justify-center h-full text-red-500">
+                <p>Error loading document: {error}</p>
+            </div>
+        </DocumentViewerLayout>
+    );
+
+    if (!documentPath) return (
+        <DocumentViewerLayout>
+            <div className="flex items-center justify-center h-full text-gray-500">
+                <p>No document selected</p>
+            </div>
+        </DocumentViewerLayout>
+    );
+
+    // Determine the file type to render appropriate viewer
+    const fileExtension = documentPath.split('.').pop().toLowerCase();
+    
+    // PDF viewer with disabled download options
+    if (fileExtension === 'pdf') {
         return (
-            <TaskForceLayout>
-                <div className="flex items-center justify-center min-h-screen bg-gray-100">
-                    <div className="text-xl text-gray-600">No document specified</div>
+            <DocumentViewerLayout>
+                <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
+                    <p className="font-bold">View Only</p>
+                    <p>This document is for viewing purposes only and cannot be downloaded.</p>
                 </div>
-            </TaskForceLayout>
+                <div className="w-full h-full relative">
+                    <iframe
+                        src={`${documentPath}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                        className="w-full h-[calc(100vh-200px)]"
+                        title="PDF Document Viewer"
+                        sandbox="allow-scripts allow-same-origin"
+                    />
+                    {/* Protection overlay */}
+                    <div className="absolute top-0 left-0 w-full h-12 bg-transparent"></div>
+                </div>
+            </DocumentViewerLayout>
         );
     }
-
-    return (
-        <TaskForceLayout>
-            <div className="p-6 bg-gray-100">
-                <div className="mb-6 space-y-4">
-                    <h1 className="text-3xl font-bold text-gray-800">
-                        {taskName || 'Document Viewer'}
-                    </h1>
-                    <div className="flex space-x-8">
-                        <div className="flex items-center">
-                            <span className="text-gray-600 font-medium">Uploaded by:</span>
-                            <span className="ml-2 text-gray-800">{uploader}</span>
+    
+    // Image viewer with protection
+    if (['jpg', 'jpeg', 'png', 'gif'].includes(fileExtension)) {
+        return (
+            <DocumentViewerLayout>
+                <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 mb-4">
+                    <p className="font-bold">View Only</p>
+                    <p>This image is for viewing purposes only and cannot be downloaded.</p>
+                </div>
+                <div className="flex items-center justify-center h-[calc(100vh-200px)] bg-gray-800 relative">
+                    <div className="relative">
+                        {/* Watermark overlay */}
+                        <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none">
+                            <span className="text-white text-5xl font-bold transform rotate-45">VIEW ONLY</span>
                         </div>
-                        <div className="flex items-center">
-                            <span className="text-gray-600 font-medium">Self-Survey Rating:</span>
-                            <span className="ml-2 text-gray-800">{rating}</span>
-                        </div>
+                        <img 
+                            src={documentPath} 
+                            alt="Document" 
+                            className="max-w-full max-h-[calc(100vh-200px)] object-contain pointer-events-none"
+                            style={{userSelect: 'none'}}
+                            onDragStart={(e) => e.preventDefault()}
+                        />
                     </div>
                 </div>
-                <div className="flex-1">
-                    <iframe
-                        src={`/file/view/${documentPath}#toolbar=0&scrollbar=1`}
-                        title="Document Viewer"
-                        className="w-full h-[calc(100vh-12rem)]"
-                        style={{
-                            border: 'none',
-                            display: 'block'
-                        }}
-                    />
+            </DocumentViewerLayout>
+        );
+    }
+    
+    // For other document types - show message but no download option
+    return (
+        <DocumentViewerLayout>
+            <div className="flex flex-col items-center justify-center h-full">
+                <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6">
+                    <p className="font-bold">This file type ({fileExtension}) cannot be previewed directly.</p>
+                    <p>For security reasons, downloading is disabled. Please contact your administrator for access to the original file.</p>
+                </div>
+                <div className="text-center">
+                    <p className="text-gray-600">File: {documentPath.split('/').pop()}</p>
+                    <p className="text-gray-600">Type: {fileExtension.toUpperCase()}</p>
                 </div>
             </div>
-        </TaskForceLayout>
+        </DocumentViewerLayout>
     );
 };
 

@@ -132,7 +132,8 @@ Route::middleware(['auth', 'role:localaccreditor'])
         })->name('accreditationAcc');
         Route::get('/selfsurveyAcc', function () {
             return Inertia::render('LocalAccreditor/Selfsurvey');
-        })->name('selfsuveyAcc');
+        })->name('selfsurveyAcc');
+        Route::get('/areas-for-survey', [AreaController::class, 'index']);
 
     });
 Route::get('/file/views/{documentId}', [DocumentController::class, 'view']);
@@ -243,6 +244,107 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('/api/departments/list', [DepartmentController::class, 'listAll']);
 });
+
+Route::middleware(['auth'])->group(function() {
+    Route::get('/document-viewer', function () {
+        return Inertia::render('DocumentViewer');
+    })->name('document-viewer');
+    
+    // Secure document streaming route
+    Route::get('/secure-document', [DocumentController::class, 'streamSecureDocument'])
+        ->name('secure-document');
+    
+    // API route to get document details
+    Route::get('/api/documents/{id}', [DocumentController::class, 'getDocument'])
+        ->name('documents.get');
+});
+
+// Add this debug route - remove in production
+Route::get('/debug-document/{id}', function ($id) {
+    $document = \App\Models\Document::find($id);
+    if (!$document) {
+        return response()->json(['error' => 'Document not found in database'], 404);
+    }
+    
+    $exists = \Illuminate\Support\Facades\Storage::exists($document->path);
+    return response()->json([
+        'document' => $document,
+        'file_exists' => $exists,
+        'storage_path' => \Illuminate\Support\Facades\Storage::path($document->path),
+        'mime_type' => $exists ? \Illuminate\Support\Facades\Storage::mimeType($document->path) : null,
+        'size' => $exists ? \Illuminate\Support\Facades\Storage::size($document->path) : null
+    ]);
+})->middleware('auth');
+
+// Add these debugging routes - REMOVE BEFORE PRODUCTION
+Route::middleware(['auth'])->group(function() {
+    // Debug document by ID
+    Route::get('/debug-document/{id}', function ($id) {
+        try {
+            $document = \App\Models\Document::find($id);
+            if (!$document) {
+                return response()->json(['error' => 'Document not found in database'], 404);
+            }
+            
+            $exists = \Illuminate\Support\Facades\Storage::exists($document->path);
+            
+            return response()->json([
+                'document' => $document,
+                'file_exists' => $exists,
+                'full_storage_path' => \Illuminate\Support\Facades\Storage::path($document->path),
+                'mime_type' => $exists ? \Illuminate\Support\Facades\Storage::mimeType($document->path) : null,
+                'size' => $exists ? \Illuminate\Support\Facades\Storage::size($document->path) : null,
+                'file_stats' => $exists ? [
+                    'permissions' => substr(sprintf('%o', fileperms(\Illuminate\Support\Facades\Storage::path($document->path))), -4),
+                    'owner' => fileowner(\Illuminate\Support\Facades\Storage::path($document->path)),
+                ] : null
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error fetching document details',
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    });
+    
+    // List all documents in database
+    Route::get('/debug-documents', function () {
+        return response()->json(\App\Models\Document::all());
+    });
+    
+    // Test direct file access
+    Route::get('/debug-file-view/{id}', function ($id) {
+        try {
+            $document = \App\Models\Document::findOrFail($id);
+            $path = $document->path;
+            
+            if (!\Illuminate\Support\Facades\Storage::exists($path)) {
+                return response('File not found in storage', 404);
+            }
+            
+            $file = \Illuminate\Support\Facades\Storage::get($path);
+            $type = \Illuminate\Support\Facades\Storage::mimeType($path);
+            
+            return response($file, 200)->header('Content-Type', $type);
+        } catch (\Exception $e) {
+            return response('Error: ' . $e->getMessage(), 500);
+        }
+    });
+});
+
+// Add these routes for the alternative document viewer
+Route::get('/alt-document-viewer/{id}', function ($id) {
+    return Inertia::render('AlternativeDocumentViewer', [
+        'id' => $id
+    ]);
+})->middleware(['auth', 'verified']);
+
+// Direct document access route with different headers to avoid ad blockers
+Route::get('/direct-document-access/{id}', [DocumentController::class, 'directAccess'])
+    ->middleware(['auth', 'verified']);
+
+
 
 
 

@@ -3,7 +3,6 @@ import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import ViewButton from "./ViewButton";
-import DocumentViewer from './DocumentViewer';
 
 const SelfSurveyForm = () => {
     const [areas, setAreas] = useState([]);
@@ -11,6 +10,7 @@ const SelfSurveyForm = () => {
     const [selectedArea, setSelectedArea] = useState(null);
     const [currentPage, setCurrentPage] = useState(0);
     const parametersPerPage = 2;
+    const [error, setError] = useState(null);
 
     useEffect(() => {
         fetchAreas();
@@ -19,14 +19,18 @@ const SelfSurveyForm = () => {
     const fetchAreas = async () => {
         try {
             setLoading(true);
+            setError(null);
             const response = await axios.get("/areasTB");
             if (response.data && response.data.length > 0) {
                 setAreas(response.data);
                 setSelectedArea(response.data[0]);
+            } else {
+                setError("No areas found. Please contact your administrator.");
             }
             setLoading(false);
         } catch (error) {
             console.error("Error fetching areas:", error);
+            setError("Failed to fetch areas. Please try again later.");
             toast.error("Failed to fetch areas");
             setLoading(false);
         }
@@ -71,10 +75,51 @@ const SelfSurveyForm = () => {
         },
     ];
 
-    const handleViewDocument = (documentId) => {
-        // Implement your document viewing logic here
-        console.log(`Viewing document with ID: ${documentId}`);
+    // Combine the functionality from your original code with improved error handling
+    const handleViewDocument = (documentId, indicator) => {
+        try {
+            // Debug: Log the document ID and indicator
+            console.log("Opening document with ID:", documentId);
+            console.log("Indicator data:", indicator);
+            
+            // Safety check for missing documentId
+            if (!documentId) {
+                console.error("Document ID is missing");
+                toast.error("Document ID is missing");
+                return;
+            }
+
+            // Get uploader info and rating if available
+            const uploader = indicator?.task?.assignee_name || "Unknown";
+            const selfRating = indicator?.task?.selfsurvey_rating || "Not rated";
+            
+            // Format rating label for display
+            let ratingLabel = selfRating;
+            if (selfRating && selfRating !== "Not rated") {
+                const ratingInfo = ratingScale.find(r => r.value === String(selfRating));
+                if (ratingInfo) {
+                    ratingLabel = `${selfRating} - ${ratingInfo.label}`;
+                }
+            }
+
+            // Create the URL for the document viewer using document ID
+            const url = `/document-viewer?id=${encodeURIComponent(documentId)}` +
+                  `&secure=true` +
+                  `&taskName=${encodeURIComponent(indicator?.description || "Document")}` + 
+                  `&uploader=${encodeURIComponent(uploader)}` +
+                  `&rating=${encodeURIComponent(ratingLabel)}`;
+            
+            console.log("Document viewer URL:", url);
+
+            // Open in new tab instead of popup
+            window.open(url, '_blank', 'noopener,noreferrer');
+            
+        } catch (e) {
+            console.error("Error opening document viewer:", e);
+            toast.error("Failed to open document viewer");
+        }
     };
+
     const toRoman = (num) => {
         const roman = [
             "I",
@@ -135,116 +180,147 @@ const SelfSurveyForm = () => {
         </div>
     );
 
-    const renderParameters = (parameters = [], startIndex) => (
-        <div>
-            {parameters.map((parameter, paramIndex) => (
-                <div
-                    key={parameter.id}
-                    className="mb-8 bg-white p-6 rounded-lg shadow-lg"
-                >
-                    <h3 className="text-xl font-semibold mb-4 text-slate-700">
-                        Parameter {toLetter(startIndex + paramIndex + 1)}:{" "}
-                        {parameter.name}
-                    </h3>
+    // Simplified document validation - just check if it exists
+    const isValidDocument = (docId) => {
+        return !!docId && docId !== '' && docId !== 0;
+    };
 
-                    <table className="w-full border-collapse border border-slate-300">
-                        <thead>
-                            <tr className="bg-slate-100">
-                                <th className="border border-slate-300 p-2 text-left text-slate-700">
-                                    Indicator
-                                </th>
-                                <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
-                                    Rating
-                                </th>
-                                <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
-                                    Document
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {parameter.indicators.map((indicator, indIndex) => (
-                                <tr
-                                    key={indicator.id}
-                                    className="even:bg-slate-50"
-                                >
-                                    <td className="border border-slate-300 p-2 text-slate-600">
-                                        {indIndex + 1}. {indicator.description}
-                                    </td>
-                                    <td className="border border-slate-300 p-2 text-center">
-                                        {indicator.task?.selfsurvey_rating ? (
-                                            <span className="text-slate-700 font-semibold">
-                                                {
-                                                    indicator.task
-                                                        .selfsurvey_rating
-                                                }{" "}
-                                                -{" "}
-                                                {ratingScale.find(
-                                                    ({ value }) =>
-                                                        value ===
-                                                        String(
-                                                            indicator.task
-                                                                .selfsurvey_rating
-                                                        )
-                                                )?.label || "No Label"}
-                                            </span>
-                                        ) : (
-                                            <span className="text-slate-500 italic">
-                                                No Rating
-                                            </span>
-                                        )}
-                                    </td>
-
-                                    <td className="border border-slate-300 p-2 text-slate-600 text-center">
-                                        {indicator.documents ? (
-                                            <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                // Open in new tab/window
-                                                window.open(
-                                                    `/document-viewer?path=${indicator.documents}`,
-                                                    "_blank",
-                                                    "noopener,noreferrer"
-                                                );
-                                            }}
-                                            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-150 ease-in-out shadow-sm group"
-                                        >
-                                            <svg
-                                                className="w-5 h-5 mr-2 transition-transform group-hover:scale-110"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                                                />
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                                                />
-                                            </svg>
-                                            <span className="group-hover:underline">
-                                                View
-                                            </span>
-                                        </button>
-                                        ) : (
-                                            <span className="text-slate-500 italic">
-                                                No Document
-                                            </span>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+    const renderParameters = (parameters = [], startIndex) => {
+        // Safety check for parameters
+        if (!parameters || parameters.length === 0) {
+            return (
+                <div className="p-4 text-center text-gray-600">
+                    No parameters found for this area.
                 </div>
-            ))}
-        </div>
-    );
+            );
+        }
+        
+        // Log the parameters for debugging
+        console.log("Rendering parameters:", parameters);
+        
+        return (
+            <div>
+                {parameters.map((parameter, paramIndex) => {
+                    // Log each parameter's indicators for debugging
+                    console.log(`Parameter ${paramIndex} indicators:`, parameter.indicators);
+                    
+                    return (
+                        <div
+                            key={parameter.id}
+                            className="mb-8 bg-white p-6 rounded-lg shadow-lg"
+                        >
+                            <h3 className="text-xl font-semibold mb-4 text-slate-700">
+                                Parameter {toLetter(startIndex + paramIndex + 1)}:{" "}
+                                {parameter.name}
+                            </h3>
+
+                            {/* Safety check for indicators */}
+                            {!parameter.indicators || parameter.indicators.length === 0 ? (
+                                <div className="p-4 text-center text-gray-600">
+                                    No indicators found for this parameter.
+                                </div>
+                            ) : (
+                                <table className="w-full border-collapse border border-slate-300">
+                                    <thead>
+                                        <tr className="bg-slate-100">
+                                            <th className="border border-slate-300 p-2 text-left text-slate-700">
+                                                Indicator
+                                            </th>
+                                            <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
+                                                Rating
+                                            </th>
+                                            <th className="border border-slate-300 p-2 text-center w-32 text-slate-700">
+                                                Document
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {parameter.indicators.map((indicator, indIndex) => {
+                                            // Log each indicator's document info
+                                            console.log(`Indicator ${indIndex} document:`, {
+                                                path: indicator.documents,
+                                                hasDocument: !!indicator.documents,
+                                                type: typeof indicator.documents
+                                            });
+                                            
+                                            // Simple check if document exists
+                                            const hasDocument = isValidDocument(indicator.documents);
+                                            
+                                            return (
+                                                <tr
+                                                    key={indicator.id}
+                                                    className="even:bg-slate-50"
+                                                >
+                                                    <td className="border border-slate-300 p-2 text-slate-600">
+                                                        {indIndex + 1}. {indicator.description}
+                                                    </td>
+                                                    <td className="border border-slate-300 p-2 text-center">
+                                                        {indicator.task?.selfsurvey_rating ? (
+                                                            <span className="text-slate-700 font-semibold">
+                                                                {indicator.task.selfsurvey_rating}{" "}
+                                                                -{" "}
+                                                                {ratingScale.find(
+                                                                    ({ value }) =>
+                                                                        value === String(indicator.task.selfsurvey_rating)
+                                                                )?.label || "No Label"}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-slate-500 italic">
+                                                                No Rating
+                                                            </span>
+                                                        )}
+                                                    </td>
+
+                                                    <td className="border border-slate-300 p-2 text-slate-600 text-center">
+                                                        {hasDocument ? (
+                                                            <button
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    handleViewDocument(indicator.documents, indicator);
+                                                                }}
+                                                                className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors duration-150 ease-in-out shadow-sm group"
+                                                            >
+                                                                <svg
+                                                                    className="w-5 h-5 mr-2 transition-transform group-hover:scale-110"
+                                                                    fill="none"
+                                                                    stroke="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                                                    />
+                                                                    <path
+                                                                        strokeLinecap="round"
+                                                                        strokeLinejoin="round"
+                                                                        strokeWidth={2}
+                                                                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                                                    />
+                                                                </svg>
+                                                                <span className="group-hover:underline">
+                                                                    View Document
+                                                                </span>
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-slate-500 italic">
+                                                                No Document
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        );
+    };
 
     const renderPagination = () => {
         if (!selectedArea?.parameters?.length) return null;
@@ -306,6 +382,34 @@ const SelfSurveyForm = () => {
         return (
             <div className="flex items-center justify-center min-h-screen bg-slate-100">
                 <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-slate-500"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100">
+                <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+                    <p className="font-bold">Error</p>
+                    <p>{error}</p>
+                </div>
+                <button 
+                    onClick={fetchAreas}
+                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
+
+    if (!areas.length) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-slate-100">
+                <div className="text-center text-slate-600">
+                    <p className="text-xl font-semibold">No areas found</p>
+                    <p className="mt-2">Please contact your administrator to set up the self-survey areas.</p>
+                </div>
             </div>
         );
     }
