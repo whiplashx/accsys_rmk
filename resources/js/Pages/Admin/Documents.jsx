@@ -16,7 +16,7 @@ export default function Documents() {
             setLoading(true);
             // Use the dedicated API endpoint instead of the page route
             const response = await axios.get('/api/documents');
-            console.log('Documents data:', response.data);
+            //console.log('Documents data:', response.data);
             if (Array.isArray(response.data)) {
                 setDocuments(response.data);
             } else {
