@@ -367,6 +367,12 @@ Route::get('/selfsurvey', function () {
     }
 })->name('selfsurvey')->middleware(['auth']);
 
+// Add this dedicated API route for documents
+Route::middleware(['auth'])->group(function () {
+    // API route for document listing
+    Route::get('/api/documents', [DocumentController::class, 'index'])->name('api.documents.index');
+});
+
 
 
 

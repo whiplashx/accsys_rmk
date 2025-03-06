@@ -79,9 +79,24 @@ class DocumentController extends Controller
         return response()->json($document);
     }
     
+    /**
+     * Get all documents
+     * 
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function index()
     {
-        return response()->json(Document::all());
+        try {
+            $documents = Document::orderBy('created_at', 'desc')->get();
+            Log::info('Fetched all documents', ['count' => $documents->count()]);
+            return response()->json($documents->toArray());
+        } catch (\Exception $e) {
+            Log::error('Error fetching all documents', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return response()->json(['error' => 'Failed to retrieve documents'], 500);
+        }
     }
 
     /**
