@@ -80,8 +80,13 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/settings', function () {
             return Inertia::render('Admin/Settings');
         })->name('settings');
-
+        
+        // Add the missing selfsurvey route for admin
+        Route::get('/selfsurveyAdmin', function () {
+            return Inertia::render('Admin/Selfsurvey');
+        })->name('admin.selfsurvey');
     });
+
 Route::get('/areas', [AreaController::class, 'index']);
 Route::middleware(['auth', 'role:localtaskforce'])
     ->group(function () {
@@ -92,9 +97,7 @@ Route::middleware(['auth', 'role:localtaskforce'])
         Route::get('/tasks', function () {
             return Inertia::render('LocalTaskForce/Tasks');
         })->name('tasks');
-        Route::get('/selfsurveyLTF', function () {
-            return Inertia::render('LocalTaskForce/Selfsurvey');
-        })->name('selfsurveyLTF');
+
         // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
         Route::get('/self-surveys/{taskId}', [SelfSurveyController::class, 'show']);
         //Route::get('/areas', [AreaController::class, 'index']);
@@ -123,7 +126,13 @@ Route::middleware(['auth', 'role:localtaskforce'])
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
+        
+        // Add the missing selfsurvey route for localtaskforce
+        Route::get('/selfsurveyLTF', function () {
+            return Inertia::render('LocalTaskForce/Selfsurvey');
+        })->name('localtaskforce.selfsurvey');
     });
+
 Route::middleware(['auth', 'role:localaccreditor'])
     ->group(function () {
 
@@ -343,6 +352,20 @@ Route::get('/alt-document-viewer/{id}', function ($id) {
 // Direct document access route with different headers to avoid ad blockers
 Route::get('/direct-document-access/{id}', [DocumentController::class, 'directAccess'])
     ->middleware(['auth', 'verified']);
+
+// Update the selfsurvey route to redirect to the proper named routes
+Route::get('/selfsurvey', function () {
+    switch (auth()->user()->role) {
+        case 'admin':
+            return redirect()->route('admin.selfsurvey');
+        case 'localtaskforce':
+            return redirect()->route('localtaskforce.selfsurvey');
+        case 'localaccreditor':
+            return redirect()->route('localaccreditor.selfsurvey');
+        default:
+            return redirect()->route('dashboard');
+    }
+})->name('selfsurvey')->middleware(['auth']);
 
 
 

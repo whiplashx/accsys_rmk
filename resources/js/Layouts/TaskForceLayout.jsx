@@ -9,7 +9,7 @@ const sidebarItems = [
   { icon: 'dashboard', label: 'Dashboard', href: route('dashboard') },
   //{ icon: 'accreditation', label: 'Accreditation', href: route('accreditationLTF') },
   { icon: 'tasks', label: 'Tasks', href: route('tasks') },
-  { icon: 'selfsurvey', label: 'Self-Survey', href: route('selfsurveyLTF') },
+  { icon: 'selfsurvey', label: 'Self-Survey', href: route('selfsurvey') },
 ];
 
 const icons = {
