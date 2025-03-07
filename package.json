@@ -23,6 +23,7 @@
     "dependencies": {
         "@heroicons/react": "^2.2.0",
         "@tanstack/react-query": "^5.62.3",
+        "html2pdf.js": "^0.9.0",
         "lucide-react": "^0.460.0",
         "react-pdf": "^9.1.1",
         "react-to-pdf": "^1.0.1",
