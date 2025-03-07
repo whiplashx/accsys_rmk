@@ -373,6 +373,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/documents', [DocumentController::class, 'index'])->name('api.documents.index');
 });
 
+// Add a new route for fetching self-survey ratings
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/self-survey-ratings', [TaskController::class, 'getSelfSurveyRatings']);
+});
+
 
 
 

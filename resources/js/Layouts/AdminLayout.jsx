@@ -14,7 +14,7 @@ const sidebarItems = [
         label: "Accreditation",
         href: route("accreditation"),
     },
-    { icon: "documents", label: "Documents", href: route("documents") },
+   //{ icon: "documents", label: "Documents", href: route("documents") },
     { icon: "selfsurvey", label: "Self-Survey", href: route("selfsurvey") },
     //{ icon: 'settings', label: 'Settings', href: route('settings') },
 ];

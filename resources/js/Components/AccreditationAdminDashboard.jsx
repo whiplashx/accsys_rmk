@@ -29,6 +29,7 @@ const AccreditationAdminDashboard = () => {
   const [error, setError] = useState(null);
   const [departmentDropdownOpen, setDepartmentDropdownOpen] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState('monthly');
+  const [selectedProgressPeriod, setSelectedProgressPeriod] = useState('monthly');
   const [taskRatings, setTaskRatings] = useState({
     overall: 0,
     complexity: 0,
@@ -36,19 +37,38 @@ const AccreditationAdminDashboard = () => {
     quality: 0,
     timeliness: 0
   });
+  const [selfSurveyRating, setSelfSurveyRating] = useState(0);
+  const [selfSurveyData, setSelfSurveyData] = useState({
+    tasks: [],
+    averageRating: 0,
+    departmentRatings: {}
+  });
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/dashboard-data');
-        setDashboardData(response.data);
-        setSelectedDepartment(response.data.departments[0]);
+        const dashboardResponse = await axios.get('/dashboard-data');
+        setDashboardData(dashboardResponse.data);
+        setSelectedDepartment(dashboardResponse.data.departments[0]);
 
         // Calculate ratings from tasks
-        if (response.data.tasks) {
-          const ratings = calculateTaskRatings(response.data.tasks);
+        if (dashboardResponse.data.tasks) {
+          const ratings = calculateTaskRatings(dashboardResponse.data.tasks);
           setTaskRatings(ratings);
+          
+          // Calculate average self-survey rating from tasks
+          const avgSelfSurveyRating = calculateSelfSurveyRating(dashboardResponse.data.tasks);
+          setSelfSurveyRating(avgSelfSurveyRating);
+        }
+        
+        // Fetch self-survey ratings data from the dedicated API endpoint
+        const selfSurveyResponse = await axios.get('/api/self-survey-ratings');
+        setSelfSurveyData(selfSurveyResponse.data);
+        
+        // Use the API data for the self-survey rating if available
+        if (selfSurveyResponse.data.averageRating) {
+          setSelfSurveyRating(selfSurveyResponse.data.averageRating);
         }
 
         setLoading(false);
@@ -69,6 +89,10 @@ const AccreditationAdminDashboard = () => {
 
   const handleTimeframeChange = (timeframe) => {
     setSelectedTimeframe(timeframe);
+  };
+
+  const handleProgressPeriodChange = (period) => {
+    setSelectedProgressPeriod(period);
   };
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -123,6 +147,40 @@ const AccreditationAdminDashboard = () => {
     ratings.overall = +((ratings.complexity + ratings.completion + ratings.quality + ratings.timeliness) / 4).toFixed(1);
 
     return ratings;
+  };
+
+  const calculateSelfSurveyRating = (tasks) => {
+    if (!tasks || !tasks.length) return 0;
+    
+    // Filter completed tasks with self-survey ratings
+    const completedTasks = tasks.filter(task => 
+      task.status === 'completed' && task.selfSurveyRating !== undefined
+    );
+    
+    if (!completedTasks.length) return 0;
+    
+    // Calculate average self-survey rating
+    const totalRating = completedTasks.reduce((sum, task) => sum + task.selfSurveyRating, 0);
+    return +(totalRating / completedTasks.length).toFixed(1);
+  };
+
+  const getProgressChartData = () => {
+    if (!dashboardData.progressOverTime) {
+      return [
+        { date: 'No data', progress: 0 }
+      ];
+    }
+    
+    switch (selectedProgressPeriod) {
+      case 'daily':
+        return dashboardData.progressOverTime.daily || [];
+      case 'weekly':
+        return dashboardData.progressOverTime.weekly || [];
+      case 'monthly':
+        return dashboardData.progressOverTime.monthly || [];
+      default:
+        return dashboardData.progressOverTime.monthly || [];
+    }
   };
 
   if (loading) {
@@ -256,7 +314,7 @@ const AccreditationAdminDashboard = () => {
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm font-medium text-gray-500'>Completed Parameters</p>
+                  <p className='text-sm font-medium text-gray-500'>Completed Indicators</p>
                   <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.completedCriteria}/{dashboardData.totalCriteria}</p>
                 </div>
                 <span className='flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600'>
@@ -275,7 +333,7 @@ const AccreditationAdminDashboard = () => {
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm font-medium text-gray-500'>Total Programs</p>
+                  <p className='text-sm font-medium text-gray-500'>Total Indicatos</p>
                   <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.totalCriteria}</p>
                 </div>
                 <span className='flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600'>
@@ -299,76 +357,29 @@ const AccreditationAdminDashboard = () => {
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm font-medium text-gray-500'>Active Accreditations</p>
-                  <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.inProgressCriteria || 0}</p>
+                  <p className='text-sm font-medium text-gray-500'>Self-Survey Rating</p>
+                  <p className='text-2xl font-semibold text-gray-800 mt-1'>
+                    {selfSurveyRating > 0 ? selfSurveyRating.toFixed(1) : 'N/A'} 
+                    {selfSurveyRating > 0 && <span className='text-sm text-gray-500'>/5</span>}
+                  </p>
+                  {selfSurveyData.tasks && (
+                    <p className='text-xs text-gray-400 mt-1'>
+                      Based on {selfSurveyData.tasks.length} completed tasks
+                    </p>
+                  )}
                 </div>
-                <span className='flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600'>
-                  <ClockIcon className='h-6 w-6' />
+                <span className='flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600'>
+                  <DocumentTextIcon className='h-6 w-6' />
                 </span>
               </div>
-              <div className='mt-4 w-full bg-gray-200 rounded-full h-1.5'>
-                <div 
-                  className='bg-blue-500 h-1.5 rounded-full'
-                  style={{ width: `${(dashboardData.inProgressCriteria / dashboardData.totalCriteria) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          </div>
-
-          {/* After stat cards, before charts section */}
-          <div className="mb-6">
-            <div className="bg-white border border-gray-100 rounded-lg shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">Task Performance Metrics</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                {/* Overall Rating */}
-                <div className="flex flex-col items-center p-4 bg-blue-50 rounded-lg">
-                  <span className="text-blue-600 font-bold text-2xl">{taskRatings.overall}</span>
-                  <div className="flex items-center mt-1">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className={`w-4 h-4 ${i < Math.floor(taskRatings.overall) ? 'text-yellow-400' : 'text-gray-300'}`} fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="text-sm text-gray-600 mt-2">Overall Performance</span>
+              {selfSurveyRating > 0 && (
+                <div className='mt-4 w-full bg-gray-200 rounded-full h-1.5'>
+                  <div 
+                    className='bg-yellow-500 h-1.5 rounded-full'
+                    style={{ width: `${(selfSurveyRating / 5) * 100}%` }}
+                  ></div>
                 </div>
-
-                {/* Task Complexity */}
-                <div className="flex flex-col items-center p-4 bg-purple-50 rounded-lg">
-                  <span className="text-purple-600 font-bold text-2xl">{taskRatings.complexity}</span>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: `${(taskRatings.complexity / 5) * 100}%` }}></div>
-                  </div>
-                  <span className="text-sm text-gray-600 mt-2">Task Complexity</span>
-                </div>
-
-                {/* Completion Rate */}
-                <div className="flex flex-col items-center p-4 bg-green-50 rounded-lg">
-                  <span className="text-green-600 font-bold text-2xl">{taskRatings.completion}</span>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${(taskRatings.completion / 5) * 100}%` }}></div>
-                  </div>
-                  <span className="text-sm text-gray-600 mt-2">Completion Rate</span>
-                </div>
-
-                {/* Quality Score */}
-                <div className="flex flex-col items-center p-4 bg-yellow-50 rounded-lg">
-                  <span className="text-yellow-600 font-bold text-2xl">{taskRatings.quality}</span>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div className="bg-yellow-500 h-2 rounded-full" style={{ width: `${(taskRatings.quality / 5) * 100}%` }}></div>
-                  </div>
-                  <span className="text-sm text-gray-600 mt-2">Quality Score</span>
-                </div>
-
-                {/* Timeliness */}
-                <div className="flex flex-col items-center p-4 bg-red-50 rounded-lg">
-                  <span className="text-red-600 font-bold text-2xl">{taskRatings.timeliness}</span>
-                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                    <div className="bg-red-500 h-2 rounded-full" style={{ width: `${(taskRatings.timeliness / 5) * 100}%` }}></div>
-                  </div>
-                  <span className="text-sm text-gray-600 mt-2">Timeliness</span>
-                </div>
-              </div>
+              )}
             </div>
           </div>
 
@@ -407,25 +418,54 @@ const AccreditationAdminDashboard = () => {
             {/* Progress Over Time Chart */}
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'>
               <div className='p-6 border-b border-gray-100'>
-                <h2 className='text-lg font-semibold text-gray-800'>Accreditation Progress</h2>
-                <p className='text-sm text-gray-500'>Monthly progress overview</p>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className='text-lg font-semibold text-gray-800'>Accreditation Progress</h2>
+                    <p className='text-sm text-gray-500'>Progress over time</p>
+                  </div>
+                  <div className='flex gap-2 bg-gray-100 p-1 rounded-lg mt-2 sm:mt-0'>
+                    <button
+                      onClick={() => handleProgressPeriodChange('daily')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        selectedProgressPeriod === 'daily' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      Daily
+                    </button>
+                    <button
+                      onClick={() => handleProgressPeriodChange('weekly')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        selectedProgressPeriod === 'weekly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      Weekly
+                    </button>
+                    <button
+                      onClick={() => handleProgressPeriodChange('monthly')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        selectedProgressPeriod === 'monthly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
+                      }`}
+                    >
+                      Monthly
+                    </button>
+                  </div>
+                </div>
               </div>
               <div className='p-6'>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart
-                    data={dashboardData.progressOverTime || [
-                      { name: 'Jan', progress: 20 },
-                      { name: 'Feb', progress: 35 },
-                      { name: 'Mar', progress: 45 },
-                      { name: 'Apr', progress: 60 },
-                      { name: 'May', progress: 75 },
-                      { name: 'Jun', progress: dashboardData.overallProgress }
-                    ]}
+                    data={getProgressChartData()}
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="name" />
-                    <YAxis unit="%" />
+                    <XAxis 
+                      dataKey="date" 
+                      tick={{ fontSize: 12 }}
+                      angle={selectedProgressPeriod === 'monthly' ? -45 : 0}
+                      textAnchor={selectedProgressPeriod === 'monthly' ? 'end' : 'middle'}
+                      height={60}
+                    />
+                    <YAxis unit="%" domain={[0, 100]} />
                     <Tooltip formatter={(value) => [`${value}%`, 'Progress']} />
                     <Legend />
                     <Line
@@ -441,6 +481,37 @@ const AccreditationAdminDashboard = () => {
               </div>
             </div>
           </div>
+
+          {/* Add a chart for self-survey ratings per department if needed */}
+          {Object.keys(selfSurveyData.departmentRatings || {}).length > 0 && (
+            <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden mb-6'>
+              <div className='p-6 border-b border-gray-100'>
+                <h2 className='text-lg font-semibold text-gray-800'>Self-Survey Ratings by Department</h2>
+                <p className='text-sm text-gray-500'>Average ratings from completed tasks</p>
+              </div>
+              <div className='p-6'>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart
+                    data={Object.entries(selfSurveyData.departmentRatings).map(([deptId, rating]) => {
+                      const department = dashboardData.departments?.find(d => d.id == deptId) || { name: `Department ${deptId}` };
+                      return {
+                        name: department.name,
+                        rating: rating
+                      };
+                    })}
+                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="name" />
+                    <YAxis domain={[0, 5]} />
+                    <Tooltip formatter={(value) => [`${value}`, 'Rating']} />
+                    <Legend />
+                    <Bar dataKey="rating" fill="#FFBB28" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          )}
 
           {/* Programs List - Update to match LocalTaskForceDashboard's criteria list structure */}
           <div className='bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden'>

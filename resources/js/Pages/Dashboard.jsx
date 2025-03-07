@@ -25,7 +25,9 @@ export default function Dashboard() {
                         <div className="bg-white shadow-sm rounded-lg">
                             <div className="p-6">
                                 <AccreditationAdminDashboard />
-                                <ActivityLog />
+                                {
+                                    //<ActivityLog />
+                                }
                             </div>
                         </div>
                     </div>

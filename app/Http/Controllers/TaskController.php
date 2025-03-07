@@ -127,6 +127,39 @@ class TaskController extends Controller
         }
     }
 
+    public function getSelfSurveyRatings()
+    {
+        try {
+            // Get all tasks with a self-survey rating that are completed
+            $tasks = Task::whereNotNull('selfsurvey_rating')
+                ->where('status', 'completed')
+                ->with('assignedUser')
+                ->get();
+                
+            // Calculate the average rating
+            $avgRating = $tasks->avg('selfsurvey_rating');
+            
+            // Group tasks by department if needed
+            $tasksByDepartment = $tasks->groupBy(function ($task) {
+                return $task->assignedUser->department_id ?? 'unknown';
+            });
+            
+            // Calculate average rating per department
+            $departmentRatings = [];
+            foreach ($tasksByDepartment as $deptId => $deptTasks) {
+                $departmentRatings[$deptId] = $deptTasks->avg('selfsurvey_rating');
+            }
+            
+            return response()->json([
+                'tasks' => $tasks,
+                'averageRating' => round($avgRating, 1),
+                'departmentRatings' => $departmentRatings
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error fetching self-survey ratings: ' . $e->getMessage());
+            return response()->json(['error' => 'Failed to fetch self-survey ratings'], 500);
+        }
+    }
 
     public function index()
     {
