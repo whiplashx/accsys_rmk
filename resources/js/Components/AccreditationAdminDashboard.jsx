@@ -223,8 +223,9 @@ const AccreditationAdminDashboard = () => {
           <p className='text-gray-500 text-center mb-8'>
             Overall Accreditation System Progress
           </p>
-
+          
           {/* Add Department Selector from LocalTaskForceDashboard */}
+          { /*
           <div className='mb-6 flex flex-col md:flex-row justify-between items-center gap-4'>
             <div className='relative w-full md:w-auto'>
               <button 
@@ -237,7 +238,7 @@ const AccreditationAdminDashboard = () => {
                 </span>
                 <ChevronDownIcon className='h-5 w-5 text-gray-500' />
               </button>
-              
+           
               {departmentDropdownOpen && (
                 <div className='absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg'>
                   <ul className='py-1 max-h-60 overflow-auto'>
@@ -286,6 +287,7 @@ const AccreditationAdminDashboard = () => {
             </div>
           </div>
 
+*/}
           {/* Progress Overview - Keep existing but update styling to match */}
           {selectedDepartment && (
             <div className='bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 sm:p-6 rounded-xl mb-6 shadow-md'>
@@ -482,36 +484,7 @@ const AccreditationAdminDashboard = () => {
             </div>
           </div>
 
-          {/* Add a chart for self-survey ratings per department if needed */}
-          {Object.keys(selfSurveyData.departmentRatings || {}).length > 0 && (
-            <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden mb-6'>
-              <div className='p-6 border-b border-gray-100'>
-                <h2 className='text-lg font-semibold text-gray-800'>Self-Survey Ratings by Department</h2>
-                <p className='text-sm text-gray-500'>Average ratings from completed tasks</p>
-              </div>
-              <div className='p-6'>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart
-                    data={Object.entries(selfSurveyData.departmentRatings).map(([deptId, rating]) => {
-                      const department = dashboardData.departments?.find(d => d.id == deptId) || { name: `Department ${deptId}` };
-                      return {
-                        name: department.name,
-                        rating: rating
-                      };
-                    })}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[0, 5]} />
-                    <Tooltip formatter={(value) => [`${value}`, 'Rating']} />
-                    <Legend />
-                    <Bar dataKey="rating" fill="#FFBB28" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
+          
 
           {/* Programs List - Update to match LocalTaskForceDashboard's criteria list structure */}
           <div className='bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden'>
