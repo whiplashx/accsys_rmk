@@ -8,31 +8,28 @@ const TasksPage = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     return (
         <AuthenticatedLayout>
-                   <div className="bg-slate-100 min-h-screen">
-            <div className="container mx-auto px-4 py-8">
-                <h1 className="text-3xl font-semibold mb-8 text-slate-800">Task Management</h1>
-                
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-                <div>
-                <button
-                        onClick={() => setIsModalOpen(true)}
-                        className="px-4 py-2 bg-slate-700 text-white rounded hover:bg-slate-600 transition-colors"
-                    >
-                         Assign Task
-                    </button>
+            <div className="bg-slate-100 min-h-screen p-6">
+                <div className="max-w-7xl mx-auto">
+                    <div className="flex justify-between items-center mb-6">
+                        <h1 className="text-2xl font-bold text-gray-800">Task Management</h1>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="px-4 py-2 bg-slate-700 text-white rounded-md hover:bg-slate-600 transition-colors"
+                        >
+                            Assign Task
+                        </button>
                     </div>
-                <TasksTable />
                     
-                    <TaskAssignment
-                        isOpen={isModalOpen}
-                        onClose={() => setIsModalOpen(false)}
-                    />
-      
-                    
+                    <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+                        <TasksTable />
+                        
+                        <TaskAssignment
+                            isOpen={isModalOpen}
+                            onClose={() => setIsModalOpen(false)}
+                        />
+                    </div>
                 </div>
             </div>
-        </div>
-            
         </AuthenticatedLayout>
     );
 };

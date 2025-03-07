@@ -65,14 +65,18 @@ class DepartmentController extends Controller
     public function updateSchedule(Request $request, Department $department)
     {
         $validator = Validator::make($request->all(), [
-            'schedule' => 'required|date',
+            'schedule_start' => 'required|date',
+            'schedule_end' => 'required|date|after:schedule_start',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors(), 400);
         }
 
-        $department->schedule = $request->schedule;
+        $department->schedule_start = $request->schedule_start;
+        $department->schedule_end = $request->schedule_end;
+        // Keep backward compatibility with old code
+        $department->schedule = $request->schedule_start;
         $department->save();
 
         return response()->json($department);

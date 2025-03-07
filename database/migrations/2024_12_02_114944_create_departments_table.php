@@ -17,7 +17,9 @@ return new class extends Migration
             $table->string('name'); // Department name
             $table->string('code')->unique(); // Unique department code
             $table->string('areaID')->nullable(); // Foreign key for area
-            $table->text('schedule')->nullable(); // Optional schedule details
+            $table->timestamp('schedule')->nullable(); // Original schedule field for backward compatibility
+            $table->timestamp('schedule_start')->nullable(); // Start time for scheduling
+            $table->timestamp('schedule_end')->nullable(); // End time for scheduling
             $table->timestamps(); // Created at and updated at timestamps
             // Foreign key constraints (optional, depends on the related tables)
             //$table->foreign('areaID')->references('id')->on('areas')->onDelete('set null');

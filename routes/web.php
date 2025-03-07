@@ -376,6 +376,9 @@ Route::middleware(['auth'])->group(function () {
 // Add a new route for fetching self-survey ratings
 Route::middleware(['auth'])->group(function () {
     Route::get('/api/self-survey-ratings', [TaskController::class, 'getSelfSurveyRatings']);
+    
+    // Task management API endpoint
+    Route::get('/api/tasks', [TaskController::class, 'index']);
 });
 
 
