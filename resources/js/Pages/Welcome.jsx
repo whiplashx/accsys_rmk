@@ -1,155 +1,270 @@
 import React, { useState, useEffect } from 'react';
-import { Book, Users, Calendar, ChevronRight } from 'lucide-react';
+import { Book, Users, Calendar, ChevronRight, ExternalLink, Instagram, Twitter, Facebook } from 'lucide-react';
 import { Link, Head } from '@inertiajs/react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import CopilotInterface from '@/Components/Chatbot';
 
 const UniversityDashboard = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState('hero');
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      
+      // Simple section detection
+      const position = window.scrollY + 100;
+      if (position < document.getElementById('explore').offsetTop) {
+        setActiveSection('hero');
+      } else if (position < document.getElementById('stats').offsetTop) {
+        setActiveSection('explore');
+      } else {
+        setActiveSection('stats');
+      }
     };
+    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <div className="font-sans text-gray-900 bg-gray-50">
+    <div className="font-sans text-gray-900 bg-gray-50 overflow-x-hidden">
       <Head title='MinSU - Accreditation' />
       
-      <header className={`fixed w-full transition-all duration-300 ${scrolled ? 'py-3 bg-white shadow-sm' : 'py-6 bg-transparent'}`}>
+      {/* Decorative elements */}
+      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
+        <div className="absolute top-[15%] left-[5%] w-64 h-64 bg-emerald-100 rounded-full opacity-30 blur-[80px]"></div>
+        <div className="absolute bottom-[25%] right-[10%] w-80 h-80 bg-emerald-200 rounded-full opacity-20 blur-[100px]"></div>
+      </div>
+      
+      <header className={`fixed w-full transition-all duration-500 z-50 ${scrolled ? 'py-3 bg-white/95 backdrop-blur-md shadow-sm' : 'py-6 bg-transparent'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center transition-all duration-300 hover:bg-emerald-100">
-              <ApplicationLogo className="w-6 h-6" />
+          <div className="flex items-center gap-3 group">
+            <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center transition-all duration-500 group-hover:bg-emerald-100 overflow-hidden">
+              <ApplicationLogo className={`transition-all duration-500 ${scrolled ? 'w-6 h-6' : 'w-7 h-7'}`} />
             </div>
             <div>
-              <h1 className={`font-light tracking-wide transition-all duration-300 ${scrolled ? 'text-emerald-800 text-xl' : 'text-emerald-700 text-2xl'}`}>
+              <h1 className={`font-light tracking-wide transition-all duration-500 ${scrolled ? 'text-emerald-800 text-xl' : 'text-emerald-700 text-2xl'}`}>
                 Mindoro State <span className="font-medium">University</span>
               </h1>
             </div>
           </div>
           
-          <Link
-            href={route('login')} 
-            active={route().current('login')}
-            className="text-emerald-800 border border-emerald-100 px-5 py-2 rounded-full hover:bg-emerald-50 transition-all duration-300"
-          >
-            Accreditation Portal
-          </Link>
+          <div className="flex items-center gap-6">
+            <nav className="hidden md:flex gap-8">
+              <a href="#hero" className={`text-sm font-light transition-all duration-300 py-1 relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 hover:after:origin-bottom-left hover:after:scale-x-100 after:transition-transform after:ease-in-out after:duration-300 ${activeSection === 'hero' ? 'text-emerald-800 after:bg-emerald-600 after:scale-x-100' : 'text-gray-600 after:bg-emerald-400'}`}>Home</a>
+              
+              <a href="#explore" className={`text-sm font-light transition-all duration-300 py-1 relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 hover:after:origin-bottom-left hover:after:scale-x-100 after:transition-transform after:ease-in-out after:duration-300 ${activeSection === 'explore' ? 'text-emerald-800 after:bg-emerald-600 after:scale-x-100' : 'text-gray-600 after:bg-emerald-400'}`}>Programs</a>
+              
+              <a href="#stats" className={`text-sm font-light transition-all duration-300 py-1 relative after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-bottom-right after:scale-x-0 hover:after:origin-bottom-left hover:after:scale-x-100 after:transition-transform after:ease-in-out after:duration-300 ${activeSection === 'stats' ? 'text-emerald-800 after:bg-emerald-600 after:scale-x-100' : 'text-gray-600 after:bg-emerald-400'}`}>Impact</a>
+            </nav>
+            
+            <Link
+              href={route('login')} 
+              active={route().current('login')}
+              className="text-emerald-800 border border-emerald-100 px-5 py-2 rounded-full hover:bg-emerald-50 transition-all duration-300 text-sm group relative overflow-hidden"
+            >
+              <span className="relative z-10 group-hover:text-white transition-colors duration-300">Accreditation Portal</span>
+              <span className="absolute inset-0 bg-emerald-600 scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-300"></span>
+            </Link>
+          </div>
         </div>
       </header>
 
       <main>
         {/* Hero Section with Animation */}
-        <section className="pt-32 pb-20 bg-gradient-to-b from-emerald-50 to-white">
-          <div className="container mx-auto px-6 text-center">
-            <h2 className="text-5xl font-light text-emerald-900 mb-8 tracking-tight">
-              Shaping <span className="font-normal">Tomorrow's Leaders</span>
-            </h2>
-            <p className="text-lg text-emerald-700 max-w-2xl mx-auto font-light leading-relaxed opacity-90">
-              Discover exceptional education in a vibrant community devoted to excellence and innovation.
-            </p>
-            <div className="mt-12">
+        <section id="hero" className="min-h-screen flex items-center pt-24 pb-20 bg-gradient-to-b from-emerald-50/70 to-white relative">
+          <div className="container mx-auto px-6 text-center relative z-10">
+            <div className="opacity-0 animate-[fadeInDown_1s_ease_forwards]">
+              <h2 className="text-6xl font-light text-emerald-900 mb-8 tracking-tight leading-tight max-w-3xl mx-auto">
+                Shaping <span className="font-normal">Tomorrow's</span> 
+                <span className="block font-medium">Leaders</span>
+              </h2>
+              <div className="w-16 h-1 bg-emerald-400 mx-auto my-6 rounded-full"></div>
+              <p className="text-lg text-emerald-700 max-w-xl mx-auto font-light leading-relaxed opacity-90">
+                Discover exceptional education in a vibrant community devoted to excellence and innovation.
+              </p>
+            </div>
+            
+            <div className="mt-16 opacity-0 animate-[fadeInUp_1s_0.5s_ease_forwards]">
               <Link 
                 href="#explore" 
-                className="inline-flex items-center gap-2 bg-emerald-700 text-white py-3 px-6 rounded-full hover:bg-emerald-800 transition-all duration-300"
+                className="inline-flex items-center gap-2 bg-emerald-700 text-white py-3 px-8 rounded-full hover:bg-emerald-800 transition-all duration-500 hover:shadow-lg hover:shadow-emerald-100 group"
               >
-                Explore Programs <ChevronRight className="w-4 h-4" />
+                <span>Explore Programs</span>
+                <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
               </Link>
+            </div>
+            
+            <div className="absolute bottom-8 left-0 w-full flex justify-center animate-bounce">
+              <div className="w-8 h-12 border-2 border-emerald-300 rounded-full flex items-start justify-center p-2">
+                <div className="w-1 h-3 bg-emerald-400 rounded-full"></div>
+              </div>
             </div>
           </div>
         </section>
 
         {/* Features Section */}
-        <section className="py-20" id="explore">
+        <section className="py-32" id="explore">
           <div className="container mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <Book className="w-8 h-8 text-emerald-600 mb-6" />
+            <div className="text-center mb-16">
+              <h3 className="text-4xl font-light text-emerald-900 mb-4">Our <span className="font-medium">Programs</span></h3>
+              <p className="text-emerald-600 max-w-lg mx-auto font-light">Discover the paths to excellence we offer to shape your future</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-50 group hover:border-emerald-50 hover:-translate-y-1">
+                <Book className="w-10 h-10 text-emerald-500 mb-8 transition-transform duration-300 group-hover:scale-110" />
                 <h3 className="text-xl font-medium text-emerald-900 mb-4">Academic Excellence</h3>
-                <p className="text-gray-600 mb-6 font-light">
-                  Over 20 undergraduate and graduate programs across diverse disciplines
+                <p className="text-gray-600 mb-8 font-light leading-relaxed">
+                  Over 20 undergraduate and graduate programs across diverse disciplines designed to prepare you for the future.
                 </p>
-                <div className="h-1 w-16 bg-emerald-500 rounded-full"></div>
+                <a href="#" className="text-emerald-700 text-sm font-medium inline-flex items-center gap-2 group/link">
+                  <span>View Programs</span>
+                  <ChevronRight className="w-3 h-3 transition-transform duration-300 group-hover/link:translate-x-1" />
+                </a>
               </div>
 
-              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <Users className="w-8 h-8 text-emerald-600 mb-6" />
+              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-50 group hover:border-emerald-50 hover:-translate-y-1 md:translate-y-6">
+                <Users className="w-10 h-10 text-emerald-500 mb-8 transition-transform duration-300 group-hover:scale-110" />
                 <h3 className="text-xl font-medium text-emerald-900 mb-4">Vibrant Community</h3>
-                <p className="text-gray-600 mb-6 font-light">
-                  Join a diverse community of over 10,000 scholars and researchers
+                <p className="text-gray-600 mb-8 font-light leading-relaxed">
+                  Join a diverse community of over 10,000 scholars and researchers committed to making a difference.
                 </p>
-                <div className="h-1 w-16 bg-emerald-500 rounded-full"></div>
+                <a href="#" className="text-emerald-700 text-sm font-medium inline-flex items-center gap-2 group/link">
+                  <span>Meet Our Community</span>
+                  <ChevronRight className="w-3 h-3 transition-transform duration-300 group-hover/link:translate-x-1" />
+                </a>
               </div>
 
-              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-                <Calendar className="w-8 h-8 text-emerald-600 mb-6" />
+              <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-50 group hover:border-emerald-50 hover:-translate-y-1">
+                <Calendar className="w-10 h-10 text-emerald-500 mb-8 transition-transform duration-300 group-hover:scale-110" />
                 <h3 className="text-xl font-medium text-emerald-900 mb-4">Campus Events</h3>
-                <p className="text-gray-600 mb-6 font-light">
-                  Engaging activities and events throughout the academic year
+                <p className="text-gray-600 mb-8 font-light leading-relaxed">
+                  Engaging activities and events throughout the academic year to enhance your educational experience.
                 </p>
-                <div className="h-1 w-16 bg-emerald-500 rounded-full"></div>
+                <a href="#" className="text-emerald-700 text-sm font-medium inline-flex items-center gap-2 group/link">
+                  <span>View Calendar</span>
+                  <ChevronRight className="w-3 h-3 transition-transform duration-300 group-hover/link:translate-x-1" />
+                </a>
               </div>
             </div>
           </div>
         </section>
 
         {/* Stats Section */}
-        <section className="py-16 bg-emerald-50">
-          <div className="container mx-auto px-6 text-center">
-            <h3 className="text-3xl font-light text-emerald-800 mb-12">Our Impact</h3>
+        <section className="py-24 bg-gradient-to-br from-emerald-50 to-white relative" id="stats">
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48ZyBmaWxsPSJub25lIj48cGF0aCBmaWxsPSIjMTBiOTgxMTAiIGQ9Ik0zNi41NyAzMy4zOGwtNi0uMjNhLjUuNSAwIDAxLS40OC0uNDhsLS4yMy02YS41LjUgMCAwMS43OC0uNDZsNi4yMyAzLjE4YS41LjUgMCAwMS4yMy4zLjUuNSAwIDAxLS4wNy4zOGwtMS45NSAyLjk0YS41LjUgMCAwMS0uNTIuMzd6Ii8+PC9nPjwvc3ZnPg==')] opacity-10"></div>
+          <div className="container mx-auto px-6 text-center relative z-10">
+            <h3 className="text-4xl font-light text-emerald-900 mb-4">Our <span className="font-medium">Impact</span></h3>
+            <p className="text-emerald-600 max-w-lg mx-auto font-light mb-16">The numbers behind our commitment to excellence</p>
+            
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              <div className="p-4">
-                <p className="text-4xl font-light text-emerald-700 mb-2">20+</p>
-                <p className="text-sm text-emerald-600 uppercase tracking-wider">Programs</p>
+              <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
+                <p className="text-5xl font-light text-emerald-700 mb-2">20+</p>
+                <p className="text-sm text-emerald-600 uppercase tracking-wider font-light">Programs</p>
               </div>
-              <div className="p-4">
-                <p className="text-4xl font-light text-emerald-700 mb-2">10K+</p>
-                <p className="text-sm text-emerald-600 uppercase tracking-wider">Students</p>
+              <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
+                <p className="text-5xl font-light text-emerald-700 mb-2">10K+</p>
+                <p className="text-sm text-emerald-600 uppercase tracking-wider font-light">Students</p>
               </div>
-              <div className="p-4">
-                <p className="text-4xl font-light text-emerald-700 mb-2">95%</p>
-                <p className="text-sm text-emerald-600 uppercase tracking-wider">Employment</p>
+              <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
+                <p className="text-5xl font-light text-emerald-700 mb-2">95%</p>
+                <p className="text-sm text-emerald-600 uppercase tracking-wider font-light">Employment</p>
               </div>
-              <div className="p-4">
-                <p className="text-4xl font-light text-emerald-700 mb-2">30+</p>
-                <p className="text-sm text-emerald-600 uppercase tracking-wider">Partners</p>
+              <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
+                <p className="text-5xl font-light text-emerald-700 mb-2">30+</p>
+                <p className="text-sm text-emerald-600 uppercase tracking-wider font-light">Partners</p>
               </div>
+            </div>
+            
+            <div className="mt-24">
+              <Link 
+                href={route('login')}
+                className="inline-flex items-center gap-3 bg-white text-emerald-800 border border-emerald-100 py-3 px-8 rounded-full hover:bg-emerald-700 hover:text-white transition-all duration-500 hover:shadow-lg hover:shadow-emerald-100 hover:border-transparent group"
+              >
+                <span>Access Accreditation Portal</span>
+                <ExternalLink className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
             </div>
           </div>
         </section>
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-100 py-12">
+      <footer className="bg-white border-t border-gray-100 py-16">
         <div className="container mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             <div>
-              <h3 className="text-sm uppercase tracking-wider text-emerald-800 font-medium mb-4">Contact</h3>
-              <p className="text-gray-600 font-light">Mindoro State University - Bongabong Campus</p>
-              <p className="text-gray-600 font-light">Oriental Mindoro, Philippines</p>
+              <div className="flex items-center gap-3 mb-6">
+                <ApplicationLogo className="w-8 h-8 text-emerald-700" />
+                <h4 className="font-normal text-lg text-emerald-800">Mindoro State University</h4>
+              </div>
+              <p className="text-gray-500 font-light text-sm leading-relaxed">
+                Dedicated to excellence in education, research and community service in Oriental Mindoro and beyond.
+              </p>
             </div>
             
             <div>
-              <h3 className="text-sm uppercase tracking-wider text-emerald-800 font-medium mb-4">Connect</h3>
-              <a href="mailto:joshneiel.manalo102403@gmail.com" className="text-emerald-700 hover:text-emerald-900 font-light block mb-2">
+              <h3 className="text-sm uppercase tracking-wider text-emerald-800 font-medium mb-6">Contact</h3>
+              <p className="text-gray-600 font-light mb-2">Mindoro State University - Bongabong Campus</p>
+              <p className="text-gray-600 font-light mb-2">Oriental Mindoro, Philippines</p>
+              <a href="mailto:joshneiel.manalo102403@gmail.com" className="text-emerald-700 hover:text-emerald-900 font-light block mt-4 transition-colors duration-300">
                 joshneiel.manalo102403@gmail.com
               </a>
             </div>
             
-            <div className="text-right">
-              <ApplicationLogo className="w-8 h-8 inline-block text-emerald-700" />
+            <div>
+              <h3 className="text-sm uppercase tracking-wider text-emerald-800 font-medium mb-6">Connect</h3>
+              <div className="flex gap-4">
+                <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-all duration-300">
+                  <Facebook className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-all duration-300">
+                  <Twitter className="w-5 h-5" />
+                </a>
+                <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-all duration-300">
+                  <Instagram className="w-5 h-5" />
+                </a>
+              </div>
             </div>
           </div>
           
-          <div className="mt-12 pt-6 border-t border-gray-100 text-center text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} Mindoro State University. All Rights Reserved.
+          <div className="mt-12 pt-8 border-t border-gray-100 text-center text-xs text-gray-500">
+            <p className="mb-2">© {new Date().getFullYear()} Mindoro State University. All Rights Reserved.</p>
+            <div className="flex justify-center gap-6 mt-4 text-gray-400 text-xs">
+              <a href="#" className="hover:text-emerald-700 transition-colors duration-300">Privacy Policy</a>
+              <a href="#" className="hover:text-emerald-700 transition-colors duration-300">Terms of Service</a>
+              <a href="#" className="hover:text-emerald-700 transition-colors duration-300">Accessibility</a>
+            </div>
           </div>
         </div>
       </footer>
+      
+      {/* Add keyframe animations */}
+      <style jsx>{`
+        @keyframes fadeInDown {
+          from {
+            opacity: 0;
+            transform: translateY(-20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
 };
