@@ -37,14 +37,14 @@ const UniversityDashboard = () => {
         <div className="absolute bottom-[25%] right-[10%] w-80 h-80 bg-emerald-200 rounded-full opacity-20 blur-[100px]"></div>
       </div>
       
-      <header className={`fixed w-full transition-all duration-500 z-50 ${scrolled ? 'py-3 bg-white/95 backdrop-blur-md shadow-sm' : 'py-6 bg-transparent'}`}>
+      <header className={`fixed w-full transition-all duration-500  color-white  z-50 ${scrolled ? 'py-3 bg-white/95 backdrop-blur-md shadow-sm' : 'py-6 bg-white/80 backdrop-blur-sm'}`}>
         <div className="container mx-auto px-6 flex justify-between items-center">
-          <div className="flex items-center gap-3 group">
-            <div className="w-10 h-10 bg-emerald-50 rounded-full flex items-center justify-center transition-all duration-500 group-hover:bg-emerald-100 overflow-hidden">
-              <ApplicationLogo className={`transition-all duration-500 ${scrolled ? 'w-6 h-6' : 'w-7 h-7'}`} />
+          <div className="flex items-center gap-4 group">
+            <div className={`${scrolled ? 'w-12 h-12' : 'w-16 h-16'} bg-transparent rounded-full flex items-center justify-center transition-all duration-500 overflow-hidden`}>
+              <ApplicationLogo className={`transition-all duration-500 ${scrolled ? 'w-10 h-10' : 'w-14 h-14'} text-emerald-700`} />
             </div>
             <div>
-              <h1 className={`font-light tracking-wide transition-all duration-500 ${scrolled ? 'text-emerald-800 text-xl' : 'text-emerald-700 text-2xl'}`}>
+              <h1 className={`font-light tracking-wide transition-all duration-500 ${scrolled ? 'text-emerald-800 text-2xl' : 'text-emerald-700 text-3xl'}`}>
                 Mindoro State <span className="font-medium">University</span>
               </h1>
             </div>
@@ -72,16 +72,26 @@ const UniversityDashboard = () => {
       </header>
 
       <main>
-        {/* Hero Section with Animation */}
-        <section id="hero" className="min-h-screen flex items-center pt-24 pb-20 bg-gradient-to-b from-emerald-50/70 to-white relative">
+        {/* Hero Section with Animation and Background Image */}
+        <section id="hero" className="min-h-screen flex items-center pt-24 pb-20 relative">
+          {/* Background Image */}
+          <div className="absolute inset-0 z-0">
+            <div className="absolute inset-0 bg-emerald-900/60 mix-blend-multiply"></div>
+            <img 
+              src="/images/body.jpg" 
+              alt="Mindoro State University Campus" 
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
           <div className="container mx-auto px-6 text-center relative z-10">
             <div className="opacity-0 animate-[fadeInDown_1s_ease_forwards]">
-              <h2 className="text-6xl font-light text-emerald-900 mb-8 tracking-tight leading-tight max-w-3xl mx-auto">
+              <h2 className="text-6xl font-light text-white mb-8 tracking-tight leading-tight max-w-3xl mx-auto">
                 Shaping <span className="font-normal">Tomorrow's</span> 
                 <span className="block font-medium">Leaders</span>
               </h2>
               <div className="w-16 h-1 bg-emerald-400 mx-auto my-6 rounded-full"></div>
-              <p className="text-lg text-emerald-700 max-w-xl mx-auto font-light leading-relaxed opacity-90">
+              <p className="text-lg text-emerald-50 max-w-xl mx-auto font-light leading-relaxed opacity-90">
                 Discover exceptional education in a vibrant community devoted to excellence and innovation.
               </p>
             </div>
@@ -152,9 +162,20 @@ const UniversityDashboard = () => {
           </div>
         </section>
 
-        {/* Stats Section */}
-        <section className="py-24 bg-gradient-to-br from-emerald-50 to-white relative" id="stats">
+        {/* Stats Section with Background Image */}
+        <section className="py-24 relative" id="stats">
+          {/* Background Image with Overlay */}
+          <div className="absolute inset-0 z-0 opacity-10">
+            <img 
+              src="/images/body.jpg" 
+              alt="Mindoro State University Campus" 
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-emerald-50"></div>
+          </div>
+          
           <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48ZyBmaWxsPSJub25lIj48cGF0aCBmaWxsPSIjMTBiOTgxMTAiIGQ9Ik0zNi41NyAzMy4zOGwtNi0uMjNhLjUuNSAwIDAxLS40OC0uNDhsLS4yMy02YS41LjUgMCAwMS43OC0uNDZsNi4yMyAzLjE4YS41LjUgMCAwMS4yMy4zLjUuNSAwIDAxLS4wNy4zOGwtMS45NSAyLjk0YS41LjUgMCAwMS0uNTIuMzd6Ii8+PC9nPjwvc3ZnPg==')] opacity-10"></div>
+          
           <div className="container mx-auto px-6 text-center relative z-10">
             <h3 className="text-4xl font-light text-emerald-900 mb-4">Our <span className="font-medium">Impact</span></h3>
             <p className="text-emerald-600 max-w-lg mx-auto font-light mb-16">The numbers behind our commitment to excellence</p>
@@ -245,7 +266,7 @@ const UniversityDashboard = () => {
       <style jsx>{`
         @keyframes fadeInDown {
           from {
-            opacity: 0;
+            opacity: 1;
             transform: translateY(-20px);
           }
           to {
