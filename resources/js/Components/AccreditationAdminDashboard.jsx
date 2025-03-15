@@ -30,36 +30,39 @@ const AccreditationAdminDashboard = () => {
   const [departmentDropdownOpen, setDepartmentDropdownOpen] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState('monthly');
   const [selectedProgressPeriod, setSelectedProgressPeriod] = useState('monthly');
-  const [taskRatings, setTaskRatings] = useState({
-    overall: 0,
-    complexity: 0,
-    completion: 0,
-    quality: 0,
-    timeliness: 0
-  });
+
   const [selfSurveyRating, setSelfSurveyRating] = useState(0);
   const [selfSurveyData, setSelfSurveyData] = useState({
     tasks: [],
     averageRating: 0,
     departmentRatings: {}
   });
+  
+  // New state for departments and task progress
+  const [departments, setDepartments] = useState([]);
+  const [taskProgressData, setTaskProgressData] = useState([]);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchAllData = async () => {
       try {
         setLoading(true);
+        
+        // Fetch dashboard data
         const dashboardResponse = await axios.get('/dashboard-data');
         setDashboardData(dashboardResponse.data);
-        setSelectedDepartment(dashboardResponse.data.departments[0]);
+        setSelectedDepartment(dashboardResponse.data.departments?.[0]);
 
         // Calculate ratings from tasks
         if (dashboardResponse.data.tasks) {
           const ratings = calculateTaskRatings(dashboardResponse.data.tasks);
-          setTaskRatings(ratings);
           
           // Calculate average self-survey rating from tasks
           const avgSelfSurveyRating = calculateSelfSurveyRating(dashboardResponse.data.tasks);
           setSelfSurveyRating(avgSelfSurveyRating);
+          
+          // Process tasks for progress graph
+          const progressData = processTaskProgressData(dashboardResponse.data.tasks);
+          setTaskProgressData(progressData);
         }
         
         // Fetch self-survey ratings data from the dedicated API endpoint
@@ -71,16 +74,77 @@ const AccreditationAdminDashboard = () => {
           setSelfSurveyRating(selfSurveyResponse.data.averageRating);
         }
 
+        // Fetch department data from the departmentsTB endpoint
+        const departmentsResponse = await axios.get('/departmentsTB');
+        setDepartments(departmentsResponse.data);
+
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching dashboard data:', error);
+        console.error('Error fetching data:', error);
         setError('Failed to load dashboard data');
         setLoading(false);
       }
     };
 
-    fetchDashboardData();
+    fetchAllData();
   }, []);
+
+  // Process task data to create monthly progress data
+  const processTaskProgressData = (tasks) => {
+    if (!tasks || !tasks.length) return [];
+
+    // Get completed tasks from the last 12 months
+    const now = new Date();
+    const oneYearAgo = new Date(now);
+    oneYearAgo.setMonth(now.getMonth() - 12);
+
+    // Filter completed tasks and group by month
+    const completedTasks = tasks.filter(task => 
+      task.status === 'completed' && 
+      new Date(task.completedAt) >= oneYearAgo
+    );
+
+    // Group tasks by month
+    const tasksByMonth = {};
+    completedTasks.forEach(task => {
+      const completedDate = new Date(task.completedAt);
+      const monthKey = `${completedDate.getFullYear()}-${(completedDate.getMonth() + 1).toString().padStart(2, '0')}`;
+      
+      if (!tasksByMonth[monthKey]) {
+        tasksByMonth[monthKey] = {
+          count: 0,
+          date: monthKey,
+          progress: 0
+        };
+      }
+      
+      tasksByMonth[monthKey].count++;
+    });
+    
+    // Convert to array and calculate progress percentage
+    const monthlyData = Object.values(tasksByMonth);
+    
+    // Calculate cumulative progress
+    let totalTasks = tasks.length;
+    let runningTotal = 0;
+    
+    return monthlyData
+      .sort((a, b) => a.date.localeCompare(b.date))
+      .map(month => {
+        runningTotal += month.count;
+        return {
+          date: formatMonthLabel(month.date),
+          progress: Math.round((runningTotal / totalTasks) * 100)
+        };
+      });
+  };
+
+  // Helper to format month label
+  const formatMonthLabel = (dateStr) => {
+    const [year, month] = dateStr.split('-');
+    const date = new Date(parseInt(year), parseInt(month) - 1);
+    return date.toLocaleDateString('default', { month: 'short', year: 'numeric' });
+  };
 
   const handleDepartmentChange = (department) => {
     setSelectedDepartment(department);
@@ -93,6 +157,45 @@ const AccreditationAdminDashboard = () => {
 
   const handleProgressPeriodChange = (period) => {
     setSelectedProgressPeriod(period);
+  };
+
+  // Calculate department status based on schedule
+  const getDepartmentStatus = (department) => {
+    if (!department.schedule_start || !department.schedule_end) {
+      return 'pending';
+    }
+    
+    const now = new Date();
+    const startDate = new Date(department.schedule_start);
+    const endDate = new Date(department.schedule_end);
+    
+    if (now < startDate) {
+      return 'pending';
+    } else if (now > endDate) {
+      return 'completed';
+    } else {
+      return 'in-progress';
+    }
+  };
+
+  // Calculate department progress (placeholder logic)
+  const getDepartmentProgress = (department) => {
+    const status = getDepartmentStatus(department);
+    
+    if (status === 'completed') {
+      return 100;
+    } else if (status === 'pending') {
+      return 0;
+    } else {
+      // For in-progress, calculate percentage based on dates
+      const now = new Date();
+      const startDate = new Date(department.schedule_start);
+      const endDate = new Date(department.schedule_end);
+      const totalDuration = endDate - startDate;
+      const elapsedDuration = now - startDate;
+      
+      return Math.min(Math.round((elapsedDuration / totalDuration) * 100), 99);
+    }
   };
 
   const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8'];
@@ -165,21 +268,21 @@ const AccreditationAdminDashboard = () => {
   };
 
   const getProgressChartData = () => {
-    if (!dashboardData.progressOverTime) {
-      return [
-        { date: 'No data', progress: 0 }
-      ];
+    if (taskProgressData.length === 0) {
+      return [{ date: 'No data', progress: 0 }];
     }
     
     switch (selectedProgressPeriod) {
       case 'daily':
-        return dashboardData.progressOverTime.daily || [];
+        // Daily data not implemented, fallback to monthly
+        return taskProgressData;
       case 'weekly':
-        return dashboardData.progressOverTime.weekly || [];
+        // Weekly data not implemented, fallback to monthly
+        return taskProgressData;
       case 'monthly':
-        return dashboardData.progressOverTime.monthly || [];
+        return taskProgressData;
       default:
-        return dashboardData.progressOverTime.monthly || [];
+        return taskProgressData;
     }
   };
 
@@ -417,36 +520,18 @@ const AccreditationAdminDashboard = () => {
               </div>
             </div>
 
-            {/* Progress Over Time Chart */}
+            {/* Updated Progress Over Time Chart with Task Completion Data */}
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'>
               <div className='p-6 border-b border-gray-100'>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className='text-lg font-semibold text-gray-800'>Accreditation Progress</h2>
-                    <p className='text-sm text-gray-500'>Progress over time</p>
+                    <p className='text-sm text-gray-500'>Based on completed tasks by month</p>
                   </div>
                   <div className='flex gap-2 bg-gray-100 p-1 rounded-lg mt-2 sm:mt-0'>
                     <button
-                      onClick={() => handleProgressPeriodChange('daily')}
-                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                        selectedProgressPeriod === 'daily' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      Daily
-                    </button>
-                    <button
-                      onClick={() => handleProgressPeriodChange('weekly')}
-                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                        selectedProgressPeriod === 'weekly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
-                      }`}
-                    >
-                      Weekly
-                    </button>
-                    <button
                       onClick={() => handleProgressPeriodChange('monthly')}
-                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                        selectedProgressPeriod === 'monthly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
-                      }`}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors bg-white shadow-sm text-blue-700 font-medium`}
                     >
                       Monthly
                     </button>
@@ -463,8 +548,8 @@ const AccreditationAdminDashboard = () => {
                     <XAxis 
                       dataKey="date" 
                       tick={{ fontSize: 12 }}
-                      angle={selectedProgressPeriod === 'monthly' ? -45 : 0}
-                      textAnchor={selectedProgressPeriod === 'monthly' ? 'end' : 'middle'}
+                      angle={-45}
+                      textAnchor="end"
                       height={60}
                     />
                     <YAxis unit="%" domain={[0, 100]} />
@@ -504,38 +589,59 @@ const AccreditationAdminDashboard = () => {
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Department</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Status</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Progress</th>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Schedule</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Last Updated</th>
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200'>
-                  {dashboardData.criteriaList?.map((program) => (
-                    <tr key={program.id} className='hover:bg-blue-50 cursor-pointer transition-colors'>
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='text-sm font-medium text-gray-900'>{program.name}</div>
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='text-sm text-gray-500'>{program.department}</div>
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        {getStatusBadge(program.status)}
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='w-full bg-gray-200 rounded-full h-2'>
-                          <div 
-                            className={`h-2 rounded-full ${
-                              program.progress >= 100 ? 'bg-green-500' : 
-                              program.progress > 50 ? 'bg-blue-500' : 'bg-yellow-500'
-                            }`}
-                            style={{ width: `${program.progress}%` }}
-                          ></div>
-                        </div>
-                        <div className='text-xs text-gray-500 mt-1'>{program.progress}%</div>
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='text-sm text-gray-500'>{program.lastUpdated}</div>
+                  {departments.length > 0 ? departments.map((department) => {
+                    const status = getDepartmentStatus(department);
+                    const progress = getDepartmentProgress(department);
+                    
+                    return (
+                      <tr key={department.id} className='hover:bg-blue-50 cursor-pointer transition-colors'>
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          <div className='text-sm font-medium text-gray-900'>{department.code || 'N/A'}</div>
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          <div className='text-sm text-gray-500'>{department.name}</div>
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          {getStatusBadge(status)}
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          <div className='w-full bg-gray-200 rounded-full h-2'>
+                            <div 
+                              className={`h-2 rounded-full ${
+                                progress >= 100 ? 'bg-green-500' : 
+                                progress > 50 ? 'bg-blue-500' : 'bg-yellow-500'
+                              }`}
+                              style={{ width: `${progress}%` }}
+                            ></div>
+                          </div>
+                          <div className='text-xs text-gray-500 mt-1'>{progress}%</div>
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          <div className='text-sm text-gray-500'>
+                            {department.schedule_start && department.schedule_end ? 
+                              `${new Date(department.schedule_start).toLocaleDateString()} - ${new Date(department.schedule_end).toLocaleDateString()}` : 
+                              'Not scheduled'}
+                          </div>
+                        </td>
+                        <td className='px-6 py-4 whitespace-nowrap'>
+                          <div className='text-sm text-gray-500'>
+                            {department.updated_at ? new Date(department.updated_at).toLocaleDateString() : 'N/A'}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  }) : (
+                    <tr>
+                      <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
+                        No departments found
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             </div>
