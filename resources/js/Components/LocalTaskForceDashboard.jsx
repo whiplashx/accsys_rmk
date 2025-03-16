@@ -167,35 +167,10 @@ const LocalTaskForceDashboard = () => {
           {/* Department Selector */}
           <div className='mb-6 flex flex-col md:flex-row justify-between items-center gap-4'>
             <div className='relative w-full md:w-auto'>
-              <button 
-                onClick={() => setDepartmentDropdownOpen(!departmentDropdownOpen)}
-                className='w-full md:w-auto flex items-center justify-between gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-              >
-                <span className='flex items-center gap-2'>
-                  <AcademicCapIcon className='h-5 w-5 text-gray-500' />
-                  {selectedDepartment ? selectedDepartment.name : 'Select Department'}
-                </span>
-                <ChevronDownIcon className='h-5 w-5 text-gray-500' />
-              </button>
+             
               
-              {departmentDropdownOpen && (
-                <div className='absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg'>
-                  <ul className='py-1 max-h-60 overflow-auto'>
-                    {dashboardData.departments.map((dept) => (
-                      <li key={dept.id}>
-                        <button
-                          onClick={() => handleDepartmentChange(dept)}
-                          className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
-                            selectedDepartment && selectedDepartment.id === dept.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
-                          }`}
-                        >
-                          {dept.name}
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+             
+              
             </div>
 
             <div className='flex gap-2 bg-gray-100 p-1 rounded-lg'>
