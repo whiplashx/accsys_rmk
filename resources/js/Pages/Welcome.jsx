@@ -129,10 +129,7 @@ const UniversityDashboard = () => {
                 <p className="text-gray-600 mb-8 font-light leading-relaxed">
                   Over 20 undergraduate and graduate programs across diverse disciplines designed to prepare you for the future.
                 </p>
-                <a href="#" className="text-emerald-700 text-sm font-medium inline-flex items-center gap-2 group/link">
-                  <span>View Programs</span>
-                  <ChevronRight className="w-3 h-3 transition-transform duration-300 group-hover/link:translate-x-1" />
-                </a>
+
               </div>
 
               <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-50 group hover:border-emerald-50 hover:-translate-y-1 md:translate-y-6">
@@ -141,10 +138,7 @@ const UniversityDashboard = () => {
                 <p className="text-gray-600 mb-8 font-light leading-relaxed">
                   Join a diverse community of over 10,000 scholars and researchers committed to making a difference.
                 </p>
-                <a href="#" className="text-emerald-700 text-sm font-medium inline-flex items-center gap-2 group/link">
-                  <span>Meet Our Community</span>
-                  <ChevronRight className="w-3 h-3 transition-transform duration-300 group-hover/link:translate-x-1" />
-                </a>
+ 
               </div>
 
               <div className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-50 group hover:border-emerald-50 hover:-translate-y-1">
@@ -153,10 +147,7 @@ const UniversityDashboard = () => {
                 <p className="text-gray-600 mb-8 font-light leading-relaxed">
                   Engaging activities and events throughout the academic year to enhance your educational experience.
                 </p>
-                <a href="#" className="text-emerald-700 text-sm font-medium inline-flex items-center gap-2 group/link">
-                  <span>View Calendar</span>
-                  <ChevronRight className="w-3 h-3 transition-transform duration-300 group-hover/link:translate-x-1" />
-                </a>
+               
               </div>
             </div>
           </div>
@@ -182,19 +173,19 @@ const UniversityDashboard = () => {
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
               <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
-                <p className="text-5xl font-light text-emerald-700 mb-2">20+</p>
+
                 <p className="text-sm text-emerald-600 uppercase tracking-wider font-light">Programs</p>
               </div>
               <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
-                <p className="text-5xl font-light text-emerald-700 mb-2">10K+</p>
+
                 <p className="text-sm text-emerald-600 uppercase tracking-wider font-light">Students</p>
               </div>
               <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
-                <p className="text-5xl font-light text-emerald-700 mb-2">95%</p>
+
                 <p className="text-sm text-emerald-600 uppercase tracking-wider font-light">Employment</p>
               </div>
               <div className="p-6 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
-                <p className="text-5xl font-light text-emerald-700 mb-2">30+</p>
+
                 <p className="text-sm text-emerald-600 uppercase tracking-wider font-light">Partners</p>
               </div>
             </div>
