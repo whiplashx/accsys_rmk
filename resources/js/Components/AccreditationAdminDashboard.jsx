@@ -27,7 +27,7 @@ const AccreditationAdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [departmentDropdownOpen, setDepartmentDropdownOpen] = useState(false);
+  const [programDropdownOpen, setDepartmentDropdownOpen] = useState(false);
   const [selectedTimeframe, setSelectedTimeframe] = useState('monthly');
   const [selectedProgressPeriod, setSelectedProgressPeriod] = useState('monthly');
 
@@ -35,11 +35,11 @@ const AccreditationAdminDashboard = () => {
   const [selfSurveyData, setSelfSurveyData] = useState({
     tasks: [],
     averageRating: 0,
-    departmentRatings: {}
+    programRatings: {}
   });
   
   // New state for programs and task progress
-  const [programs, setprograms] = useState([]);
+  const [programs, setPrograms] = useState([]);
   const [taskProgressData, setTaskProgressData] = useState([]);
 
   useEffect(() => {
@@ -50,7 +50,15 @@ const AccreditationAdminDashboard = () => {
         // Fetch dashboard data
         const dashboardResponse = await axios.get('/dashboard-data');
         setDashboardData(dashboardResponse.data);
-        setSelectedDepartment(dashboardResponse.data.programs?.[0]);
+        
+        // Fetch program data from the programsTB endpoint
+        const programsResponse = await axios.get('/programsTB');
+        setPrograms(programsResponse.data);
+        
+        // Set first program as selected if available
+        if (programsResponse.data.length > 0) {
+          setSelectedDepartment(programsResponse.data[0]);
+        }
 
         // Calculate ratings from tasks
         if (dashboardResponse.data.tasks) {
@@ -73,10 +81,6 @@ const AccreditationAdminDashboard = () => {
         if (selfSurveyResponse.data.averageRating) {
           setSelfSurveyRating(selfSurveyResponse.data.averageRating);
         }
-
-        // Fetch department data from the programsTB endpoint
-        const programsResponse = await axios.get('/programsTB');
-        setprograms(programsResponse.data);
 
         setLoading(false);
       } catch (error) {
@@ -146,8 +150,8 @@ const AccreditationAdminDashboard = () => {
     return date.toLocaleDateString('default', { month: 'short', year: 'numeric' });
   };
 
-  const handleDepartmentChange = (department) => {
-    setSelectedDepartment(department);
+  const handleDepartmentChange = (program) => {
+    setSelectedDepartment(program);
     setDepartmentDropdownOpen(false);
   };
 
@@ -159,15 +163,15 @@ const AccreditationAdminDashboard = () => {
     setSelectedProgressPeriod(period);
   };
 
-  // Calculate department status based on schedule
-  const getprogramstatus = (department) => {
-    if (!department.schedule_start || !department.schedule_end) {
+  // Calculate program status based on schedule
+  const getprogramstatus = (program) => {
+    if (!program.schedule_start || !program.schedule_end) {
       return 'pending';
     }
     
     const now = new Date();
-    const startDate = new Date(department.schedule_start);
-    const endDate = new Date(department.schedule_end);
+    const startDate = new Date(program.schedule_start);
+    const endDate = new Date(program.schedule_end);
     
     if (now < startDate) {
       return 'pending';
@@ -178,9 +182,9 @@ const AccreditationAdminDashboard = () => {
     }
   };
 
-  // Calculate department progress (placeholder logic)
-  const getDepartmentProgress = (department) => {
-    const status = getprogramstatus(department);
+  // Calculate program progress (placeholder logic)
+  const getDepartmentProgress = (program) => {
+    const status = getprogramstatus(program);
     
     if (status === 'completed') {
       return 100;
@@ -189,8 +193,8 @@ const AccreditationAdminDashboard = () => {
     } else {
       // For in-progress, calculate percentage based on dates
       const now = new Date();
-      const startDate = new Date(department.schedule_start);
-      const endDate = new Date(department.schedule_end);
+      const startDate = new Date(program.schedule_start);
+      const endDate = new Date(program.schedule_end);
       const totalDuration = endDate - startDate;
       const elapsedDuration = now - startDate;
       
@@ -328,11 +332,11 @@ const AccreditationAdminDashboard = () => {
           </p>
           
           {/* Add Department Selector from LocalTaskForceDashboard */}
-          { /*
+          
           <div className='mb-6 flex flex-col md:flex-row justify-between items-center gap-4'>
             <div className='relative w-full md:w-auto'>
               <button 
-                onClick={() => setDepartmentDropdownOpen(!departmentDropdownOpen)}
+                onClick={() => setDepartmentDropdownOpen(!programDropdownOpen)}
                 className='w-full md:w-auto flex items-center justify-between gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
               >
                 <span className='flex items-center gap-2'>
@@ -342,18 +346,18 @@ const AccreditationAdminDashboard = () => {
                 <ChevronDownIcon className='h-5 w-5 text-gray-500' />
               </button>
            
-              {departmentDropdownOpen && (
+              {programDropdownOpen && (
                 <div className='absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg'>
                   <ul className='py-1 max-h-60 overflow-auto'>
-                    {dashboardData.programs.map((dept) => (
-                      <li key={dept.id}>
+                    {programs.map((program) => (
+                      <li key={program.id}>
                         <button
-                          onClick={() => handleDepartmentChange(dept)}
+                          onClick={() => handleDepartmentChange(program)}
                           className={`w-full text-left px-4 py-2 text-sm hover:bg-gray-100 ${
-                            selectedDepartment && selectedDepartment.id === dept.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+                            selectedDepartment && selectedDepartment.id === program.id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
                           }`}
                         >
-                          {dept.name}
+                          {program.name} - {program.college}
                         </button>
                       </li>
                     ))}
@@ -390,7 +394,6 @@ const AccreditationAdminDashboard = () => {
             </div>
           </div>
 
-*/}
           {/* Progress Overview - Keep existing but update styling to match */}
           {selectedDepartment && (
             <div className='bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 sm:p-6 rounded-xl mb-6 shadow-md'>
@@ -586,7 +589,7 @@ const AccreditationAdminDashboard = () => {
                 <thead className='bg-gray-50'>
                   <tr>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Program</th>
-                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Department</th>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>College</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Status</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Progress</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Schedule</th>
@@ -594,17 +597,17 @@ const AccreditationAdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200'>
-                  {programs.length > 0 ? programs.map((department) => {
-                    const status = getprogramstatus(department);
-                    const progress = getDepartmentProgress(department);
+                  {programs.length > 0 ? programs.map((program) => {
+                    const status = getprogramstatus(program);
+                    const progress = getDepartmentProgress(program);
                     
                     return (
-                      <tr key={department.id} className='hover:bg-blue-50 cursor-pointer transition-colors'>
+                      <tr key={program.id} className='hover:bg-blue-50 cursor-pointer transition-colors'>
                         <td className='px-6 py-4 whitespace-nowrap'>
-                          <div className='text-sm font-medium text-gray-900'>{department.code || 'N/A'}</div>
+                          <div className='text-sm font-medium text-gray-900'>{program.name || 'N/A'}</div>
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
-                          <div className='text-sm text-gray-500'>{department.name}</div>
+                          <div className='text-sm text-gray-500'>{program.college}</div>
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
                           {getStatusBadge(status)}
@@ -623,14 +626,14 @@ const AccreditationAdminDashboard = () => {
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
                           <div className='text-sm text-gray-500'>
-                            {department.schedule_start && department.schedule_end ? 
-                              `${new Date(department.schedule_start).toLocaleDateString()} - ${new Date(department.schedule_end).toLocaleDateString()}` : 
+                            {program.schedule_start && program.schedule_end ? 
+                              `${new Date(program.schedule_start).toLocaleDateString()} - ${new Date(program.schedule_end).toLocaleDateString()}` : 
                               'Not scheduled'}
                           </div>
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
                           <div className='text-sm text-gray-500'>
-                            {department.updated_at ? new Date(department.updated_at).toLocaleDateString() : 'N/A'}
+                            {program.updated_at ? new Date(program.updated_at).toLocaleDateString() : 'N/A'}
                           </div>
                         </td>
                       </tr>
