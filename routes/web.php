@@ -22,6 +22,12 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\TaskAssignmentController;
 
 
+Route::get('/aboutus', function () {
+    return Inertia::render('AboutUs');
+})->name('aboutus');
+Route::get('/welcome', function () {
+    return Inertia::render('Welcome');
+})->name('welcome');
 
 Route::get('/', function () {
     return Inertia::render('Welcome', [
@@ -380,6 +386,7 @@ Route::middleware(['auth'])->group(function () {
     // Task management API endpoint
     Route::get('/api/tasks', [TaskController::class, 'index']);
 });
+
 
 
 
