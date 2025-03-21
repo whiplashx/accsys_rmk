@@ -5,19 +5,23 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Department extends Model
+class Program extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'name',
         'code',
+        'college',
         'description',
+        'schedule',
+        'schedule_start',
+        'schedule_end',
     ];
 
     public function users()
     {
-        return $this->hasMany(User::class, 'departments', 'id');
+        return $this->hasMany(User::class, 'programs', 'id');
     }
 
     // If you have a relationship with an Area model, you can define it here

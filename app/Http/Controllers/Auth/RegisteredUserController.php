@@ -42,7 +42,7 @@ class RegisteredUserController extends Controller
              'name' => 'required|string|max:255',
              'email' => 'required|string|email|max:255|unique:users',
              'role' => 'required|string|in:admin,localtaskforce,localaccreditor',
-             'departments' => 'required|exists:departments,id',
+             'programs' => 'required|exists:programs,id',
          ]);
          
          // Generate a random password
@@ -52,7 +52,7 @@ class RegisteredUserController extends Controller
              'name' => $validated['name'],
              'email' => $validated['email'],
              'role' => $validated['role'],
-             'departments' => $validated['departments'],
+             'programs' => $validated['programs'],
              'password' => Hash::make($password),
              'status' => 'active',
          ]);

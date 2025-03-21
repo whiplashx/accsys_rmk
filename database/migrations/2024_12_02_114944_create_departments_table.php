@@ -12,10 +12,10 @@ return new class extends Migration
     public function up()
     {
   
-        Schema::create('departments', function (Blueprint $table) {
+        Schema::create('programs', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
             $table->string('name'); // Department name
-            $table->string('code')->unique(); // Unique department code
+            $table->string('college')->unique(); // Unique department college
             $table->string('areaID')->nullable(); // Foreign key for area
             $table->timestamp('schedule')->nullable(); // Original schedule field for backward compatibility
             $table->timestamp('schedule_start')->nullable(); // Start time for scheduling
@@ -32,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('departments');
+        Schema::dropIfExists('programs');
     }
 };

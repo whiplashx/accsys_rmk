@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Mail\LoginCredentials;
 use App\Models\User;
-use App\Models\Department;
+use App\Models\Program;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -41,12 +41,12 @@ class UserController extends Controller
     }
 
     /**
-     * Get all departments for user management
+     * Get all programs for user management
      */
-    public function getDepartments()
+    public function getprograms()
     {
-        $departments = Department::all();
-        return response()->json($departments);
+        $programs = Program::all();
+        return response()->json($programs);
     }
 
     /**
@@ -61,7 +61,7 @@ class UserController extends Controller
             $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
                 'role' => 'required|string',
-                'departments' => 'required',
+                'programs' => 'required',
                 'status' => 'required|string|in:active,inactive',
             ]);
             
@@ -75,7 +75,7 @@ class UserController extends Controller
             // Update the user with validated data
             $user->name = $request->name;
             $user->role = $request->role;
-            $user->departments = $request->departments;
+            $user->programs = $request->programs;
             $user->status = $request->status;
             $user->save();
             
@@ -123,7 +123,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'role' => 'required|string|in:admin,localtaskforce,localaccreditor',
-            'departments' => 'required|exists:departments,id',
+            'programs' => 'required|exists:programs,id',
         ]);
         
         // Generate a random password
@@ -133,7 +133,7 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
-            'departments' => $validated['departments'],
+            'programs' => $validated['programs'],
             'password' => Hash::make($password),
             'status' => 'active',
         ]);

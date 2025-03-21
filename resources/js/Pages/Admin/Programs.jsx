@@ -6,10 +6,10 @@ import { Check, Edit, Link, Trash, Plus, Calendar, X } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-export default function Departments() {
+export default function programs() {
     const [data, setData] = useState([]);
     const [isAddScheduleOpen, setIsAddScheduleOpen] = useState(false);
-    const [selectedDepartment, setSelectedDepartment] = useState(null);
+    const [selectedProgram, setSelectedProgram] = useState(null);
     const [scheduleData, setScheduleData] = useState({
         start_date: "",
         end_date: ""
@@ -22,16 +22,16 @@ export default function Departments() {
     const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
     const [formData, setFormData] = useState({
         name: '',
-        code: '',
+        college: '',
     });
 
     useEffect(() => {
-        fetchData();
+        fetchProgram();
     }, []);
 
-    const fetchData = () => {
+    const fetchProgram = () => {
         setIsLoading(true);
-        axios.get('fetchData')
+        axios.get('fetchProgram')
         .then(response => {
             setData(response.data);
             setIsLoading(false);
@@ -40,12 +40,12 @@ export default function Departments() {
             console.error('Error: ', error);
             setError("Failed to fetch data. Please try again.");
             setIsLoading(false);
-            toast.error("Failed to load departments");
+            toast.error("Failed to load programs");
         });
     };
 
     const handleAddSchedule = (item) => {
-        setSelectedDepartment(item);
+        setSelectedProgram(item);
         if (item.schedule_start && item.schedule_end) {
             const formatDateForInput = (dateString) => {
                 const date = new Date(dateString);
@@ -72,7 +72,7 @@ export default function Departments() {
 
         setIsLoading(true);
         setError("");
-        axios.post(`/department/${selectedDepartment.id}/schedule`, {
+        axios.post(`/program/${selectedProgram.id}/schedule`, {
             schedule_start: scheduleData.start_date,
             schedule_end: scheduleData.end_date
         })
@@ -80,7 +80,7 @@ export default function Departments() {
             setIsLoading(false);
             setIsAddScheduleOpen(false);
             setData(prevData => prevData.map(item => 
-                item.id === selectedDepartment.id ? { 
+                item.id === selectedProgram.id ? { 
                     ...item, 
                     schedule_start: response.data.schedule_start,
                     schedule_end: response.data.schedule_end,
@@ -88,7 +88,7 @@ export default function Departments() {
                 } : item
             ));
             setScheduleData({ start_date: "", end_date: "" });
-            setSelectedDepartment(null);
+            setSelectedProgram(null);
             toast.success("Schedule updated successfully");
         })
         .catch(error => {
@@ -108,18 +108,18 @@ export default function Departments() {
     // New functions for CRUD operations
     const openAddModal = () => {
         setModalMode('add');
-        setFormData({ name: '', code: '' });
+        setFormData({ name: '', college: '' });
         setIsModalOpen(true);
         setError("");
     };
 
-    const openEditModal = (department) => {
+    const openEditModal = (program) => {
         setModalMode('edit');
         setFormData({
-            name: department.name,
-            code: department.code,
+            name: program.name,
+            college: program.college,
         });
-        setSelectedDepartment(department);
+        setSelectedProgram(program);
         setIsModalOpen(true);
         setError("");
     };
@@ -129,48 +129,48 @@ export default function Departments() {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const submitDepartment = () => {
+    const submitProgram = () => {
         setIsLoading(true);
         setError("");
         
         const request = modalMode === 'add' 
-            ? axios.post('/department', formData)
-            : axios.put(`/department/${selectedDepartment.id}`, formData);
+            ? axios.post('/program/add', formData)
+            : axios.put(`/program/${selectedProgram.id}`, formData);
 
         request.then(response => {
             setIsLoading(false);
             setIsModalOpen(false);
-            fetchData(); // Refresh data
-            toast.success(modalMode === 'add' ? "Department added successfully" : "Department updated successfully");
+            fetchProgram(); // Refresh data
+            toast.success(modalMode === 'add' ? "Program added successfully" : "Program updated successfully");
         })
         .catch(error => {
             setIsLoading(false);
-            console.error('Error processing department: ', error);
+            console.error('Error processing program: ', error);
             if (error.response && error.response.data && error.response.data.errors) {
                 const errorMessages = Object.values(error.response.data.errors).flat();
                 setError(errorMessages.join(' '));
                 toast.error(errorMessages.join(' '));
             } else {
-                setError("Failed to process department. Please try again.");
-                toast.error("Failed to process department");
+                setError("Failed to process program. Please try again.");
+                toast.error("Failed to process program");
             }
         });
     };
 
     const handleDelete = (id) => {
-        if (!confirm('Are you sure you want to delete this department?')) return;
+        if (!confirm('Are you sure you want to delete this program?')) return;
         
         setIsLoading(true);
-        axios.delete(`/department/${id}`)
+        axios.delete(`/program/${id}`)
             .then(() => {
                 setData(prevData => prevData.filter(item => item.id !== id));
                 setIsLoading(false);
-                toast.success("Department deleted successfully");
+                toast.success("Program deleted successfully");
             })
             .catch(error => {
-                console.error('Error deleting department: ', error);
+                console.error('Error deleting program: ', error);
                 setIsLoading(false);
-                toast.error("Failed to delete department");
+                toast.error("Failed to delete program");
             });
     };
 
@@ -201,7 +201,7 @@ export default function Departments() {
     const columns = [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Name' },
-        { key: 'code', label: 'Code'},
+        { key: 'college', label: 'College'},
         { key: 'schedule', label: 'Schedule Period', render: (item) => {
             if (!item.schedule_start && !item.schedule) {
                 return (
@@ -273,13 +273,13 @@ export default function Departments() {
                 
                 <div className="max-w-7xl mx-auto">
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800">Departments</h1>
+                        <h1 className="text-2xl font-bold text-gray-800">Programs</h1>
                         <button
                             onClick={openAddModal}
                             className="px-4 py-2 bg-slate-700 text-white rounded-md hover:bg-slate-600 flex items-center gap-2"
                         >
                             <Plus size={16} />
-                            Add Department
+                            Add Program
                         </button>
                     </div>
                     
@@ -299,7 +299,7 @@ export default function Departments() {
                         
                         {!isLoading && data.length === 0 && (
                             <div className="text-center py-8 text-gray-500">
-                                No departments found. Add one to get started.
+                                No programs found. Add one to get started.
                             </div>
                         )}
                     </div>
@@ -311,7 +311,7 @@ export default function Departments() {
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
                     <div className="relative p-5 border w-96 shadow-lg rounded-md bg-white">
                         <div className="flex justify-between items-center pb-3">
-                            <h3 className="text-lg font-medium text-gray-900">Schedule Department</h3>
+                            <h3 className="text-lg font-medium text-gray-900">Schedule Program</h3>
                             <button 
                                 onClick={() => {
                                     setIsAddScheduleOpen(false);
@@ -373,13 +373,13 @@ export default function Departments() {
                 </div>
             )}
             
-            {/* Department Add/Edit Modal */}
+            {/* Program Add/Edit Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex items-center justify-center z-50">
                     <div className="relative p-5 border w-96 shadow-lg rounded-md bg-white">
                         <div className="flex justify-between items-center pb-3">
                             <h3 className="text-lg font-medium text-gray-900">
-                                {modalMode === 'add' ? 'Add New Department' : 'Edit Department'}
+                                {modalMode === 'add' ? 'Add New Program' : 'Edit Program'}
                             </h3>
                             <button 
                                 onClick={() => {
@@ -394,7 +394,7 @@ export default function Departments() {
                         <div className="mt-2 px-2 py-3">
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Department Name
+                                    Program Name
                                 </label>
                                 <input
                                     type="text"
@@ -407,12 +407,12 @@ export default function Departments() {
                             </div>
                             <div className="mb-4">
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    Department Code
+                                    College
                                 </label>
                                 <input
                                     type="text"
-                                    name="code"
-                                    value={formData.code}
+                                    name="college"
+                                    value={formData.college}
                                     onChange={handleFormChange}
                                     className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-slate-500 focus:ring focus:ring-slate-200 focus:ring-opacity-50"
                                     required
@@ -431,11 +431,11 @@ export default function Departments() {
                                 Cancel
                             </button>
                             <button
-                                onClick={submitDepartment}
-                                disabled={isLoading}
+                                onClick={submitProgram}
+                                disabled={isLoading || !formData.name || !formData.college}
                                 className="px-3 py-1.5 bg-slate-700 text-white rounded-md text-sm hover:bg-slate-600 disabled:opacity-50"
                             >
-                                {isLoading ? 'Processing...' : modalMode === 'add' ? 'Create Department' : 'Update Department'}
+                                {isLoading ? 'Processing...' : modalMode === 'add' ? 'Create Program' : 'Update Program'}
                             </button>
                         </div>
                     </div>

@@ -30,7 +30,7 @@ const LocalTaskForceDashboard = () => {
         setLoading(true);
         const response = await axios.get('/dashboard-data');
         setDashboardData(response.data);
-        setSelectedDepartment(response.data.departments[0]);
+        setSelectedDepartment(response.data.programs[0]);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);

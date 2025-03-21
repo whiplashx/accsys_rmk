@@ -38,8 +38,8 @@ const AccreditationAdminDashboard = () => {
     departmentRatings: {}
   });
   
-  // New state for departments and task progress
-  const [departments, setDepartments] = useState([]);
+  // New state for programs and task progress
+  const [programs, setprograms] = useState([]);
   const [taskProgressData, setTaskProgressData] = useState([]);
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const AccreditationAdminDashboard = () => {
         // Fetch dashboard data
         const dashboardResponse = await axios.get('/dashboard-data');
         setDashboardData(dashboardResponse.data);
-        setSelectedDepartment(dashboardResponse.data.departments?.[0]);
+        setSelectedDepartment(dashboardResponse.data.programs?.[0]);
 
         // Calculate ratings from tasks
         if (dashboardResponse.data.tasks) {
@@ -74,9 +74,9 @@ const AccreditationAdminDashboard = () => {
           setSelfSurveyRating(selfSurveyResponse.data.averageRating);
         }
 
-        // Fetch department data from the departmentsTB endpoint
-        const departmentsResponse = await axios.get('/departmentsTB');
-        setDepartments(departmentsResponse.data);
+        // Fetch department data from the programsTB endpoint
+        const programsResponse = await axios.get('/programsTB');
+        setprograms(programsResponse.data);
 
         setLoading(false);
       } catch (error) {
@@ -160,7 +160,7 @@ const AccreditationAdminDashboard = () => {
   };
 
   // Calculate department status based on schedule
-  const getDepartmentStatus = (department) => {
+  const getprogramstatus = (department) => {
     if (!department.schedule_start || !department.schedule_end) {
       return 'pending';
     }
@@ -180,7 +180,7 @@ const AccreditationAdminDashboard = () => {
 
   // Calculate department progress (placeholder logic)
   const getDepartmentProgress = (department) => {
-    const status = getDepartmentStatus(department);
+    const status = getprogramstatus(department);
     
     if (status === 'completed') {
       return 100;
@@ -345,7 +345,7 @@ const AccreditationAdminDashboard = () => {
               {departmentDropdownOpen && (
                 <div className='absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg'>
                   <ul className='py-1 max-h-60 overflow-auto'>
-                    {dashboardData.departments.map((dept) => (
+                    {dashboardData.programs.map((dept) => (
                       <li key={dept.id}>
                         <button
                           onClick={() => handleDepartmentChange(dept)}
@@ -450,8 +450,8 @@ const AccreditationAdminDashboard = () => {
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm font-medium text-gray-500'>Total Departments</p>
-                  <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.departments?.length || 0}</p>
+                  <p className='text-sm font-medium text-gray-500'>Total programs</p>
+                  <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.programs?.length || 0}</p>
                 </div>
                 <span className='flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-600'>
                   <UserGroupIcon className='h-6 w-6' />
@@ -594,8 +594,8 @@ const AccreditationAdminDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className='bg-white divide-y divide-gray-200'>
-                  {departments.length > 0 ? departments.map((department) => {
-                    const status = getDepartmentStatus(department);
+                  {programs.length > 0 ? programs.map((department) => {
+                    const status = getprogramstatus(department);
                     const progress = getDepartmentProgress(department);
                     
                     return (
@@ -638,7 +638,7 @@ const AccreditationAdminDashboard = () => {
                   }) : (
                     <tr>
                       <td colSpan="6" className="px-6 py-4 text-center text-sm text-gray-500">
-                        No departments found
+                        No programs found
                       </td>
                     </tr>
                   )}

@@ -10,7 +10,7 @@ import "react-toastify/dist/ReactToastify.css";
 export default function UserManagement() {
     const [showModal, setShowModal] = useState(false);
     const [userData, setUserData] = useState([]);
-    const [departments, setDepartments] = useState([]);
+    const [programs, setprograms] = useState([]);
     const [editRowId, setEditRowId] = useState(null);
     const [editedData, setEditedData] = useState({});
     const [loading, setLoading] = useState(true);
@@ -18,12 +18,12 @@ export default function UserManagement() {
 
     const fetchUsers = useCallback(async () => {
         try {
-            const [usersResponse, departmentsResponse] = await Promise.all([
+            const [usersResponse, programsResponse] = await Promise.all([
                 axios.get("/api/user-management/users"),
-                axios.get("/api/departments/list")
+                axios.get("/api/programs/list")
             ]);
             setUserData(usersResponse.data);
-            setDepartments(departmentsResponse.data);
+            setprograms(programsResponse.data);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -47,9 +47,9 @@ export default function UserManagement() {
 
     const handleSave = async (id) => {
         const originalData = userData.find(user => user.id === id);
-        const { name, departments, status } = editedData;
+        const { name, programs, status } = editedData;
 
-        if (!name || !departments) {
+        if (!name || !programs) {
             toast.error("Name and department are required fields.");
             return;
         }
@@ -57,7 +57,7 @@ export default function UserManagement() {
         // Check if anything has changed, including status
         if (
             name === originalData.name && 
-            departments === originalData.departments &&
+            programs === originalData.programs &&
             status === originalData.status
         ) {
             setEditRowId(null);
@@ -69,7 +69,7 @@ export default function UserManagement() {
             
             const response = await axios.put(`/api/user-management/users/${id}`, { 
                 name, 
-                departments: departments.toString(),
+                programs: programs.toString(),
                 status: status // Send the string status value
             });
             
@@ -142,20 +142,20 @@ export default function UserManagement() {
             render: (item) => item.role, // Role is now read-only even in edit mode
         },
         {
-            key: "departments",
+            key: "programs",
             label: "Department",
             render: (item) => editRowId === item.id ? (
                 <select
-                    value={editedData.departments || ""}
-                    onChange={(e) => handleInputChange("departments", e.target.value)}
+                    value={editedData.programs || ""}
+                    onChange={(e) => handleInputChange("programs", e.target.value)}
                     className="w-full border p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                     <option value="" disabled>Select Department</option>
-                    {departments.map(dept => (
+                    {programs.map(dept => (
                         <option key={dept.id} value={dept.id}>{`${dept.name} (${dept.code})`}</option>
                     ))}
                 </select>
-            ) : departments.find(dept => dept.id === item.departments)?.name || "N/A",
+            ) : programs.find(dept => dept.id === item.programs)?.name || "N/A",
         },
         { key: "email", label: "Email" },
         {

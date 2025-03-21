@@ -231,9 +231,61 @@ const UniversityDashboard = () => {
                             ))}
                         </div>
                     </div>
+
                 </section>
 
-                
+                {/* Mission & Vision Section with Background Image */}
+                <section className="py-24 relative" id="mission">
+                    {/* Background Image with Overlay */}
+                    <div className="absolute inset-0 z-0 opacity-10">
+                        <img
+                            src="/images/body.jpg"
+                            alt="Mindoro State University Campus"
+                            className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-emerald-50"></div>
+                    </div>
+
+                    <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48ZyBmaWxsPSJub25lIj48cGF0aCBmaWxsPSIjMTBiOTgxMTAiIGQ9Ik0zNi41NyAzMy4zOGwtNi0uMjNhLjUuNSAwIDAxLS40OC0uNDhsLS4yMy02YS41LjUgMCAwMS43OC0uNDZsNi4yMyAzLjE4YS41LjUgMCAwMS4yMy4zLjUuNSAwIDAxLS4wNy4zOGwtMS45NSAyLjk0YS41LjUgMCAwMS0uNTIuMzd6Ii8+PC9nPjwvc3ZnPg==')] opacity-10"></div>
+
+                    <div className="container mx-auto px-6 text-center relative z-10">
+                        <h3 className="text-4xl font-light text-emerald-900 mb-4">
+                            Our <span className="font-medium">Mission & Vision</span>
+                        </h3>
+                        <p className="text-emerald-600 max-w-lg mx-auto font-light mb-16">
+                            The driving force behind our university's commitment to excellence
+                        </p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div className="p-8 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
+                                <h4 className="text-xl font-medium text-emerald-800 mb-4">Our Mission</h4>
+                                <p className="text-gray-600 font-light leading-relaxed">
+                                    To provide accessible quality education through responsive instruction, 
+                                    distinctive research, sustainable extension and production programs 
+                                    for the holistic development of individuals in a dynamic society.
+                                </p>
+                            </div>
+                            <div className="p-8 bg-white rounded-2xl shadow-sm border border-gray-50 hover:shadow-md hover:border-emerald-50 transition-all duration-300">
+                                <h4 className="text-xl font-medium text-emerald-800 mb-4">Our Vision</h4>
+                                <p className="text-gray-600 font-light leading-relaxed">
+                                    A premier university in the MIMAROPA region with recognized excellence 
+                                    in instruction, research and extension that nurtures morally upright individuals 
+                                    competitive in the global knowledge economy.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mt-24">
+                            <Link
+                                href={route("login")}
+                                className="inline-flex items-center gap-3 bg-white text-emerald-800 border border-emerald-100 py-3 px-8 rounded-full hover:bg-emerald-700 hover:text-white transition-all duration-500 hover:shadow-lg hover:shadow-emerald-100 hover:border-transparent group"
+                            >
+                                <span>Access Accreditation Portal</span>
+                                <ExternalLink className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                            </Link>
+                        </div>
+                    </div>
+                </section>
             </main>
 
             {/* Footer */}

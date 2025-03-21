@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Department;
+
 use App\Models\Indicator;
+use App\Models\Program;
 use App\Models\Task;
 use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
@@ -13,8 +14,8 @@ class DashboardController extends Controller
 {
     public function getDashboardData(): JsonResponse
     {
-        $departments = Department::select('id', 'name')->get();
-        $areas = Department::select('areaID as name')->distinct()->get();
+        $programs = Program::select('id', 'name')->get();
+        $areas = Program::select('areaID as name')->distinct()->get();
         $recentActivities = Task::select('title as description', 'updated_at as date')
             ->orderBy('updated_at', 'desc')
             ->limit(3)
@@ -29,7 +30,7 @@ class DashboardController extends Controller
         $completedCriteria = Indicator::whereNotNull('documents')->count();
 
         $data = [
-            'departments' => $departments->map(function ($dept) {
+            'programs' => $programs->map(function ($dept) {
                 return [
                     'id' => $dept->id,
                     'name' => $dept->name,

@@ -2,7 +2,7 @@ import React from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
 import AccreditationAreasPage from "@/Components/AddAreasPage";
 
-export default function departments(){
+export default function programs(){
     return(
         <AdminLayout>
                 <div className="min-h-screen bg-gray.-50">

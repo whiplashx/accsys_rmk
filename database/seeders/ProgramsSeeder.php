@@ -2,36 +2,37 @@
 
 namespace Database\Seeders;
 
+use App\Models\Program;
 use Illuminate\Database\Seeder;
 use App\Models\Department;
 use App\Models\Area;
 use Carbon\Carbon;
 
-class DepartmentSeeder extends Seeder
+class ProgramsSeeder extends Seeder
 {
     public function run()
     {
         $areas = Area::all();
 
-        $departments = [
-            ['name' => 'Computer Engineering', 'code' => 'CpE'],
-            ['name' => 'Information Technology', 'code' => 'IT'],
-            ['name' => 'Education', 'code' => 'EDU'],
-            ['name' => 'Political Science', 'code' => 'PolSci'],  
-            ['name' => 'Fisheries', 'code' => 'Fi'],
+        $programs = [
+            ['name' => 'Colege of Computer Studies', 'college' => 'CpE'],
+            ['name' => 'Colege of Computer Studies', 'college' => 'IT'],
+            ['name' => 'College of Teacher Education', 'college' => 'EDU'],
+            ['name' => 'College of Arts and Sciences', 'college' => 'PolSci'],  
+            ['name' => 'College of Fisheries', 'college' => 'Fi'],
         ];
 
-        foreach ($departments as $dept) {
-            // Generate random scheduling dates for some departments
+        foreach ($programs as $dept) {
+            // Generate random scheduling dates for some programs
             $hasSchedule = rand(0, 1) === 1;
             $now = Carbon::now();
             
             $scheduleStart = $hasSchedule ? $now->copy()->addDays(rand(-5, 30)) : null;
             $scheduleEnd = $scheduleStart ? $scheduleStart->copy()->addDays(rand(5, 60)) : null;
             
-            Department::create([
+            Program::create([
                 'name' => $dept['name'],
-                'code' => $dept['code'],
+                'college' => $dept['college'],
                 // 'areaID' => $areas->random()->id,
                 'schedule' => $scheduleStart ? $scheduleStart->toDateTimeString() : null,
                 'schedule_start' => $scheduleStart ? $scheduleStart->toDateTimeString() : null,

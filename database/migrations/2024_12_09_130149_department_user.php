@@ -14,13 +14,13 @@ return new class extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            // Add the departments column as a foreign key
-            $table->unsignedBigInteger('departments')->nullable();
+            // Add the programs column as a foreign key
+            $table->unsignedBigInteger('programs')->nullable();
 
             // Define the foreign key constraint
-            $table->foreign('departments')
+            $table->foreign('programs')
                 ->references('id')
-                ->on('departments')
+                ->on('programs')
                 ->onDelete('set null'); // Set to null if the department is deleted
         });
     }
@@ -34,10 +34,10 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // Drop the foreign key constraint first
-            $table->dropForeign(['departments']);
+            $table->dropForeign(['programs']);
 
-            // Drop the departments column
-            $table->dropColumn('departments');
+            // Drop the programs column
+            $table->dropColumn('programs');
         });
     }
 };

@@ -8,36 +8,36 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
         name: "",
         email: "",
         role: "",
-        departments: "",
+        programs: "",
     });
-    const [departments, setDepartments] = useState([]);
+    const [programs, setprograms] = useState([]);
     const [loading, setLoading] = useState(false);
     const [dataLoading, setDataLoading] = useState(false);
     const [errors, setErrors] = useState({});
 
     useEffect(() => {
-        const fetchDepartments = async () => {
+        const fetchprograms = async () => {
             if (!show) return;
             
             try {
                 setDataLoading(true);
-                const response = await axios.get("/api/departments/list");
-                setDepartments(response.data);
+                const response = await axios.get("/api/programs/list");
+                setprograms(response.data);
             } catch (error) {
-                console.error("Error fetching departments:", error);
-                toast.error("Failed to load departments");
+                console.error("Error fetching programs:", error);
+                toast.error("Failed to load programs");
             } finally {
                 setDataLoading(false);
             }
         };
 
         if (show) {
-            fetchDepartments();
+            fetchprograms();
             setFormData({
                 name: "",
                 email: "",
                 role: "",
-                departments: "",
+                programs: "",
             });
             setErrors({});
         }
@@ -66,7 +66,7 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
             newErrors.email = "Valid email is required";
         }
         if (!formData.role) newErrors.role = "Role is required";
-        if (!formData.departments) newErrors.departments = "Department is required";
+        if (!formData.programs) newErrors.programs = "Department is required";
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -88,7 +88,7 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
                 role: formData.role,
                 password: "password", // dummy password
                 password_confirmation: "password", // dummy password
-                departments: formData.departments,
+                programs: formData.programs,
             });
             
             toast.success("User created successfully! Login credentials have been sent to the user's email.");
@@ -181,25 +181,25 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
                             {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
                         </div>
                         <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="departments">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="programs">
                                 Department*
                             </label>
                             <select
-                                id="departments"
-                                name="departments"
-                                value={formData.departments}
+                                id="programs"
+                                name="programs"
+                                value={formData.programs}
                                 onChange={handleChange}
-                                className={`w-full border p-2 rounded ${errors.departments ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full border p-2 rounded ${errors.programs ? 'border-red-500' : 'border-gray-300'}`}
                                 disabled={loading}
                             >
                                 <option value="">Select a department</option>
-                                {departments.map((dept) => (
+                                {programs.map((dept) => (
                                     <option key={dept.id} value={dept.id}>
                                         {dept.name} ({dept.code})
                                     </option>
                                 ))}
                             </select>
-                            {errors.departments && <p className="text-red-500 text-xs mt-1">{errors.departments}</p>}
+                            {errors.programs && <p className="text-red-500 text-xs mt-1">{errors.programs}</p>}
                         </div>
                         <div className="flex justify-end mt-6">
                             <button

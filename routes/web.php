@@ -9,7 +9,7 @@ use App\Http\Controllers\SelfSurveyController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\DepartmentController;
+use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Routing\FiltersControllerMiddleware;
@@ -60,9 +60,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'all']);
         Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
         Route::post('/assign-task', [TaskController::class, 'assignTask']);
-        Route::get('/departments', function () {
-            return Inertia::render('Admin/Departments');
-        })->name('departments');
+        Route::get('/programs', function () {
+            return Inertia::render('Admin/Programs');
+        })->name('programs');
         Route::get('/assignTask', function () {
             return Inertia::render('Admin/TaskAssignmentPage');
         })->name('assignTask');
@@ -169,15 +169,17 @@ Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
 
 Route::middleware('auth')->get('/userID', [UserController::class, 'getUserId']);
 
-//DEPARTMENT API
-Route::apiResource('department', DepartmentController::class);
-Route::get('fetchData', [DepartmentController::class, 'fetchData'])->name('fetchDepartment');
-Route::prefix('department')->group(function () {
-    Route::get('/{department}', [DepartmentController::class, 'show']);
-    Route::put('/{department}', [DepartmentController::class, 'update']);
-    Route::delete('/{department}', [DepartmentController::class, 'destroy']);
-    Route::post('/{department}/schedule', [DepartmentController::class, 'updateSchedule']);
+//program API
+Route::apiResource('program', ProgramController::class);
+Route::get('fetchProgram', [ProgramController::class, 'fetchProgram'])->name('fetchProgram');
+Route::prefix('program')->group(function () {
+    Route::post('/add', [ProgramController::class, 'programAdd']); // Dedicated add endpoint
+    Route::get('/{program}', [ProgramController::class, 'show']);
+    Route::put('/{program}', [ProgramController::class, 'update']);
+    Route::delete('/{program}', [ProgramController::class, 'destroy']);
+    Route::post('/{program}/schedule', [ProgramController::class, 'updateSchedule']);
 });
+
 //API FOR USERS
 Route::get('getUser', [AdminController::class, 'getUser'])->name('getUser');
 
@@ -229,11 +231,11 @@ Route::middleware('auth')->group(function () {
 
 });
 
-Route::get('/select-department', [DepartmentController::class, 'selectDepartment'])->name('select-department');
-Route::post('/set-department', [DepartmentController::class, 'setDepartment'])->name('set-department');
+Route::get('/select-program', [ProgramController::class, 'selectprogram'])->name('select-program');
+Route::post('/set-program', [ProgramController::class, 'setprogram'])->name('set-program');
 
 // API routes
-Route::get('/departmentsTB', [DepartmentController::class, 'index']);
+Route::get('/programsTB', [ProgramController::class, 'index']);
 
 //selfsurvey
 // New routes for self-surveys and areas
@@ -257,7 +259,7 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
 // This route is used by both admin and non-admin pages
 Route::middleware(['auth'])->group(function () {
-    Route::get('/api/departments/list', [DepartmentController::class, 'listAll']);
+    Route::get('/api/programs/list', [ProgramController::class, 'listAll']);
 });
 
 Route::middleware(['auth'])->group(function() {

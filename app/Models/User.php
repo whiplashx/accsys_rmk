@@ -24,7 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'departments',
+        'programs',
         'status',
     ];
 
@@ -55,7 +55,7 @@ class User extends Authenticatable
     
     public function department()
     {
-        return $this->belongsTo(Department::class, 'departments', 'id');
+        return $this->belongsTo(Program::class, 'programs', 'id');
     }
 
     // Add a helper method to check if the user is active
