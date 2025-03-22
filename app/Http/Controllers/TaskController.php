@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Indicator;
 use App\Models\Task;
 use App\Models\User;
+use App\Models\SelfSurvey; // Add missing import
 use DB;
 use Illuminate\Http\Request;
 use Log;
@@ -194,21 +195,26 @@ class TaskController extends Controller
         DB::beginTransaction();
         try {
             foreach ($request->tasks as $taskData) {
+                // Create the task with consistent field names
                 $task = Task::create([
-                    'indicator_id' => $taskData['indicator_id'],
-                    'user_id' => $taskData['user_id'],
                     'title' => $taskData['title'],
                     'description' => $taskData['description'],
+                    'assignee' => $taskData['user_id'], // Make sure this matches your assignTask method
+                    'status' => 'pending',
                     'program_id' => $taskData['program_id'],
-                    'status' => 'pending'
                 ]);
 
-                // Create a corresponding empty self survey for this task
-                SelfSurvey::create([
-                    'task_id' => $task->id,
-                    'rating' => null,
-                    'remarks' => null,
-                ]);
+                // Link the indicator to this task
+                $indicator = Indicator::findOrFail($taskData['indicator_id']);
+                $indicator->update(['task' => $task->id]);
+
+                // If you have a SelfSurvey model and table, create the record
+                // Uncomment this if needed and make sure the model exists
+                // SelfSurvey::create([
+                //     'task_id' => $task->id,
+                //     'rating' => null,
+                //     'remarks' => null,
+                // ]);
 
                 $createdTasks[] = $task;
             }
@@ -220,6 +226,7 @@ class TaskController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
+            Log::error('Bulk task assignment error: ' . $e->getMessage());
             return response()->json([
                 'message' => 'Failed to assign tasks: ' . $e->getMessage()
             ], 500);

@@ -14,6 +14,7 @@ class Task extends Model
         'description', 
         'assignee', 
         'status',
+        'program_id',
         'selfsurvey_rating',
         'indicator_id', 
         'created_at', 
