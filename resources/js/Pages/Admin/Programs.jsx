@@ -90,6 +90,9 @@ export default function programs() {
             setScheduleData({ start_date: "", end_date: "" });
             setSelectedProgram(null);
             toast.success("Schedule updated successfully");
+            
+            // Update user statuses after schedule change
+            updateUserStatuses();
         })
         .catch(error => {
             setIsLoading(false);
@@ -103,6 +106,19 @@ export default function programs() {
                 toast.error("Failed to update schedule");
             }
         });
+    };
+    
+    // Add a new function to update user statuses
+    const updateUserStatuses = () => {
+        axios.get('/api/user-management/update-statuses')
+            .then(response => {
+                if (response.data.updated_count > 0) {
+                    toast.info(`${response.data.updated_count} user statuses updated based on program schedules`);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating user statuses:', error);
+            });
     };
     
     // New functions for CRUD operations

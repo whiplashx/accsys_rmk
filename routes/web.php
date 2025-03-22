@@ -255,6 +255,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::put('/api/user-management/users/{id}', [UserController::class, 'updateUser']);
     Route::post('/api/user-management/users', [UserController::class, 'createUser']);
     Route::post('/api/user-management/users/{id}/delete', [UserController::class, 'deleteUser']);
+    
+    // Update user statuses based on program schedules
+    Route::get('/api/user-management/update-statuses', [UserController::class, 'updateUserStatuses']);
 });
 
 // This route is used by both admin and non-admin pages

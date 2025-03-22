@@ -12,8 +12,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Check and update user status every minute
-        $schedule->command('users:update-status')->everyMinute();
+        // Run daily at midnight to update user statuses based on program schedules
+        $schedule->command('users:update-statuses')->daily();
     }
 
     /**

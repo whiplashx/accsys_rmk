@@ -129,13 +129,31 @@ class UserController extends Controller
         // Generate a random password
         $password = Str::random(10);
         
+        // Check program schedule to determine initial status
+        $program = Program::find($validated['program_id']);
+        $status = 'inactive';
+        
+        if ($program) {
+            $now = now();
+            $startDate = $program->schedule_start ?: $program->schedule;
+            $endDate = $program->schedule_end;
+            
+            if ($startDate && $endDate) {
+                if ($now >= $startDate && $now <= $endDate) {
+                    $status = 'active';
+                }
+            } elseif ($startDate && $now >= $startDate) {
+                $status = 'active';
+            }
+        }
+        
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
             'program_id' => $validated['program_id'],
             'password' => Hash::make($password),
-            'status' => 'active',
+            'status' => $status,
         ]);
 
         $role = Role::findByName($request->role);
@@ -147,6 +165,62 @@ class UserController extends Controller
         event(new Registered($user));
 
         return redirect(route('accounts'));
+    }
+    
+    /**
+     * Update all user statuses based on their program schedules
+     */
+    public function updateUserStatuses()
+    {
+        try {
+            $users = User::whereNotNull('program_id')->get();
+            $updated = 0;
+            
+            foreach ($users as $user) {
+                // Skip admin users (they don't depend on program schedules)
+                if ($user->role === 'admin') {
+                    continue;
+                }
+                
+                $program = Program::find($user->program_id);
+                
+                if (!$program) {
+                    continue;
+                }
+                
+                $now = now();
+                $startDate = $program->schedule_start ?: $program->schedule;
+                $endDate = $program->schedule_end;
+                $newStatus = 'inactive';
+                
+                // Check if current date is within program schedule
+                if ($startDate && $endDate) {
+                    if ($now >= $startDate && $now <= $endDate) {
+                        $newStatus = 'active';
+                    }
+                } elseif ($startDate && $now >= $startDate) {
+                    $newStatus = 'active';
+                }
+                
+                // Only update if status actually changed
+                if ($user->status !== $newStatus) {
+                    $user->status = $newStatus;
+                    $user->save();
+                    $updated++;
+                }
+            }
+            
+            return response()->json([
+                'message' => 'User statuses updated successfully',
+                'updated_count' => $updated
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error updating user statuses',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
 

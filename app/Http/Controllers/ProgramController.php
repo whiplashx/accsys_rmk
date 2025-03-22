@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Program;
+use App\Http\Controllers\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -69,22 +70,33 @@ class ProgramController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * Update program schedule and update user statuses
+     */
     public function updateSchedule(Request $request, Program $program)
     {
+        // Validate the incoming request
         $validator = Validator::make($request->all(), [
             'schedule_start' => 'required|date',
             'schedule_end' => 'required|date|after:schedule_start',
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json([
+                'message' => 'Validation error',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
+        // Update program schedule
         $program->schedule_start = $request->schedule_start;
         $program->schedule_end = $request->schedule_end;
-        // Keep backward compatibility with old schedule
-        $program->schedule = $request->schedule_start;
+        $program->schedule = $request->schedule_start; // Maintain backward compatibility
         $program->save();
+
+        // Update user statuses based on new schedule
+        $userController = new UserController();
+        $userController->updateUserStatuses();
 
         return response()->json($program);
     }
