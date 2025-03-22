@@ -79,5 +79,43 @@ class AccreditationController extends Controller
         $indicator->delete();
         return response()->json(null, 204);
     }
+
+    /**
+     * Get parameters for a specific area
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getParameters(Request $request)
+    {
+        $request->validate([
+            'area_id' => 'required|exists:areas,id',
+        ]);
+
+        $parameters = \App\Models\Parameter::where('area_id', $request->area_id)
+            ->orderBy('id')
+            ->get();
+        
+        return response()->json($parameters);
+    }
+
+    /**
+     * Get indicators for a specific parameter
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function getIndicators(Request $request)
+    {
+        $request->validate([
+            'parameter_id' => 'required|exists:parameters,id',
+        ]);
+
+        $indicators = \App\Models\Indicator::where('parameter_id', $request->parameter_id)
+            ->orderBy('id')
+            ->get();
+        
+        return response()->json($indicators);
+    }
 }
 

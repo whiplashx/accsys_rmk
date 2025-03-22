@@ -60,6 +60,8 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/parameters/{parameter}/indicators', [IndicatorController::class, 'all']);
         Route::get('/users/localtaskforce', [AdminController::class, 'getLocalTaskForceUsers']);
         Route::post('/assign-task', [TaskController::class, 'assignTask']);
+        Route::post('/tasks/assign', [TaskController::class, 'assignTask']); // Alternative endpoint
+        Route::post('/tasks/bulk-assign', [TaskController::class, 'bulkAssignTasks']); // New bulk assignment endpoint
         Route::get('/programs', function () {
             return Inertia::render('Admin/Programs');
         })->name('programs');
@@ -218,6 +220,9 @@ Route::delete('/areasTB/{id}', [AccreditationController::class, 'deleteArea']);
 Route::delete('/parametersTB/{id}', [AccreditationController::class, 'deleteParameter']);
 Route::delete('/indicatorsTB/{id}', [AccreditationController::class, 'deleteIndicator']);
 
+// Add these GET routes for parameters and indicators
+Route::get('/parametersTB', [AccreditationController::class, 'getParameters']);
+Route::get('/indicatorsTB', [AccreditationController::class, 'getIndicators']);
 
 //Route::get('/team-members', [::class, 'index']);
 Route::get('assigned-tasks', [TaskController::class, 'fetchAssignedTasks']);

@@ -171,5 +171,59 @@ class TaskController extends Controller
             return response()->json(['error' => 'Failed to fetch tasks'], 500);
         }
     }
+
+    /**
+     * Bulk assign tasks to a user
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function bulkAssignTasks(Request $request)
+    {
+        $request->validate([
+            'tasks' => 'required|array',
+            'tasks.*.indicator_id' => 'required|exists:indicators,id',
+            'tasks.*.user_id' => 'required|exists:users,id',
+            'tasks.*.title' => 'required|string|max:255',
+            'tasks.*.description' => 'required|string',
+            'tasks.*.program_id' => 'required|exists:programs,id',
+        ]);
+
+        $createdTasks = [];
+
+        DB::beginTransaction();
+        try {
+            foreach ($request->tasks as $taskData) {
+                $task = Task::create([
+                    'indicator_id' => $taskData['indicator_id'],
+                    'user_id' => $taskData['user_id'],
+                    'title' => $taskData['title'],
+                    'description' => $taskData['description'],
+                    'program_id' => $taskData['program_id'],
+                    'status' => 'pending'
+                ]);
+
+                // Create a corresponding empty self survey for this task
+                SelfSurvey::create([
+                    'task_id' => $task->id,
+                    'rating' => null,
+                    'remarks' => null,
+                ]);
+
+                $createdTasks[] = $task;
+            }
+
+            DB::commit();
+            return response()->json([
+                'message' => count($createdTasks) . ' tasks assigned successfully',
+                'tasks' => $createdTasks
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to assign tasks: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
