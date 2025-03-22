@@ -69,7 +69,7 @@ export default function UserManagement() {
             
             const response = await axios.put(`/api/user-management/users/${id}`, { 
                 name, 
-                programs: programs.toString(),
+                program_id: programs.toString(), // Changed from programs_id to program_id
                 status: status // Send the string status value
             });
             
@@ -143,7 +143,7 @@ export default function UserManagement() {
         },
         {
             key: "programs",
-            label: "Department",
+            label: "Programs",
             render: (item) => editRowId === item.id ? (
                 <select
                     value={editedData.programs || ""}

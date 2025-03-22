@@ -11,7 +11,6 @@ return new class extends Migration
      */
     public function up()
     {
-  
         Schema::create('programs', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
             $table->string('name'); // Department name
@@ -25,6 +24,7 @@ return new class extends Migration
             //$table->foreign('areaID')->references('id')->on('areas')->onDelete('set null');
         });
     }
+    
     /**
      * Reverse the migrations.
      *

@@ -123,7 +123,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'role' => 'required|string|in:admin,localtaskforce,localaccreditor',
-            'programs' => 'required|exists:programs,id',
+            'program_id' => 'required|exists:programs,id',
         ]);
         
         // Generate a random password
@@ -133,7 +133,7 @@ class UserController extends Controller
             'name' => $validated['name'],
             'email' => $validated['email'],
             'role' => $validated['role'],
-            'programs' => $validated['programs'],
+            'program_id' => $validated['program_id'],
             'password' => Hash::make($password),
             'status' => 'active',
         ]);

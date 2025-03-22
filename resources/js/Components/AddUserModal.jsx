@@ -8,7 +8,7 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
         name: "",
         email: "",
         role: "",
-        programs: "",
+        program_id: "", // Changed from programs to program_id
     });
     const [programs, setprograms] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -37,7 +37,7 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
                 name: "",
                 email: "",
                 role: "",
-                programs: "",
+                program_id: "", // Changed from programs to program_id
             });
             setErrors({});
         }
@@ -66,7 +66,7 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
             newErrors.email = "Valid email is required";
         }
         if (!formData.role) newErrors.role = "Role is required";
-        if (!formData.programs) newErrors.programs = "Department is required";
+        if (!formData.program_id) newErrors.program_id = "Department is required"; // Changed from programs to program_id
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -88,7 +88,7 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
                 role: formData.role,
                 password: "password", // dummy password
                 password_confirmation: "password", // dummy password
-                programs: formData.programs,
+                program_id: formData.program_id, // Changed from programs to program_id
             });
             
             toast.success("User created successfully! Login credentials have been sent to the user's email.");
@@ -181,25 +181,25 @@ export default function AddUserModal({ show, handleClose, onSuccess }) {
                             {errors.role && <p className="text-red-500 text-xs mt-1">{errors.role}</p>}
                         </div>
                         <div className="mb-4">
-                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="programs">
+                            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="program_id">
                                 Department*
                             </label>
                             <select
-                                id="programs"
-                                name="programs"
-                                value={formData.programs}
+                                id="program_id"
+                                name="program_id"
+                                value={formData.program_id}
                                 onChange={handleChange}
-                                className={`w-full border p-2 rounded ${errors.programs ? 'border-red-500' : 'border-gray-300'}`}
+                                className={`w-full border p-2 rounded ${errors.program_id ? 'border-red-500' : 'border-gray-300'}`}
                                 disabled={loading}
                             >
                                 <option value="">Select a department</option>
                                 {programs.map((dept) => (
                                     <option key={dept.id} value={dept.id}>
-                                        {dept.name} ({dept.code})
+                                        {dept.name} ({dept.college})
                                     </option>
                                 ))}
                             </select>
-                            {errors.programs && <p className="text-red-500 text-xs mt-1">{errors.programs}</p>}
+                            {errors.program_id && <p className="text-red-500 text-xs mt-1">{errors.program_id}</p>}
                         </div>
                         <div className="flex justify-end mt-6">
                             <button

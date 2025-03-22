@@ -24,7 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
-        'programs',
+        'program_id', // Make sure this is program_id, not programs
         'status',
     ];
 
@@ -55,7 +55,7 @@ class User extends Authenticatable
     
     public function department()
     {
-        return $this->belongsTo(Program::class, 'programs', 'id');
+        return $this->belongsTo(Program::class, 'program_id', 'id'); // Changed from 'programs' to 'program_id'
     }
 
     // Add a helper method to check if the user is active

@@ -15,16 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             //$table->unsignedBigInteger('programs')->nullable();
-           //$table->foreignId('programs')->constrained('programs')->onDelete('cascade');
+            $table->foreignId('program_id')->constrained('programs')->onDelete('cascade');
             $table->string('role');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->string('status')->default('inactive')->nullable(); // Adding status column with a default value
-            $table->timestamp('valid_until')->nullable(); // Adding valid_until column
+            $table->string('status')->default('inactive'); // Status will be updated based on program schedule
             $table->rememberToken();
             $table->timestamps();
-            
+            // Removed valid_until as status will now be determined by program schedule
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
