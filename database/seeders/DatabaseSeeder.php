@@ -15,7 +15,6 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-
         $this->call([
             AreaSeeder::class,
             ParameterSeeder::class,
@@ -23,7 +22,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             AdminSeeder::class,
             ProgramsSeeder::class,
-            
+            AreasTableSeeder::class,
         ]);
     }
 }

@@ -2,23 +2,40 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use App\Models\Area;
 use App\Models\Parameter;
 use App\Models\Indicator;
-use Illuminate\Http\Request;
 
 class AccreditationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $areas = Area::with('parameters.indicators')->get();
+        $programId = $request->query('program_id');
+
+        $query = Area::with(['parameters.indicators']);
+
+        if ($programId) {
+            $query->where('program_id', $programId);
+        }
+
+        $areas = $query->get();
+        
         return response()->json($areas);
     }
 
     public function addArea(Request $request)
     {
-        $request->validate(['name' => 'required|string|max:255']);
-        $area = Area::create($request->all());
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'program_id' => 'required|exists:programs,id',
+        ]);
+
+        $area = Area::create([
+            'name' => $validated['name'],
+            'program_id' => $validated['program_id'],
+        ]);
+
         return response()->json($area, 201);
     }
 

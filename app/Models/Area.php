@@ -9,11 +9,21 @@ class Area extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $table = 'areas';
+
+    protected $fillable = [
+        'name',
+        'program_id'
+    ];
 
     public function parameters()
     {
         return $this->hasMany(Parameter::class);
+    }
+
+    public function program()
+    {
+        return $this->belongsTo(Program::class);
     }
 }
 

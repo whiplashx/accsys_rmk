@@ -6,6 +6,8 @@ import Modal from './Modal';
 
 const AccreditationAreasPage = () => {
   const [areas, setAreas] = useState([]);
+  const [programs, setPrograms] = useState([]);
+  const [selectedProgramId, setSelectedProgramId] = useState('');
   const [newAreaName, setNewAreaName] = useState('');
   const [newParameterName, setNewParameterName] = useState('');
   const [newIndicatorDescription, setNewIndicatorDescription] = useState('');
@@ -16,12 +18,37 @@ const AccreditationAreasPage = () => {
   const [selectedParameter, setSelectedParameter] = useState(null);
 
   useEffect(() => {
-    fetchAreas();
+    fetchPrograms();
   }, []);
 
-  const fetchAreas = async () => {
+  useEffect(() => {
+    if (selectedProgramId) {
+      fetchAreas();
+    } else {
+      setAreas([]);
+      setLoading(false);
+    }
+  }, [selectedProgramId]);
+
+  const fetchPrograms = async () => {
     try {
-      const response = await axios.get('/areasTB');
+      const response = await axios.get('/api/programs/list');
+      setPrograms(response.data);
+      if (response.data.length > 0) {
+        setSelectedProgramId(response.data[0].id);
+      }
+    } catch (error) {
+      console.error('Error fetching programs:', error);
+      toast.error('Failed to fetch programs');
+    }
+  };
+
+  const fetchAreas = async () => {
+    if (!selectedProgramId) return;
+    
+    try {
+      setLoading(true);
+      const response = await axios.get(`/areasTB?program_id=${selectedProgramId}`);
       setAreas(response.data);
       setLoading(false);
     } catch (error) {
@@ -32,13 +59,21 @@ const AccreditationAreasPage = () => {
   };
 
   const addArea = async () => {
+    if (!selectedProgramId) {
+      toast.error('Please select a program first');
+      return;
+    }
+    
     if (!newAreaName.trim()) {
       toast.error('Area name cannot be empty');
       return;
     }
     
     try {
-      const response = await axios.post('/areasTB', { name: newAreaName });
+      const response = await axios.post('/areasTB', { 
+        name: newAreaName,
+        program_id: selectedProgramId 
+      });
       setAreas([...areas, { ...response.data, parameters: [] }]);
       setNewAreaName('');
       toast.success('Area added successfully');
@@ -187,6 +222,10 @@ const AccreditationAreasPage = () => {
 
   const toLetter = (num) => String.fromCharCode(64 + num);
 
+  const handleProgramChange = (e) => {
+    setSelectedProgramId(e.target.value);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-100">
@@ -213,12 +252,39 @@ const AccreditationAreasPage = () => {
           </button>
         </div>
         
-        {areas.length === 0 ? (
+        {/* Program Selection Dropdown */}
+        <div className="mb-6 bg-white p-4 rounded-lg shadow-sm">
+          <label htmlFor="program-select" className="block text-sm font-medium text-slate-700 mb-2">
+            Select Program
+          </label>
+          <select
+            id="program-select"
+            value={selectedProgramId}
+            onChange={handleProgramChange}
+            className="w-full md:w-1/2 p-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-slate-500"
+          >
+            <option value="">-- Select a Program --</option>
+            {programs.map(program => (
+              <option key={program.id} value={program.id}>
+                {program.name} ({program.college})
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        {!selectedProgramId ? (
+          <div className="bg-white rounded-lg shadow-lg p-8 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p className="mt-4 text-slate-600 text-lg">Please select a program to view its accreditation areas.</p>
+          </div>
+        ) : areas.length === 0 ? (
           <div className="bg-white rounded-lg shadow-lg p-8 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            <p className="mt-4 text-slate-600 text-lg">No areas found. Click the "Add Area" button to create your first accreditation area.</p>
+            <p className="mt-4 text-slate-600 text-lg">No areas found for this program. Click the "Add Area" button to create your first accreditation area.</p>
           </div>
         ) : (
           <div className="space-y-6">
@@ -265,7 +331,7 @@ const AccreditationAreasPage = () => {
                           <div className="p-4 border-b border-slate-100">
                             <div className="flex justify-between items-center">
                               <h4 className="text-lg font-medium text-slate-700">
-                                Parameter {toLetter(paramIndex + 1)}: {parameter.name}
+                                 {parameter.name}
                               </h4>
                               <div className="flex items-center space-x-2">
                                 <button
@@ -301,7 +367,7 @@ const AccreditationAreasPage = () => {
                                 <li key={indicator.id} className="p-3 hover:bg-slate-50 transition-colors">
                                   <div className="flex justify-between items-center">
                                     <div className="flex items-start">
-                                      <span className="text-slate-500 mr-2 font-medium">{indIndex + 1}.</span>
+                                      
                                       <span className="text-slate-700">{indicator.description}</span>
                                     </div>
                                     <button
@@ -341,6 +407,15 @@ const AccreditationAreasPage = () => {
         >
           {modalType === 'area' && (
             <div className="space-y-4">
+              {selectedProgramId ? (
+                <div className="text-sm text-slate-500 mb-2">
+                  Adding area to: {programs.find(p => p.id == selectedProgramId)?.name} ({programs.find(p => p.id == selectedProgramId)?.college})
+                </div>
+              ) : (
+                <div className="text-sm text-red-500 mb-2">
+                  Please select a program first
+                </div>
+              )}
               <div>
                 <label htmlFor="areaName" className="block text-sm font-medium text-slate-700 mb-1">Area Name</label>
                 <input
@@ -361,9 +436,9 @@ const AccreditationAreasPage = () => {
                 </button>
                 <button
                   onClick={addArea}
-                  disabled={!newAreaName.trim()}
+                  disabled={!newAreaName.trim() || !selectedProgramId}
                   className={`px-4 py-2 rounded-md text-white transition-colors ${
-                    newAreaName.trim() ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-400 cursor-not-allowed'
+                    newAreaName.trim() && selectedProgramId ? 'bg-slate-700 hover:bg-slate-600' : 'bg-slate-400 cursor-not-allowed'
                   }`}
                 >
                   Add Area

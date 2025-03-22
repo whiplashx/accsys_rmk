@@ -27,16 +27,15 @@ class ProgramsSeeder extends Seeder
             $hasSchedule = rand(0, 1) === 1;
             $now = Carbon::now();
             
-            $scheduleStart = $hasSchedule ? $now->copy()->addDays(rand(-5, 30)) : null;
-            $scheduleEnd = $scheduleStart ? $scheduleStart->copy()->addDays(rand(5, 60)) : null;
+
             
             Program::create([
                 'name' => $dept['name'],
                 'college' => $dept['college'],
                 // 'areaID' => $areas->random()->id,
-                'schedule' => $scheduleStart ? $scheduleStart->toDateTimeString() : null,
-                'schedule_start' => $scheduleStart ? $scheduleStart->toDateTimeString() : null,
-                'schedule_end' => $scheduleEnd ? $scheduleEnd->toDateTimeString() : null,
+                'schedule' => null,
+                'schedule_start' => null,
+                'schedule_end' => null,
             ]);
         }
     }

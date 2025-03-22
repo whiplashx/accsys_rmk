@@ -31,6 +31,7 @@ class AdminSeeder extends Seeder
             'email' => 'lwhip91@gmail.com',
             'program_id' => $program->id,
             'role' => 'admin',
+            'status' => 'active',
             'password' => Hash::make('password'), // Hash the password
         ]);
         $user->assignRole('admin');
