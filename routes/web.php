@@ -131,10 +131,10 @@ Route::middleware(['auth', 'role:localtaskforce'])
         // Route::delete('/task-documents/{taskDocument}', [LocalTaskForceController::class, 'removeTaskDocument']);
         //Route::post('/tasks/{task}/update-document', [LocalTaskForceController::class, 'updateTaskDocument']);
         // Route::post('/self-surveys', [SelfSurveyController::class, 'store']);
+
         Route::get('/user', function (Request $request) {
             return $request->user();
         });
-        
         // Add the missing selfsurvey route for localtaskforce
         Route::get('/selfsurveyLTF', function () {
             return Inertia::render('LocalTaskForce/Selfsurvey');
