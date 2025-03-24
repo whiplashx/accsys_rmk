@@ -47,19 +47,10 @@ export default function UserManagement() {
 
     const handleSave = async (id) => {
         const originalData = userData.find(user => user.id === id);
-        const { name, programs, status } = editedData;
+        const { status } = editedData;
 
-        if (!name || !programs) {
-            toast.error("Name and department are required fields.");
-            return;
-        }
-
-        // Check if anything has changed, including status
-        if (
-            name === originalData.name && 
-            programs === originalData.programs &&
-            status === originalData.status
-        ) {
+        // Check if status has changed
+        if (status === originalData.status) {
             setEditRowId(null);
             return;
         }
@@ -68,9 +59,7 @@ export default function UserManagement() {
             setLoading(true);
             
             const response = await axios.put(`/api/user-management/users/${id}`, { 
-                name, 
-                program_id: programs.toString(), // Changed from programs_id to program_id
-                status: status // Send the string status value
+                status: status // Only send the status value
             });
             
             setUserData(prevData =>
@@ -78,7 +67,7 @@ export default function UserManagement() {
                     user.id === id ? { ...user, ...response.data } : user
                 )
             );
-            toast.success("User updated successfully!");
+            toast.success("User status updated successfully!");
         } catch (error) {
             console.error("Error updating user:", error);
             
@@ -127,35 +116,17 @@ export default function UserManagement() {
         {
             key: "name",
             label: "Name",
-            render: (item) => editRowId === item.id ? (
-                <input
-                    type="text"
-                    value={editedData.name || ""}
-                    onChange={(e) => handleInputChange("name", e.target.value)}
-                    className="border p-1 rounded"
-                />
-            ) : item.name,
+            render: (item) => item.name, // Made read-only
         },
         {
             key: "role",
             label: "Role",
-            render: (item) => item.role, // Role is now read-only even in edit mode
+            render: (item) => item.role, // Role is read-only
         },
         {
             key: "programs",
             label: "Programs",
-            render: (item) => editRowId === item.id ? (
-                <select
-                    value={editedData.programs || ""}
-                    onChange={(e) => handleInputChange("programs", e.target.value)}
-                    className="w-full border p-1 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                    <option value="" disabled>Select Department</option>
-                    {programs.map(dept => (
-                        <option key={dept.id} value={dept.id}>{`${dept.name} (${dept.code})`}</option>
-                    ))}
-                </select>
-            ) : programs.find(dept => dept.id === item.programs)?.name || "N/A",
+            render: (item) => programs.find(dept => dept.id === item.id)?.name || "N/A", // Made read-only
         },
         { key: "email", label: "Email" },
         {

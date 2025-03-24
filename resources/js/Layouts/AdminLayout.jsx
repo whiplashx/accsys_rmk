@@ -7,7 +7,7 @@ import { Link } from "@inertiajs/react";
 const sidebarItems = [
     { icon: "dashboard", label: "Dashboard", href: route("dashboard") },
     { icon: "assignTask", label: "Assign Task", href: route("assignTask") },
-    { icon: "programs", label: "programs", href: route("programs") },
+    { icon: "programs", label: "Programs", href: route("programs") },
     { icon: "accounts", label: "Accounts", href: route("accounts") },
     {
         icon: "accreditation",
@@ -188,7 +188,7 @@ export default function AccreditationLayout({ children }) {
                 } overflow-hidden shadow-lg`}
             >
                 <div className="p-6">
-                    <h2 className="text-2xl font-bold mb-6 text-green-400">
+                    <h2 className="text-2xl font-bold mb-6 text-green-600">
                         Accreditation System
                     </h2>
                     <nav>

@@ -59,9 +59,6 @@ class UserController extends Controller
             
             // Validate the incoming request
             $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'role' => 'required|string',
-                'programs' => 'required',
                 'status' => 'required|string|in:active,inactive',
             ]);
             
@@ -72,10 +69,7 @@ class UserController extends Controller
                 ], 422);
             }
             
-            // Update the user with validated data
-            $user->name = $request->name;
-            $user->role = $request->role;
-            $user->programs = $request->programs;
+
             $user->status = $request->status;
             $user->save();
             
