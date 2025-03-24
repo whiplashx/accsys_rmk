@@ -14,6 +14,10 @@ const SelfSurveyForm = () => {
   const parametersPerPage = 2
   const [error, setError] = useState(null)
 
+  // Add program state
+  const [programs, setPrograms] = useState([])
+  const [selectedProgramId, setSelectedProgramId] = useState("")
+  
   // New state for export functionality
   const [selectedAreasForExport, setSelectedAreasForExport] = useState({})
   const [showExportOptions, setShowExportOptions] = useState(false)
@@ -23,8 +27,15 @@ const SelfSurveyForm = () => {
   const [exportLoading, setExportLoading] = useState(false)
 
   useEffect(() => {
-    fetchAreas()
+    fetchPrograms() // Only fetch programs on initial load
   }, [])
+
+  // Update useEffect to call fetchAreas when selectedProgramId changes
+  useEffect(() => {
+    if (selectedProgramId) {
+      fetchAreas(selectedProgramId)
+    }
+  }, [selectedProgramId])
 
   useEffect(() => {
     // Initialize selected areas for export when areas are loaded
@@ -37,16 +48,19 @@ const SelfSurveyForm = () => {
     }
   }, [areas])
 
-  const fetchAreas = async () => {
+  const fetchAreas = async (programId) => {
     try {
       setLoading(true)
       setError(null)
-      const response = await axios.get("/areasTB")
+      const response = await axios.get(`/areasTB?program_id=${programId}`)
       if (response.data && response.data.length > 0) {
         setAreas(response.data)
         setSelectedArea(response.data[0])
       } else {
-        setError("No areas found. Please contact your administrator.")
+        // Don't set an error for empty areas, just clear the arrays
+        setAreas([])
+        setSelectedArea(null)
+        // No error message here anymore
       }
       setLoading(false)
     } catch (error) {
@@ -54,6 +68,23 @@ const SelfSurveyForm = () => {
       setError("Failed to fetch areas. Please try again later.")
       toast.error("Failed to fetch areas")
       setLoading(false)
+    }
+  }
+
+  const fetchPrograms = async () => {
+    try {
+      const response = await axios.get("/programsTB")
+      if (response.data && response.data.length > 0) {
+        setPrograms(response.data)
+        setSelectedProgramId(response.data[0].id) // Select first program by default
+        // fetchAreas will be called by the useEffect when selectedProgramId changes
+      } else {
+        setError("No programs found. Please contact your administrator.")
+      }
+    } catch (error) {
+      console.error("Error fetching programs:", error)
+      toast.error("Failed to fetch programs")
+      setError("Failed to fetch programs. Please try again later.")
     }
   }
 
@@ -478,6 +509,28 @@ const SelfSurveyForm = () => {
     }
   }
 
+    const handleProgramChange = (e) => {
+    setSelectedProgramId(e.target.value);
+    setCurrentPage(0); // Reset to first page when changing programs
+  };
+
+  // Update the retry button to use the selected program ID
+  const handleRetry = () => {
+    if (selectedProgramId) {
+      fetchAreas(selectedProgramId);
+    } else {
+      fetchPrograms();
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-100">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-600"></div>
+        <span className="ml-3 text-slate-600 font-medium">Loading...</span>
+      </div>
+    );
+  }
   // Export options modal
   const renderExportOptions = () => {
     if (!showExportOptions) return null
@@ -795,24 +848,13 @@ const SelfSurveyForm = () => {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-slate-100">
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded">
+        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4 rounded max-w-lg">
           <p className="font-bold">Error</p>
           <p>{error}</p>
         </div>
-        <button onClick={fetchAreas} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+        <button onClick={handleRetry} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
           Retry
         </button>
-      </div>
-    )
-  }
-
-  if (!areas.length) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-100">
-        <div className="text-center text-slate-600">
-          <p className="text-xl font-semibold">No areas found</p>
-          <p className="mt-2">Please contact your administrator to set up the self-survey areas.</p>
-        </div>
       </div>
     )
   }
@@ -828,6 +870,7 @@ const SelfSurveyForm = () => {
           <button
             onClick={() => setShowExportOptions(true)}
             className="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-md transition-colors duration-150 ease-in-out shadow-sm"
+            disabled={areas.length === 0}
           >
             <svg
               className="w-5 h-5 mr-2"
@@ -847,29 +890,101 @@ const SelfSurveyForm = () => {
           </button>
         </div>
 
-        {renderAreaButtons()}
-
-        <div id="survey-form-content" className="space-y-8">
-          {renderRatingScale()}
-
-          {selectedArea && (
-            <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold mb-6 text-slate-700 border-b pb-2">
-                Area {toRoman(areas.findIndex((a) => a.id === selectedArea.id) + 1)}: {selectedArea.name}
-              </h2>
-
-              {renderParameters(
-                selectedArea.parameters?.slice(
-                  currentPage * parametersPerPage,
-                  (currentPage + 1) * parametersPerPage,
-                ) || [],
-                currentPage * parametersPerPage,
+        {/* Program Selection Dropdown */}
+        <div className="mb-6 bg-white p-6 rounded-lg shadow-lg">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <label htmlFor="program-select" className="text-lg font-medium text-slate-700 mb-2 md:mb-0">
+              Select Program:
+            </label>
+            <select
+              id="program-select"
+              value={selectedProgramId}
+              onChange={handleProgramChange}
+              className="px-4 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 w-full md:w-1/2 lg:w-1/3"
+            >
+              {programs.length === 0 ? (
+                <option value="">No programs available</option>
+              ) : (
+                programs.map((program) => (
+                  <option key={program.id} value={program.id}>
+                    {program.name} ({program.college})
+                  </option>
+                ))
               )}
-
-              {renderPagination()}
-            </div>
-          )}
+            </select>
+          </div>
         </div>
+
+        {areas.length > 0 ? (
+          <>
+            {renderAreaButtons()}
+
+            <div id="survey-form-content" className="space-y-8">
+              {renderRatingScale()}
+
+              {selectedArea && (
+                <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
+                  <h2 className="text-2xl font-bold mb-6 text-slate-700 border-b pb-2">
+                    Area {toRoman(areas.findIndex((a) => a.id === selectedArea.id) + 1)}: {selectedArea.name}
+                  </h2>
+
+                  {renderParameters(
+                    selectedArea.parameters?.slice(
+                      currentPage * parametersPerPage,
+                      (currentPage + 1) * parametersPerPage,
+                    ) || [],
+                    currentPage * parametersPerPage,
+                  )}
+
+                  {renderPagination()}
+                </div>
+              )}
+            </div>
+          </>
+        ) : !loading && (
+          <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+          
+            <svg 
+              className="w-16 h-16 text-slate-400 mx-auto mb-4" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24" 
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth="2" 
+                d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+            <h3 className="text-xl font-semibold text-slate-700 mb-2">No areas found for this program</h3>
+            <p className="text-slate-600">
+              Please select a different program or contact your administrator to set up areas for this program.
+            </p>
+            {/* Add a helpful button to refresh */}
+            <button 
+              onClick={() => fetchAreas(selectedProgramId)}
+              className="mt-2 inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md"
+            >
+              <svg 
+                className="w-4 h-4 mr-2" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round" 
+                  strokeWidth="2" 
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" 
+                />
+              </svg>
+              Refresh
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
