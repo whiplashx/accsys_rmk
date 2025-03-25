@@ -341,7 +341,7 @@ export default function DocumentViewerPage() {
         <DocumentViewerLayout>
             <Head title={`Viewing: ${taskName || "Document"}`} />
             
-            {/* Document Debug Information - Remove in production */}
+            {/* Document Debug Information - Remove in production }
             {debugInfo && (
                 <div className="mb-4 bg-gray-100 p-4 rounded-lg text-sm">
                     <details>
@@ -358,6 +358,7 @@ export default function DocumentViewerPage() {
                     </details>
                 </div>
             )}
+                */}
             
             <div className="space-y-4 md:space-y-6">
                 {/* Document info header */}

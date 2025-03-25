@@ -445,7 +445,7 @@ const SelfSurveyForm = ({ areas = [] }) => {
         .save()
         .then(() => {
           toast.dismiss(loadingToast)
-          toast.success("PDF exported successfully!")
+          toast.success("Self-survey exported successfully!")
           setExportLoading(false)
           setShowExportOptions(false)
         })
@@ -475,7 +475,7 @@ const SelfSurveyForm = ({ areas = [] }) => {
           return (
             <div key={parameter.id} className="mb-8 bg-white p-6 rounded-lg shadow-lg">
               <h3 className="text-xl font-semibold mb-4 text-slate-700">
-                Parameter {toLetter(startIndex + paramIndex + 1)}: {parameter.name}
+                {parameter.name}
               </h3>
 
               {!parameter.indicators || parameter.indicators.length === 0 ? (

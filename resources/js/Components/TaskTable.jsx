@@ -56,10 +56,10 @@ const TasksTable = () => {
                   ID
                 </th>
                 <th className="border border-slate-300 p-2 text-center text-lg font-semibold text-slate-700">
-                  Title
+                  Assignee
                 </th>
                 <th className="border border-slate-300 p-2 text-center text-lg font-semibold text-slate-700">
-                  Assignee
+                  Title
                 </th>
                 <th className="border border-slate-300 p-2 text-center text-lg font-semibold text-slate-700">
                   Status
@@ -76,10 +76,10 @@ const TasksTable = () => {
                     {task.id}
                   </td>
                   <td className="border border-slate-300 p-2 text-sm text-slate-600">
-                    {task.title}
+                    {task.assigned_user.name}
                   </td>
                   <td className="border border-slate-300 p-2 text-sm text-slate-600">
-                    {task.assigned_user.name}
+                    {task.title}
                   </td>
                   <td className={`border border-slate-300 p-2 text-sm text-center ${getStatusClass(task.status)}`}>
                     {task.status}
