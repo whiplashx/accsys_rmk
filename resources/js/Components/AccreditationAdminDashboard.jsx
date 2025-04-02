@@ -38,7 +38,6 @@ const AccreditationAdminDashboard = () => {
     programRatings: {}
   });
   
-  // New state for programs and task progress
   const [programs, setPrograms] = useState([]);
   const [taskProgressData, setTaskProgressData] = useState([]);
 
@@ -47,45 +46,37 @@ const AccreditationAdminDashboard = () => {
       try {
         setLoading(true);
         
-        // Fetch dashboard data
         const dashboardResponse = await axios.get('/dashboard-data');
         setDashboardData(dashboardResponse.data);
         
-        // Fetch program data from the programsTB endpoint
-        const programsResponse = await axios.get('/programsTB');
-        setPrograms(programsResponse.data);
-        
-        // Set first program as selected if available
-        if (programsResponse.data.length > 0) {
-          setSelectedDepartment(programsResponse.data[0]);
+        if (dashboardResponse.data.programs && dashboardResponse.data.programs.length > 0) {
+          setPrograms(dashboardResponse.data.programs);
+          setSelectedDepartment(dashboardResponse.data.programs[0]);
+        } else {
+          const programsResponse = await axios.get('/programsTB');
+          setPrograms(programsResponse.data);
+          
+          if (programsResponse.data.length > 0) {
+            setSelectedDepartment(programsResponse.data[0]);
+          }
         }
 
-        // Calculate ratings from tasks
-        if (dashboardResponse.data.tasks) {
-          const ratings = calculateTaskRatings(dashboardResponse.data.tasks);
-          
-          // Calculate average self-survey rating from tasks
+        if (dashboardResponse.data.tasks && dashboardResponse.data.tasks.length > 0) {
           const avgSelfSurveyRating = calculateSelfSurveyRating(dashboardResponse.data.tasks);
           setSelfSurveyRating(avgSelfSurveyRating);
-          
-          // Process tasks for progress graph
-          const progressData = processTaskProgressData(dashboardResponse.data.tasks);
+        }
+        
+        if (dashboardResponse.data.progressOverTime && dashboardResponse.data.progressOverTime.monthly) {
+          setTaskProgressData(dashboardResponse.data.progressOverTime.monthly);
+        } else {
+          const progressData = processTaskProgressData(dashboardResponse.data.tasks || []);
           setTaskProgressData(progressData);
         }
         
-        // Fetch self-survey ratings data from the dedicated API endpoint
-        const selfSurveyResponse = await axios.get('/api/self-survey-ratings');
-        setSelfSurveyData(selfSurveyResponse.data);
-        
-        // Use the API data for the self-survey rating if available
-        if (selfSurveyResponse.data.averageRating) {
-          setSelfSurveyRating(selfSurveyResponse.data.averageRating);
-        }
-
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setError('Failed to load dashboard data');
+        setError('Failed to load dashboard data. Please try again later.');
         setLoading(false);
       }
     };
@@ -93,22 +84,18 @@ const AccreditationAdminDashboard = () => {
     fetchAllData();
   }, []);
 
-  // Process task data to create monthly progress data
   const processTaskProgressData = (tasks) => {
     if (!tasks || !tasks.length) return [];
 
-    // Get completed tasks from the last 12 months
     const now = new Date();
     const oneYearAgo = new Date(now);
     oneYearAgo.setMonth(now.getMonth() - 12);
 
-    // Filter completed tasks and group by month
     const completedTasks = tasks.filter(task => 
       task.status === 'completed' && 
       new Date(task.completedAt) >= oneYearAgo
     );
 
-    // Group tasks by month
     const tasksByMonth = {};
     completedTasks.forEach(task => {
       const completedDate = new Date(task.completedAt);
@@ -125,10 +112,8 @@ const AccreditationAdminDashboard = () => {
       tasksByMonth[monthKey].count++;
     });
     
-    // Convert to array and calculate progress percentage
     const monthlyData = Object.values(tasksByMonth);
     
-    // Calculate cumulative progress
     let totalTasks = tasks.length;
     let runningTotal = 0;
     
@@ -143,7 +128,6 @@ const AccreditationAdminDashboard = () => {
       });
   };
 
-  // Helper to format month label
   const formatMonthLabel = (dateStr) => {
     const [year, month] = dateStr.split('-');
     const date = new Date(parseInt(year), parseInt(month) - 1);
@@ -163,7 +147,6 @@ const AccreditationAdminDashboard = () => {
     setSelectedProgressPeriod(period);
   };
 
-  // Calculate program status based on schedule
   const getprogramstatus = (program) => {
     if (!program.schedule_start || !program.schedule_end) {
       return 'pending';
@@ -182,8 +165,11 @@ const AccreditationAdminDashboard = () => {
     }
   };
 
-  // Calculate program progress (placeholder logic)
   const getDepartmentProgress = (program) => {
+    if (program && typeof program.progress === 'number') {
+      return program.progress;
+    }
+    
     const status = getprogramstatus(program);
     
     if (status === 'completed') {
@@ -191,10 +177,14 @@ const AccreditationAdminDashboard = () => {
     } else if (status === 'pending') {
       return 0;
     } else {
-      // For in-progress, calculate percentage based on dates
       const now = new Date();
       const startDate = new Date(program.schedule_start);
       const endDate = new Date(program.schedule_end);
+      
+      if (isNaN(startDate) || isNaN(endDate)) {
+        return 0;
+      }
+      
       const totalDuration = endDate - startDate;
       const elapsedDuration = now - startDate;
       
@@ -244,13 +234,11 @@ const AccreditationAdminDashboard = () => {
       ratings.timeliness += task.onTime ? 5 : 0;
     });
 
-    // Calculate averages
     const taskCount = tasks.length;
     Object.keys(ratings).forEach(key => {
       ratings[key] = +(ratings[key] / taskCount).toFixed(1);
     });
 
-    // Calculate overall rating (average of all metrics)
     ratings.overall = +((ratings.complexity + ratings.completion + ratings.quality + ratings.timeliness) / 4).toFixed(1);
 
     return ratings;
@@ -259,34 +247,31 @@ const AccreditationAdminDashboard = () => {
   const calculateSelfSurveyRating = (tasks) => {
     if (!tasks || !tasks.length) return 0;
     
-    // Filter completed tasks with self-survey ratings
-    const completedTasks = tasks.filter(task => 
-      task.status === 'completed' && task.selfSurveyRating !== undefined
+    const tasksWithRatings = tasks.filter(task => 
+      task.status === 'completed' && task.self_survey_rating
     );
     
-    if (!completedTasks.length) return 0;
+    if (!tasksWithRatings.length) return 0;
     
-    // Calculate average self-survey rating
-    const totalRating = completedTasks.reduce((sum, task) => sum + task.selfSurveyRating, 0);
-    return +(totalRating / completedTasks.length).toFixed(1);
+    const totalRating = tasksWithRatings.reduce((sum, task) => 
+      sum + (parseFloat(task.self_survey_rating) || 0), 0);
+      
+    return +(totalRating / tasksWithRatings.length).toFixed(1);
   };
 
   const getProgressChartData = () => {
-    if (taskProgressData.length === 0) {
+    if (!dashboardData.progressOverTime) {
       return [{ date: 'No data', progress: 0 }];
     }
     
     switch (selectedProgressPeriod) {
       case 'daily':
-        // Daily data not implemented, fallback to monthly
-        return taskProgressData;
+        return dashboardData.progressOverTime.daily || [];
       case 'weekly':
-        // Weekly data not implemented, fallback to monthly
-        return taskProgressData;
+        return dashboardData.progressOverTime.weekly || [];
       case 'monthly':
-        return taskProgressData;
       default:
-        return taskProgressData;
+        return dashboardData.progressOverTime.monthly || [];
     }
   };
 
@@ -330,8 +315,6 @@ const AccreditationAdminDashboard = () => {
           <p className='text-gray-500 text-center mb-8'>
             Overall Accreditation System Progress
           </p>
-          
-          {/* Add Department Selector from LocalTaskForceDashboard */}
           
           <div className='mb-6 flex flex-col md:flex-row justify-between items-center gap-4'>
             <div className='relative w-full md:w-auto'>
@@ -394,7 +377,6 @@ const AccreditationAdminDashboard = () => {
             </div>
           </div>
 
-          {/* Progress Overview - Keep existing but update styling to match */}
           {selectedDepartment && (
             <div className='bg-gradient-to-r from-blue-500 to-blue-600 text-white p-4 sm:p-6 rounded-xl mb-6 shadow-md'>
               <div className='flex flex-col md:flex-row items-start md:items-center justify-between mb-4'>
@@ -403,27 +385,27 @@ const AccreditationAdminDashboard = () => {
                   <p className='text-blue-100'>Total Accreditation Progress</p>
                 </div>
                 <div className='mt-4 md:mt-0 flex items-center gap-2'>
-                  <div className='text-5xl font-bold'>{dashboardData.overallProgress}%</div>
+                  <div className='text-5xl font-bold'>{dashboardData.overallProgress || 0}%</div>
                   <ArrowTrendingUpIcon className='h-6 w-6 text-blue-200' />
                 </div>
               </div>
               <div className='w-full bg-blue-300 bg-opacity-30 rounded-full h-4'>
                 <div 
                   className='bg-white h-4 rounded-full transition-all duration-1000 ease-out'
-                  style={{ width: `${dashboardData.overallProgress}%` }}
+                  style={{ width: `${dashboardData.overallProgress || 0}%` }}
                 ></div>
               </div>
             </div>
           )}
 
-          {/* Update Stat Cards to match LocalTaskForceDashboard structure */}
           <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6'>
-            {/* Copy the exact four stat cards from LocalTaskForceDashboard */}
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
                   <p className='text-sm font-medium text-gray-500'>Completed Indicators</p>
-                  <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.completedCriteria}/{dashboardData.totalCriteria}</p>
+                  <p className='text-2xl font-semibold text-gray-800 mt-1'>
+                    {dashboardData.completedCriteria || 0}/{dashboardData.totalCriteria || 0}
+                  </p>
                 </div>
                 <span className='flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600'>
                   <CheckCircleIcon className='h-6 w-6' />
@@ -432,16 +414,16 @@ const AccreditationAdminDashboard = () => {
               <div className='mt-4 w-full bg-gray-200 rounded-full h-1.5'>
                 <div 
                   className='bg-green-500 h-1.5 rounded-full'
-                  style={{ width: `${(dashboardData.completedCriteria / dashboardData.totalCriteria) * 100}%` }}
+                  style={{ width: `${dashboardData.totalCriteria ? 
+                    (dashboardData.completedCriteria / dashboardData.totalCriteria) * 100 : 0}%` }}
                 ></div>
               </div>
             </div>
 
-            {/* Copy the other three stat cards from LocalTaskForceDashboard */}
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm font-medium text-gray-500'>Total Indicatos</p>
+                  <p className='text-sm font-medium text-gray-500'>Total Indicators</p>
                   <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.totalCriteria}</p>
                 </div>
                 <span className='flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600'>
@@ -491,9 +473,7 @@ const AccreditationAdminDashboard = () => {
             </div>
           </div>
 
-          {/* Charts Section - Keep the same structure but update titles */}
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6'>
-            {/* Criteria Completion Chart */}
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'>
               <div className='p-6 border-b border-gray-100'>
                 <h2 className='text-lg font-semibold text-gray-800'>Program Status</h2>
@@ -503,7 +483,7 @@ const AccreditationAdminDashboard = () => {
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={dashboardData.criteriaCompletionData}
+                      data={dashboardData.criteriaCompletionData || []}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -512,7 +492,7 @@ const AccreditationAdminDashboard = () => {
                       dataKey="value"
                       label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                     >
-                      {dashboardData.criteriaCompletionData.map((entry, index) => (
+                      {(dashboardData.criteriaCompletionData || []).map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -523,18 +503,35 @@ const AccreditationAdminDashboard = () => {
               </div>
             </div>
 
-            {/* Updated Progress Over Time Chart with Task Completion Data */}
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden'>
               <div className='p-6 border-b border-gray-100'>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <h2 className='text-lg font-semibold text-gray-800'>Accreditation Progress</h2>
-                    <p className='text-sm text-gray-500'>Based on completed tasks by month</p>
+                    <p className='text-sm text-gray-500'>Based on completed tasks over time</p>
                   </div>
                   <div className='flex gap-2 bg-gray-100 p-1 rounded-lg mt-2 sm:mt-0'>
                     <button
+                      onClick={() => handleProgressPeriodChange('daily')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        selectedProgressPeriod === 'daily' ? 'bg-white shadow-sm text-blue-700 font-medium' : ''
+                      }`}
+                    >
+                      Daily
+                    </button>
+                    <button
+                      onClick={() => handleProgressPeriodChange('weekly')}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        selectedProgressPeriod === 'weekly' ? 'bg-white shadow-sm text-blue-700 font-medium' : ''
+                      }`}
+                    >
+                      Weekly
+                    </button>
+                    <button
                       onClick={() => handleProgressPeriodChange('monthly')}
-                      className={`px-3 py-1 text-xs rounded-md transition-colors bg-white shadow-sm text-blue-700 font-medium`}
+                      className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                        selectedProgressPeriod === 'monthly' ? 'bg-white shadow-sm text-blue-700 font-medium' : ''
+                      }`}
                     >
                       Monthly
                     </button>
@@ -572,9 +569,6 @@ const AccreditationAdminDashboard = () => {
             </div>
           </div>
 
-          
-
-          {/* Programs List - Update to match LocalTaskForceDashboard's criteria list structure */}
           <div className='bg-white border border-gray-100 rounded-lg shadow-sm overflow-hidden'>
             <div className='p-4 border-b border-gray-100'>
               <h2 className='text-lg font-semibold text-gray-800 flex items-center'>
@@ -599,7 +593,7 @@ const AccreditationAdminDashboard = () => {
                 <tbody className='bg-white divide-y divide-gray-200'>
                   {programs.length > 0 ? programs.map((program) => {
                     const status = getprogramstatus(program);
-                    const progress = getDepartmentProgress(program);
+                    const progress = program.progress || getDepartmentProgress(program);
                     
                     return (
                       <tr key={program.id} className='hover:bg-blue-50 cursor-pointer transition-colors'>
@@ -607,7 +601,7 @@ const AccreditationAdminDashboard = () => {
                           <div className='text-sm font-medium text-gray-900'>{program.name || 'N/A'}</div>
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
-                          <div className='text-sm text-gray-500'>{program.college}</div>
+                          <div className='text-sm text-gray-500'>{program.college || 'N/A'}</div>
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
                           {getStatusBadge(status)}

@@ -165,7 +165,10 @@ Route::middleware(['auth', 'role:accreditor'])
     });
 use App\Http\Controllers\DashboardController;
 
-Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
+// Update dashboard data route to be properly authenticated and accessible for all roles
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard-data', [DashboardController::class, 'getDashboardData']);
+});
 
 //get user id
 
