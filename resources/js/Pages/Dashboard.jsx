@@ -50,7 +50,15 @@ export default function Dashboard() {
                         <div className="w-full">
                             <div className="bg-white shadow-sm rounded-lg">
                                 <div className="p-6">
-                                    <AccreditationAdminDashboard />
+                                    <div className="text-center sm:text-left">
+                                        <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome, {user.name}!</h1>
+                                        <p className="text-gray-600 mb-4">Local Accreditor Dashboard</p>
+                                        <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
+                                            <p className="text-md text-blue-700">
+                                                You have access to view and evaluate accreditation materials for your assigned programs.
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -58,7 +66,20 @@ export default function Dashboard() {
                     : (user.role === 'accreditor' ?
                         <AccreditorLayout_>
                             <div className="w-full">
-                                <WelcomeDashboard />
+                                <div className="bg-white shadow-sm rounded-lg">
+                                    <div className="p-6">
+                                        <div className="text-center sm:text-left">
+                                            <h1 className="text-2xl font-bold text-gray-800 mb-2">Welcome, {user.name}!</h1>
+                                            <p className="text-gray-600 mb-4">Accreditor Dashboard</p>
+                                            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-md">
+                                                <p className="text-sm text-blue-700">
+                                                    You're all set to review accreditation materials and provide evaluations.
+                                                    Navigate to your assigned programs to get started.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </AccreditorLayout_>
                         :

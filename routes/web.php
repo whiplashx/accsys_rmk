@@ -397,6 +397,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/tasks', [TaskController::class, 'index']);
 });
 
+// Add this route for authenticated users to get their profile information
+Route::middleware(['auth'])->group(function () {
+    Route::get('/api/user', function (Request $request) {
+        return $request->user();
+    });
+});
+
 
 
 

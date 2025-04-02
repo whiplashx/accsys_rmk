@@ -110,8 +110,8 @@ export default function UserManagement() {
         setEditRowId(null);
         setEditedData({});
     };
-
     const columns = [
+        
         { key: "id", label: "ID" },
         {
             key: "name",
@@ -126,7 +126,10 @@ export default function UserManagement() {
         {
             key: "programs",
             label: "Programs",
-            render: (item) => programs.find(dept => dept.id === item.id)?.name || "N/A", // Made read-only
+            render: (item) => {
+                const program = programs.find(prog => prog.id === item.program_id);
+                return program ? `${program.name} - ${program.college}` : "N/A";
+            },
         },
         { key: "email", label: "Email" },
         {
