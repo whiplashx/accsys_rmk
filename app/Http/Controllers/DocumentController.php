@@ -56,13 +56,24 @@ class DocumentController extends Controller
             abort(404, 'File not found.');
         }
 
+        // Improved security headers for the StreamedResponse
+        $headers = [
+            'Content-Type' => Storage::disk('private')->mimeType($document->path),
+            'Content-Disposition' => 'inline; filename="' . $document->name . '"',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma' => 'no-cache',
+            'Expires' => 'Sat, 01 Jan 1990 00:00:00 GMT',
+            'X-Content-Type-Options' => 'nosniff',
+            'Content-Security-Policy' => "default-src 'self'; script-src 'none'; object-src 'self'; frame-ancestors 'self'",
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'X-Download-Options' => 'noopen',
+            'X-NoDownload' => 'true'
+        ];
+
         return new StreamedResponse(function () use ($document) {
             $stream = Storage::disk('private')->readStream($document->path);
             fpassthru($stream);
-        }, 200, [
-            'Content-Type' => Storage::disk('private')->mimeType($document->path),
-            'Content-Disposition' => 'inline; filename="' . $document->name . '"',
-        ]);
+        }, 200, $headers);
     }
 
     public function getTaskDocument($taskId)
@@ -239,13 +250,20 @@ class DocumentController extends Controller
                 $response = Response::make($file, 200);
                 $response->header("Content-Type", $type);
                 
-                // Disable caching for security
+                // Enhanced security headers to prevent downloading
                 $response->header('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
                 $response->header('Pragma', 'no-cache');
                 $response->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
                 
-                // Discourage downloads
+                // Discourage downloads with strict security headers
                 $response->header('Content-Disposition', 'inline; filename="' . $document->name . '"');
+                $response->header('X-Content-Type-Options', 'nosniff');
+                $response->header('Content-Security-Policy', "default-src 'self'; script-src 'none'; object-src 'self'; frame-ancestors 'self'");
+                $response->header('X-Frame-Options', 'SAMEORIGIN');
+                
+                // Add custom header to indicate no-download policy
+                $response->header('X-Download-Options', 'noopen');
+                $response->header('X-NoDownload', 'true');
                 
                 return $response;
             } catch (\Exception $e) {
