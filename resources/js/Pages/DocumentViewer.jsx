@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import DocumentViewerLayout from '@/Layouts/DocumentViewerLayout';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
+import ReactPDFViewer from '@/Components/ReactPDFViewer';
 
 export default function DocumentViewerPage() {
     const [loading, setLoading] = useState(true);
@@ -18,16 +19,6 @@ export default function DocumentViewerPage() {
     const uploader = queryParams.get('uploader') || 'Unknown';
     const rating = queryParams.get('rating') || 'Not rated';
     
-    // Add a console.log to help debug what parameters are being received
-   /* console.log("Document viewer loaded with parameters:", {
-        documentId,
-        taskName,
-        uploader,
-        rating,
-        fullUrl: window.location.href
-    });
-    */
-    
     // Generate secure document URL using document ID
     const secureDocumentUrl = documentId ? 
         `/secure-document?id=${encodeURIComponent(documentId)}` : 
@@ -37,8 +28,33 @@ export default function DocumentViewerPage() {
     const alternativeDocumentUrl = documentId ? 
         `/alt-document-viewer/${encodeURIComponent(documentId)}` : 
         null;
-    
-    //console.log("Secure document URL:", secureDocumentUrl);
+
+    // Add event listeners to disable right-click and keyboard shortcuts
+    useEffect(() => {
+        // Disable right click on the main document
+        const handleContextMenu = (e) => {
+            e.preventDefault();
+            return false;
+        };
+        
+        // Prevent keyboard shortcuts for saving/printing
+        const handleKeyDown = (e) => {
+            // Prevent Ctrl+S, Ctrl+P, etc.
+            if ((e.ctrlKey || e.metaKey) && 
+                (e.key === 's' || e.key === 'p' || e.key === 'a')) {
+                e.preventDefault();
+                return false;
+            }
+        };
+        
+        document.addEventListener('contextmenu', handleContextMenu);
+        document.addEventListener('keydown', handleKeyDown);
+        
+        return () => {
+            document.removeEventListener('contextmenu', handleContextMenu);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
 
     useEffect(() => {
         if (!documentId) {
@@ -53,10 +69,7 @@ export default function DocumentViewerPage() {
         // Fetch document details
         const fetchDocument = async () => {
             try {
-                //console.log("Fetching document details for ID:", documentId);
                 const response = await axios.get(`/api/documents/${documentId}`);
-                
-                //console.log("API response:", response.data);
                 
                 if (response.data && !response.data.error) {
                     setDocument(response.data);
@@ -65,7 +78,6 @@ export default function DocumentViewerPage() {
                     try {
                         const debugResponse = await axios.get(`/debug-document/${documentId}`);
                         setDebugInfo(debugResponse.data);
-                       // console.log("Debug info:", debugResponse.data);
                     } catch (debugErr) {
                         console.error("Error fetching debug info:", debugErr);
                     }
@@ -74,7 +86,6 @@ export default function DocumentViewerPage() {
                     const filename = response.data.name || '';
                     const extension = filename.split('.').pop().toLowerCase();
                     setDocumentType(extension);
-                   // console.log("Document type detected:", extension);
                 } else {
                     throw new Error(response.data.error || "Document not found");
                 }
@@ -99,7 +110,6 @@ export default function DocumentViewerPage() {
                 try {
                     const debugResponse = await axios.get(`/debug-document/${documentId}`);
                     setDebugInfo(debugResponse.data);
-                   // console.log("Debug info after error:", debugResponse.data);
                 } catch (debugErr) {
                     console.error("Error fetching debug info:", debugErr);
                 }
@@ -109,10 +119,10 @@ export default function DocumentViewerPage() {
         fetchDocument();
     }, [documentId]);
     
-    // Check for iframe load errors that might indicate blocking
+    // Check for iframe load errors that might indicate blocking (only for non-PDF documents)
     useEffect(() => {
-        const checkIframeLoaded = () => {
-            if (iframeRef.current) {
+        if (documentType !== 'pdf' && iframeRef.current) {
+            const checkIframeLoaded = () => {
                 try {
                     // This will throw an error if the iframe was blocked
                     const iframeDoc = iframeRef.current.contentDocument;
@@ -123,12 +133,12 @@ export default function DocumentViewerPage() {
                     console.error("Iframe access error - likely blocked by browser:", e);
                     setBlockedByClient(true);
                 }
-            }
-        };
-        
-        const timer = setTimeout(checkIframeLoaded, 2000);
-        return () => clearTimeout(timer);
-    }, [document]);
+            };
+            
+            const timer = setTimeout(checkIframeLoaded, 2000);
+            return () => clearTimeout(timer);
+        }
+    }, [document, documentType]);
 
     const renderDocumentContent = () => {
         if (loading) {
@@ -218,12 +228,6 @@ export default function DocumentViewerPage() {
                 </div>
             );
         }
-        /*
-        console.log("Rendering document content:", {
-            type: documentType,
-            url: secureDocumentUrl
-        });
-        */
         
         // Image viewer with watermark
         if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(documentType)) {
@@ -250,13 +254,32 @@ export default function DocumentViewerPage() {
             );
         }
         
-        // For PDFs and other documents
+        // For PDF documents, use the ReactPDFViewer component
+        if (documentType === 'pdf') {
+            return (
+                <div className="h-[calc(100vh-220px)] md:h-[calc(100vh-250px)] relative border border-gray-300">
+                    <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between text-xs p-1 md:p-2">
+                        <div className="bg-slate-800 bg-opacity-20 text-white p-1 md:p-2 rounded shadow truncate max-w-[45%]">
+                            Viewed by: {uploader}
+                        </div>
+                        <div className="bg-slate-800 bg-opacity-20 text-white p-1 md:p-2 rounded shadow">
+                            {new Date().toLocaleDateString()}
+                        </div>
+                    </div>
+                    
+                    <ReactPDFViewer 
+                        url={secureDocumentUrl} 
+                        watermarkText="MinSU Accreditation" 
+                    />
+                </div>
+            );
+        }
+        
+        // For other document types (fallback to iframe)
         return (
             <div className="h-[calc(100vh-220px)] md:h-[calc(100vh-250px)] relative border border-gray-300">
                 {/* Watermark overlay - positioned above the iframe */}
                 <div className="absolute inset-0 pointer-events-none z-10 flex flex-col justify-between items-center p-4 md:p-8">
-                    
-                    
                     {/* Center watermark - repeating pattern */}
                     <div className="flex-grow w-full flex items-center justify-center">
                         <div className="transform rotate-30 opacity-10 pointer-events-none select-none">
@@ -283,43 +306,55 @@ export default function DocumentViewerPage() {
                 
                 <iframe
                     ref={iframeRef}
-                    // For PDFs, add parameters to disable toolbar and downloads
-                    src={documentType === 'pdf' 
-                        ? `${secureDocumentUrl}#toolbar=0&navpanes=0&scrollbar=0&statusbar=0&messages=0&download=0` 
-                        : secureDocumentUrl}
+                    src={secureDocumentUrl}
                     className="w-full h-full border-0"
                     title="Document Viewer"
-                    // Add minimal sandbox restrictions to prevent downloads but allow viewing
-                    // Disable context menu to prevent right-click save
+                    sandbox="allow-scripts allow-same-origin"
                     onContextMenu={(e) => e.preventDefault()}
-                    // Disable keyboard shortcuts that could enable download
                     onKeyDown={(e) => {
                         if ((e.ctrlKey && e.key === 's') || 
                             (e.ctrlKey && e.key === 'p')) {
                             e.preventDefault();
                         }
                     }}
-                    //onLoad={() => console.log("Document iframe loaded successfully")}
+                    onLoad={() => {
+                        try {
+                            if (iframeRef.current) {
+                                const iframeDocument = iframeRef.current.contentDocument || 
+                                                     iframeRef.current.contentWindow.document;
+                                
+                                // Disable right-click within the iframe
+                                iframeDocument.addEventListener('contextmenu', (e) => {
+                                    e.preventDefault();
+                                    return false;
+                                });
+                                
+                                // Add CSS to disable selection in the iframe
+                                const style = iframeDocument.createElement('style');
+                                style.textContent = `
+                                    * {
+                                        user-select: none !important;
+                                        -webkit-user-select: none !important;
+                                        -moz-user-select: none !important;
+                                        -ms-user-select: none !important;
+                                    }
+                                    
+                                    a[download], button[download], [data-download], 
+                                    .download-button, .print-button {
+                                        display: none !important;
+                                    }
+                                `;
+                                iframeDocument.head.appendChild(style);
+                            }
+                        } catch (e) {
+                            console.log('Unable to modify iframe content due to same-origin policy');
+                        }
+                    }}
                     onError={(e) => {
                         console.error("Document iframe failed to load");
                         setBlockedByClient(true);
                         setError("Failed to load document. This may be blocked by your browser or the file may be corrupted.");
                     }}
-                />
-                
-                {/* Add an invisible overlay to catch and prevent keyboard shortcuts for the entire viewer */}
-                <div 
-                    className="absolute inset-0 z-5"
-                    onContextMenu={(e) => e.preventDefault()}
-                    onClick={(e) => e.stopPropagation()}
-                    onKeyDown={(e) => {
-                        if ((e.ctrlKey && e.key === 's') || 
-                            (e.ctrlKey && e.key === 'p')) {
-                            e.preventDefault();
-                            return false;
-                        }
-                    }}
-                    style={{ pointerEvents: 'none' }}
                 />
                 
                 {document && (
@@ -340,25 +375,6 @@ export default function DocumentViewerPage() {
     return (
         <DocumentViewerLayout>
             <Head title={`Viewing: ${taskName || "Document"}`} />
-            
-            {/* Document Debug Information - Remove in production }
-            {debugInfo && (
-                <div className="mb-4 bg-gray-100 p-4 rounded-lg text-sm">
-                    <details>
-                        <summary className="font-semibold cursor-pointer text-blue-600">Debug Information (Admin Only)</summary>
-                        <div className="mt-2 space-y-2 pl-4">
-                            <p>Document ID: {debugInfo.document?.id || 'N/A'}</p>
-                            <p>Name: {debugInfo.document?.name || 'N/A'}</p>
-                            <p>Path: {debugInfo.document?.path || 'N/A'}</p>
-                            <p>File Exists: {debugInfo.file_exists ? 'Yes' : 'No'}</p>
-                            <p>Full Storage Path: {debugInfo.full_storage_path || 'N/A'}</p>
-                            <p>MIME Type: {debugInfo.mime_type || 'N/A'}</p>
-                            <p>Size: {debugInfo.size || 'N/A'} bytes</p>
-                        </div>
-                    </details>
-                </div>
-            )}
-                */}
             
             <div className="space-y-4 md:space-y-6">
                 {/* Document info header */}

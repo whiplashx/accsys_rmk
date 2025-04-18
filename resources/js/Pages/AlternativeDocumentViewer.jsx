@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Head } from '@inertiajs/react';
 import axios from 'axios';
 import DocumentViewerLayout from '@/Layouts/DocumentViewerLayout';
+import ReactPDFViewer from '@/Components/ReactPDFViewer';
 
 export default function AlternativeDocumentViewer({ id }) {
     const [document, setDocument] = useState(null);
@@ -11,6 +12,33 @@ export default function AlternativeDocumentViewer({ id }) {
     
     // Use a different endpoint that serves content differently to avoid blocks
     const directDocumentUrl = `/direct-document-access/${id}`;
+    
+    // Add event listeners to disable right-click and keyboard shortcuts
+    useEffect(() => {
+        // Disable right click on the main document
+        const handleContextMenu = (e) => {
+            e.preventDefault();
+            return false;
+        };
+        
+        // Prevent keyboard shortcuts for saving/printing
+        const handleKeyDown = (e) => {
+            // Prevent Ctrl+S, Ctrl+P, etc.
+            if ((e.ctrlKey || e.metaKey) && 
+                (e.key === 's' || e.key === 'p' || e.key === 'a')) {
+                e.preventDefault();
+                return false;
+            }
+        };
+        
+        document.addEventListener('contextmenu', handleContextMenu);
+        document.addEventListener('keydown', handleKeyDown);
+        
+        return () => {
+            document.removeEventListener('contextmenu', handleContextMenu);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
     
     useEffect(() => {
         const fetchDocument = async () => {
@@ -82,7 +110,22 @@ export default function AlternativeDocumentViewer({ id }) {
             );
         }
         
-        // For PDFs and other documents, use a different approach
+        // For PDF documents, use the ReactPDFViewer component
+        if (documentType === 'pdf') {
+            return (
+                <div className="h-[70vh] relative">
+                    <ReactPDFViewer 
+                        url={directDocumentUrl}
+                        watermarkText="MinSU Accreditation" 
+                    />
+                    <div className="absolute bottom-2 right-2 z-30 bg-slate-800 bg-opacity-70 text-white px-2 py-1 rounded text-xs">
+                        Viewed: {new Date().toLocaleDateString()}
+                    </div>
+                </div>
+            );
+        }
+        
+        // For other document types, fallback to object tag
         return (
             <div className="flex flex-col h-[70vh]">
                 <div className="bg-gray-100 p-2 border-b">

@@ -15,6 +15,7 @@ import {
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 const LocalTaskForceDashboard = () => {
+  const [currentUser, setCurrentUser] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -25,12 +26,24 @@ const LocalTaskForceDashboard = () => {
   const [selectedCriteria, setSelectedCriteria] = useState(null);
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
+    const fetchUserAndDashboardData = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/dashboard-data');
-        setDashboardData(response.data);
-        setSelectedDepartment(response.data.programs[0]);
+        
+        // First fetch the current user
+        const userResponse = await axios.get('/api/user');
+        setCurrentUser(userResponse.data);
+        
+        // Then fetch dashboard data with the user's program_id
+        const dashboardResponse = await axios.get(`/dashboard-data?program_id=${userResponse.data.program_id}`);
+        setDashboardData(dashboardResponse.data);
+        
+        // Set the selected department based on the user's program
+        const userProgram = dashboardResponse.data.programs.find(
+          program => program.id === userResponse.data.program_id
+        );
+        
+        setSelectedDepartment(userProgram || dashboardResponse.data.programs[0]);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -39,7 +52,7 @@ const LocalTaskForceDashboard = () => {
       }
     };
 
-    fetchDashboardData();
+    fetchUserAndDashboardData();
   }, []);
 
   const handleDepartmentChange = (department) => {

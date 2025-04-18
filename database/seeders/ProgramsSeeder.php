@@ -15,8 +15,8 @@ class ProgramsSeeder extends Seeder
         $areas = Area::all();
 
         $programs = [
-            ['name' => 'Colege of Computer Studies', 'college' => 'CpE'],
-            ['name' => 'Colege of Computer Studies', 'college' => 'IT'],
+            ['name' => 'College of Computer Studies', 'college' => 'CpE'],
+            ['name' => 'College of Computer Studies', 'college' => 'IT'],
             ['name' => 'College of Teacher Education', 'college' => 'EDU'],
             ['name' => 'College of Arts and Sciences', 'college' => 'PolSci'],  
             ['name' => 'College of Fisheries', 'college' => 'Fi'],

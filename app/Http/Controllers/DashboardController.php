@@ -20,6 +20,9 @@ class DashboardController extends Controller
     public function getDashboardData(): JsonResponse
     {
         try {
+            // Get the program_id from the request
+            $programId = request('program_id');
+            
             // Default empty data structure
             $data = [
                 'programs' => [],
@@ -39,84 +42,119 @@ class DashboardController extends Controller
                     'weekly' => [],
                     'monthly' => []
                 ],
-                'tasks' => []
+                'tasks' => [],
+                'inProgressCriteria' => 0,
+                'activeTasks' => 0,
+                'totalDocuments' => 0,
+                'pendingReviewDocuments' => 0,
+                'criteriaList' => []
             ];
 
             // Get all programs with their relevant details
             try {
+                // Base query for programs
+                $programsQuery = Program::select('id', 'name', 'college', 'schedule_start', 'schedule_end', 'updated_at');
+                
+                // If programId is provided, filter by it
+                if ($programId) {
+                    $programsQuery->where('id', $programId);
+                }
+                
                 // Check if tasks relationship exists on Program model
                 if (method_exists(Program::class, 'tasks')) {
-                    $programs = Program::select('id', 'name', 'college', 'schedule_start', 'schedule_end', 'updated_at')
-                        ->withCount(['tasks as completed_tasks' => function($query) {
-                            $query->where('status', 'completed');
-                        }])
-                        ->withCount('tasks')
-                        ->get();
-                        
-                    $data['programs'] = $programs->map(function ($program) {
-                        // Calculate program progress based on tasks
-                        $progress = $program->tasks_count > 0
-                            ? round(($program->completed_tasks / $program->tasks_count) * 100)
-                            : 0;
-                        
-                        return [
-                            'id' => $program->id,
-                            'name' => $program->name,
-                            'college' => $program->college,
-                            'progress' => $progress,
-                            'schedule_start' => $program->schedule_start,
-                            'schedule_end' => $program->schedule_end,
-                            'updated_at' => $program->updated_at,
-                        ];
-                    });
-                } else {
-                    // Fallback if relationship doesn't exist
-                    $data['programs'] = Program::select('id', 'name', 'college', 'schedule_start', 'schedule_end', 'updated_at')
-                        ->get();
+                    $programsQuery->withCount(['tasks as completed_tasks' => function($query) {
+                        $query->where('status', 'completed');
+                    }])
+                    ->withCount('tasks');
                 }
+                
+                $programs = $programsQuery->get();
+                        
+                $data['programs'] = $programs->map(function ($program) {
+                    // Calculate program progress based on tasks
+                    $progress = $program->tasks_count > 0
+                        ? round(($program->completed_tasks / $program->tasks_count) * 100)
+                        : 0;
+                    
+                    return [
+                        'id' => $program->id,
+                        'name' => $program->name,
+                        'college' => $program->college,
+                        'progress' => $progress,
+                        'schedule_start' => $program->schedule_start,
+                        'schedule_end' => $program->schedule_end,
+                        'updated_at' => $program->updated_at,
+                    ];
+                });
             } catch (Exception $e) {
                 Log::error("Error fetching programs: " . $e->getMessage());
             }
 
-            // Get all areas with their indicators and parameters
+            // Get areas with their indicators and parameters, filtered by program_id if provided
             try {
+                $areasQuery = Area::query();
+                
+                // If programId is provided, filter areas by program_id
+                if ($programId) {
+                    $areasQuery->where('program_id', $programId);
+                }
+                
                 // Check if indicators relationship exists on Area model
                 if (method_exists(Area::class, 'indicators')) {
-                    $areas = Area::withCount(['indicators as total_indicators'])
+                    $areasQuery->withCount(['indicators as total_indicators'])
                         ->withCount(['indicators as completed_indicators' => function($query) {
                             $query->whereHas('documents');
-                        }])
-                        ->get();
-                    
-                    $data['areas'] = $areas->map(function ($area) {
-                        // Calculate area progress based on completed indicators
-                        $progress = $area->total_indicators > 0
-                            ? round(($area->completed_indicators / $area->total_indicators) * 100)
-                            : 0;
-                        
-                        return [
-                            'name' => $area->name,
-                            'progress' => $progress,
-                            'total_indicators' => $area->total_indicators,
-                            'completed_indicators' => $area->completed_indicators
-                        ];
-                    });
-                } else {
-                    // Fallback if relationship doesn't exist
-                    $data['areas'] = Area::all();
+                        }]);
                 }
+                
+                $areas = $areasQuery->get();
+                
+                $data['areas'] = $areas->map(function ($area) {
+                    // Calculate area progress based on completed indicators
+                    $progress = $area->total_indicators > 0
+                        ? round(($area->completed_indicators / $area->total_indicators) * 100)
+                        : 0;
+                    
+                    return [
+                        'id' => $area->id,
+                        'name' => $area->name,
+                        'progress' => $progress,
+                        'total_indicators' => $area->total_indicators,
+                        'completed_indicators' => $area->completed_indicators
+                    ];
+                });
             } catch (Exception $e) {
                 Log::error("Error fetching areas: " . $e->getMessage());
             }
 
-            // Calculate total and completed indicators across all areas
+            // Calculate total and completed indicators across all areas, filtered by program_id if provided
             try {
-                $totalCriteria = Indicator::count();
+                $indicatorsQuery = Indicator::query();
+                
+                // If programId is provided, filter indicators by related areas with that program_id
+                if ($programId) {
+                    $indicatorsQuery->whereHas('parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                
+                $totalCriteria = $indicatorsQuery->count();
                 $completedCriteria = 0;
+                $inProgressCriteria = 0;
                 
                 // Check if documents relationship exists on Indicator model
                 if (method_exists(Indicator::class, 'documents')) {
-                    $completedCriteria = Indicator::whereHas('documents')->count();
+                    // Clone the query to count completed indicators
+                    $completedQuery = clone $indicatorsQuery;
+                    $completedCriteria = $completedQuery->whereHas('documents')->count();
+                    
+                    // Clone the query to count in-progress indicators (has some documents but not completed)
+                    $inProgressQuery = clone $indicatorsQuery;
+                    $inProgressCriteria = $inProgressQuery->whereHas('documents')
+                        ->whereDoesntHave('documents', function($query) {
+                            $query->where('status', 'completed');
+                        })
+                        ->count();
                 }
                 
                 // Calculate overall progress based on completed indicators
@@ -124,52 +162,160 @@ class DashboardController extends Controller
                 
                 $data['totalCriteria'] = $totalCriteria;
                 $data['completedCriteria'] = $completedCriteria;
+                $data['inProgressCriteria'] = $inProgressCriteria;
                 $data['overallProgress'] = $overallProgress;
                 
                 // Criteria completion data for pie chart
                 $data['criteriaCompletionData'] = [
                     ['name' => 'Completed', 'value' => $completedCriteria],
-                    ['name' => 'Remaining', 'value' => $totalCriteria - $completedCriteria]
+                    ['name' => 'In Progress', 'value' => $inProgressCriteria],
+                    ['name' => 'Not Started', 'value' => $totalCriteria - $completedCriteria - $inProgressCriteria]
                 ];
+                
+                // Generate criteria list for datatable
+                $criteriaListQuery = Indicator::query();
+                
+                if ($programId) {
+                    $criteriaListQuery->whereHas('parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                
+                $criteriaListQuery->with(['parameter', 'parameter.area', 'documents']);
+                
+                $criteriaList = $criteriaListQuery->get();
+                
+                $data['criteriaList'] = $criteriaList->map(function($indicator) {
+                    $totalTasks = Task::where('indicator_id', $indicator->id)->count();
+                    $completedTasks = Task::where('indicator_id', $indicator->id)->where('status', 'completed')->count();
+                    $docCount = $indicator->documents->count();
+                    
+                    // Determine status based on documents and tasks
+                    $status = 'not-started';
+                    if ($docCount > 0) {
+                        $status = 'in-progress';
+                        $completedDocs = $indicator->documents->where('status', 'completed')->count();
+                        if ($completedDocs > 0 && $completedTasks === $totalTasks && $totalTasks > 0) {
+                            $status = 'completed';
+                        }
+                    }
+                    
+                    // Calculate progress
+                    $progress = 0;
+                    if ($totalTasks > 0) {
+                        $progress = round(($completedTasks / $totalTasks) * 100);
+                    } elseif ($docCount > 0) {
+                        $progress = 50; // Some progress if documents exist but no tasks
+                    }
+                    
+                    return [
+                        'id' => $indicator->id,
+                        'name' => $indicator->name,
+                        'description' => $indicator->description,
+                        'area' => $indicator->parameter->area->name,
+                        'parameter' => $indicator->parameter->name,
+                        'status' => $status,
+                        'progress' => $progress,
+                        'completedTasks' => $completedTasks,
+                        'totalTasks' => $totalTasks,
+                        'documents' => $docCount,
+                        'deadline' => $indicator->deadline ?? 'Not set',
+                    ];
+                });
+                
             } catch (Exception $e) {
                 Log::error("Error calculating indicator stats: " . $e->getMessage());
             }
 
-            // Recent activities - get recent task status changes
+            // Recent activities - get recent task status changes, filtered by program_id
             try {
-                $data['recentActivities'] = Task::select('title as description', 'status', 'updated_at as date')
+                $activitiesQuery = Task::select('title as description', 'status', 'updated_at as date')
                     ->orderBy('updated_at', 'desc')
-                    ->limit(5)
-                    ->get();
+                    ->limit(5);
+                
+                if ($programId) {
+                    $activitiesQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                
+                $data['recentActivities'] = $activitiesQuery->get();
             } catch (Exception $e) {
                 Log::error("Error fetching recent activities: " . $e->getMessage());
             }
 
-            // Upcoming deadlines
+            // Upcoming deadlines, filtered by program_id
             try {
-                $data['upcomingDeadlines'] = Task::select('title as task', 'due_date as date')
+                $deadlinesQuery = Task::select('title as task', 'due_date as date')
                     ->where('status', '!=', 'completed')
                     ->whereNotNull('due_date')
                     ->orderBy('due_date', 'asc')
-                    ->limit(3)
-                    ->get();
+                    ->limit(3);
+                
+                if ($programId) {
+                    $deadlinesQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                
+                $data['upcomingDeadlines'] = $deadlinesQuery->get();
             } catch (Exception $e) {
                 Log::error("Error fetching upcoming deadlines: " . $e->getMessage());
             }
 
-            // Team members count - users involved in tasks
+            // Team members count - users involved in tasks, filtered by program_id
             try {
-                $data['teamMembers'] = User::whereIn('role', ['localtaskforce', 'localaccreditor'])->count();
+                $usersQuery = User::query();
+                
+                if ($programId) {
+                    $usersQuery->where('program_id', $programId);
+                }
+                
+                $usersQuery->whereIn('role', ['localtaskforce', 'localaccreditor']);
+                $data['teamMembers'] = $usersQuery->count();
             } catch (Exception $e) {
                 Log::error("Error counting team members: " . $e->getMessage());
+            }
+
+            // Active tasks count
+            try {
+                $activeTasksQuery = Task::where('status', '!=', 'completed');
+                
+                if ($programId) {
+                    $activeTasksQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                
+                $data['activeTasks'] = $activeTasksQuery->count();
+            } catch (Exception $e) {
+                Log::error("Error counting active tasks: " . $e->getMessage());
+            }
+            
+            // Document counts
+            try {
+                $documentsQuery = Document::query();
+                
+                if ($programId) {
+                    $documentsQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                
+                $data['totalDocuments'] = $documentsQuery->count();
+                
+                $pendingReviewQuery = clone $documentsQuery;
+                $data['pendingReviewDocuments'] = $pendingReviewQuery->where('status', 'pending_review')->count();
+            } catch (Exception $e) {
+                Log::error("Error counting documents: " . $e->getMessage());
             }
 
             // Progress over time data - handle separately with error handling
             try {
                 $data['progressOverTime'] = [
-                    'daily' => $this->getDailyProgressData(),
-                    'weekly' => $this->getWeeklyProgressData(),
-                    'monthly' => $this->getMonthlyProgressData()
+                    'daily' => $this->getDailyProgressData($programId),
+                    'weekly' => $this->getWeeklyProgressData($programId),
+                    'monthly' => $this->getMonthlyProgressData($programId)
                 ];
             } catch (Exception $e) {
                 Log::error("Error calculating progress over time: " . $e->getMessage());
@@ -178,6 +324,12 @@ class DashboardController extends Controller
             // Get tasks for frontend use - handle relationships carefully
             try {
                 $tasksQuery = Task::query()->orderBy('updated_at', 'desc');
+                
+                if ($programId) {
+                    $tasksQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
                 
                 // Only include these relationships if they exist
                 if (method_exists(Task::class, 'indicator')) {
@@ -206,7 +358,7 @@ class DashboardController extends Controller
         }
     }
 
-    private function getDailyProgressData(): array
+    private function getDailyProgressData($programId = null): array
     {
         try {
             // Get data for the last 14 days
@@ -214,12 +366,23 @@ class DashboardController extends Controller
             $startDate = Carbon::now()->subDays(13);
             
             // Get total task count
-            $totalTasks = Task::count() ?: 1; // Avoid division by zero
+            $totalTasksQuery = Task::query();
+            if ($programId) {
+                $totalTasksQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                    $query->where('program_id', $programId);
+                });
+            }
+            $totalTasks = $totalTasksQuery->count() ?: 1; // Avoid division by zero
             
             // Get completed tasks before start date (starting count)
-            $startingCount = Task::where('status', 'completed')
-                ->where('updated_at', '<', $startDate)
-                ->count();
+            $startingCountQuery = Task::where('status', 'completed')
+                ->where('updated_at', '<', $startDate);
+            if ($programId) {
+                $startingCountQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                    $query->where('program_id', $programId);
+                });
+            }
+            $startingCount = $startingCountQuery->count();
             
             // Prepare dates array
             $dates = [];
@@ -230,13 +393,17 @@ class DashboardController extends Controller
             }
             
             // Get completion data from database
-            $completionData = Task::where('status', 'completed')
+            $completionDataQuery = Task::where('status', 'completed')
                 ->whereBetween('updated_at', [$startDate, $endDate])
                 ->select(DB::raw('DATE(updated_at) as date'), DB::raw('count(*) as count'))
                 ->groupBy('date')
-                ->orderBy('date')
-                ->get()
-                ->keyBy('date');
+                ->orderBy('date');
+            if ($programId) {
+                $completionDataQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                    $query->where('program_id', $programId);
+                });
+            }
+            $completionData = $completionDataQuery->get()->keyBy('date');
             
             // Calculate cumulative progress
             $cumulativeCount = $startingCount;
@@ -260,7 +427,7 @@ class DashboardController extends Controller
         }
     }
     
-    private function getWeeklyProgressData(): array
+    private function getWeeklyProgressData($programId = null): array
     {
         try {
             // Get data for the last 12 weeks
@@ -268,12 +435,23 @@ class DashboardController extends Controller
             $startDate = Carbon::now()->subWeeks(11)->startOfWeek();
             
             // Get total task count
-            $totalTasks = Task::count() ?: 1;
+            $totalTasksQuery = Task::query();
+            if ($programId) {
+                $totalTasksQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                    $query->where('program_id', $programId);
+                });
+            }
+            $totalTasks = $totalTasksQuery->count() ?: 1;
             
             // Get completed tasks before start date (starting count)
-            $startingCount = Task::where('status', 'completed')
-                ->where('updated_at', '<', $startDate)
-                ->count();
+            $startingCountQuery = Task::where('status', 'completed')
+                ->where('updated_at', '<', $startDate);
+            if ($programId) {
+                $startingCountQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                    $query->where('program_id', $programId);
+                });
+            }
+            $startingCount = $startingCountQuery->count();
             
             // Create weekly buckets
             $weeks = [];
@@ -294,9 +472,14 @@ class DashboardController extends Controller
             $result = [];
             
             foreach ($weeks as $week) {
-                $completedThisWeek = Task::where('status', 'completed')
-                    ->whereBetween('updated_at', [$week['start'], $week['end']])
-                    ->count();
+                $completedThisWeekQuery = Task::where('status', 'completed')
+                    ->whereBetween('updated_at', [$week['start'], $week['end']]);
+                if ($programId) {
+                    $completedThisWeekQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                $completedThisWeek = $completedThisWeekQuery->count();
                     
                 $cumulativeCount += $completedThisWeek;
                 
@@ -313,7 +496,7 @@ class DashboardController extends Controller
         }
     }
     
-    private function getMonthlyProgressData(): array
+    private function getMonthlyProgressData($programId = null): array
     {
         try {
             // Get data for the last 12 months
@@ -321,12 +504,23 @@ class DashboardController extends Controller
             $startDate = Carbon::now()->subMonths(11)->startOfMonth();
             
             // Get total task count
-            $totalTasks = Task::count() ?: 1;
+            $totalTasksQuery = Task::query();
+            if ($programId) {
+                $totalTasksQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                    $query->where('program_id', $programId);
+                });
+            }
+            $totalTasks = $totalTasksQuery->count() ?: 1;
             
             // Get completed tasks before start date (starting count)
-            $startingCount = Task::where('status', 'completed')
-                ->where('updated_at', '<', $startDate)
-                ->count();
+            $startingCountQuery = Task::where('status', 'completed')
+                ->where('updated_at', '<', $startDate);
+            if ($programId) {
+                $startingCountQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                    $query->where('program_id', $programId);
+                });
+            }
+            $startingCount = $startingCountQuery->count();
             
             // Create monthly buckets
             $months = [];
@@ -347,9 +541,14 @@ class DashboardController extends Controller
             $result = [];
             
             foreach ($months as $month) {
-                $completedThisMonth = Task::where('status', 'completed')
-                    ->whereBetween('updated_at', [$month['start'], $month['end']])
-                    ->count();
+                $completedThisMonthQuery = Task::where('status', 'completed')
+                    ->whereBetween('updated_at', [$month['start'], $month['end']]);
+                if ($programId) {
+                    $completedThisMonthQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                $completedThisMonth = $completedThisMonthQuery->count();
                     
                 $cumulativeCount += $completedThisMonth;
                 
