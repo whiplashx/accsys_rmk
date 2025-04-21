@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
@@ -14,8 +14,17 @@ export default function ReactPDFViewer({ url, watermarkText = "VIEW ONLY" }) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // Memoize the options object to prevent unnecessary re-renders
+    const pdfOptions = useMemo(() => ({
+        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+        cMapPacked: true,
+    }), []);
+
     // Add effect to prevent right-click and keyboard shortcuts
     useEffect(() => {
+        // Only add event listeners in the browser environment
+        if (typeof document === 'undefined') return;
+
         const handleContextMenu = (e) => {
             e.preventDefault();
             return false;
@@ -37,6 +46,27 @@ export default function ReactPDFViewer({ url, watermarkText = "VIEW ONLY" }) {
         return () => {
             document.removeEventListener('contextmenu', handleContextMenu);
             document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+    // Handle transport destroyed error by creating a cleanup function
+    useEffect(() => {
+        return () => {
+            // Cleanup function to handle component unmounting
+            // This helps prevent "Transport destroyed" warnings
+            if (pdfjs.PDFWorker) {
+                // Attempt to terminate any worker threads when component unmounts
+                try {
+                    const workers = pdfjs.GlobalWorkerOptions._workers;
+                    if (workers) {
+                        workers.forEach(worker => {
+                            try { worker.terminate(); } catch (e) { /* ignore */ }
+                        });
+                    }
+                } catch (e) {
+                    // Silently handle any errors during cleanup
+                }
+            }
         };
     }, []);
 
@@ -144,10 +174,7 @@ export default function ReactPDFViewer({ url, watermarkText = "VIEW ONLY" }) {
                         onLoadSuccess={onDocumentLoadSuccess}
                         onLoadError={onDocumentLoadError}
                         loading={null}
-                        options={{
-                            cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
-                            cMapPacked: true,
-                        }}
+                        options={pdfOptions}
                     >
                         <Page 
                             pageNumber={pageNumber}
