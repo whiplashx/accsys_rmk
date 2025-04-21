@@ -1,35 +1,39 @@
 import DocumentViewerLayout from '@/Layouts/DocumentViewerLayout';
 import React, { useState, useEffect } from 'react';
 
+console.log('DocumentViewer component loaded');
 const DocumentViewer = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // Implement security measures
     useEffect(() => {
-        // Prevent right-clicking
-        const handleContextMenu = (e) => {
-            e.preventDefault();
-            return false;
-        };
-        
-        // Prevent keyboard shortcuts
-        const handleKeyDown = (e) => {
-            // Prevent Ctrl+S, Ctrl+P, etc.
-            if ((e.ctrlKey || e.metaKey) && 
-                (e.key === 's' || e.key === 'p' || e.key === 'a')) {
+        // Check if document exists (to avoid issues during SSR)
+        if (typeof document !== 'undefined') {
+            // Prevent right-clicking
+            const handleContextMenu = (e) => {
                 e.preventDefault();
                 return false;
-            }
-        };
-        
-        document.addEventListener('contextmenu', handleContextMenu);
-        document.addEventListener('keydown', handleKeyDown);
-        
-        return () => {
-            document.removeEventListener('contextmenu', handleContextMenu);
-            document.removeEventListener('keydown', handleKeyDown);
-        };
+            };
+            
+            // Prevent keyboard shortcuts
+            const handleKeyDown = (e) => {
+                // Prevent Ctrl+S, Ctrl+P, etc.
+                if ((e.ctrlKey || e.metaKey) && 
+                    (e.key === 's' || e.key === 'p' || e.key === 'a')) {
+                    e.preventDefault();
+                    return false;
+                }
+            };
+            
+            document.addEventListener('contextmenu', handleContextMenu);
+            document.addEventListener('keydown', handleKeyDown);
+            
+            return () => {
+                document.removeEventListener('contextmenu', handleContextMenu);
+                document.removeEventListener('keydown', handleKeyDown);
+            };
+        }
     }, []);
 
     const queryParams = new URLSearchParams(window.location.search);

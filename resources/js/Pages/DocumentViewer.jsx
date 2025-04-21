@@ -7,7 +7,7 @@ import ReactPDFViewer from '@/Components/ReactPDFViewer';
 export default function DocumentViewerPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [document, setDocument] = useState(null);
+    const [documentData, setDocumentData] = useState(null);
     const [documentType, setDocumentType] = useState(null);
     const [debugInfo, setDebugInfo] = useState(null);
     const [blockedByClient, setBlockedByClient] = useState(false);
@@ -31,29 +31,32 @@ export default function DocumentViewerPage() {
 
     // Add event listeners to disable right-click and keyboard shortcuts
     useEffect(() => {
-        // Disable right click on the main document
-        const handleContextMenu = (e) => {
-            e.preventDefault();
-            return false;
-        };
-        
-        // Prevent keyboard shortcuts for saving/printing
-        const handleKeyDown = (e) => {
-            // Prevent Ctrl+S, Ctrl+P, etc.
-            if ((e.ctrlKey || e.metaKey) && 
-                (e.key === 's' || e.key === 'p' || e.key === 'a')) {
+        // Check if window and document are available (to avoid SSR issues)
+        if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
+            // Disable right click on the main document
+            const handleContextMenu = (e) => {
                 e.preventDefault();
                 return false;
-            }
-        };
-        
-        document.addEventListener('contextmenu', handleContextMenu);
-        document.addEventListener('keydown', handleKeyDown);
-        
-        return () => {
-            document.removeEventListener('contextmenu', handleContextMenu);
-            document.removeEventListener('keydown', handleKeyDown);
-        };
+            };
+            
+            // Prevent keyboard shortcuts for saving/printing
+            const handleKeyDown = (e) => {
+                // Prevent Ctrl+S, Ctrl+P, etc.
+                if ((e.ctrlKey || e.metaKey) && 
+                    (e.key === 's' || e.key === 'p' || e.key === 'a')) {
+                    e.preventDefault();
+                    return false;
+                }
+            };
+            
+            window.document.addEventListener('contextmenu', handleContextMenu);
+            window.document.addEventListener('keydown', handleKeyDown);
+            
+            return () => {
+                window.document.removeEventListener('contextmenu', handleContextMenu);
+                window.document.removeEventListener('keydown', handleKeyDown);
+            };
+        }
     }, []);
 
     useEffect(() => {
@@ -72,7 +75,7 @@ export default function DocumentViewerPage() {
                 const response = await axios.get(`/api/documents/${documentId}`);
                 
                 if (response.data && !response.data.error) {
-                    setDocument(response.data);
+                    setDocumentData(response.data);
                     
                     // Also fetch debug info
                     try {
@@ -138,7 +141,7 @@ export default function DocumentViewerPage() {
             const timer = setTimeout(checkIframeLoaded, 2000);
             return () => clearTimeout(timer);
         }
-    }, [document, documentType]);
+    }, [documentData, documentType]);
 
     const renderDocumentContent = () => {
         if (loading) {
@@ -212,7 +215,7 @@ export default function DocumentViewerPage() {
             );
         }
 
-        if (!document) {
+        if (!documentData) {
             return (
                 <div className="flex flex-col items-center justify-center h-[calc(100vh-250px)]">
                     <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 max-w-lg">
@@ -357,7 +360,7 @@ export default function DocumentViewerPage() {
                     }}
                 />
                 
-                {document && (
+                {documentData && (
                     <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-80 text-white text-xs p-1 md:p-2 text-center z-20">
                         If the document doesn't load, it may be blocked by your browser. 
                         <a 
@@ -383,9 +386,9 @@ export default function DocumentViewerPage() {
                         {taskName || "Document Viewer"}
                     </h1>
                     
-                    {document && (
+                    {documentData && (
                         <p className="text-xs md:text-sm text-gray-500 mb-3 md:mb-4 truncate">
-                            Filename: <span className="font-medium">{document.name}</span>
+                            Filename: <span className="font-medium">{documentData.name}</span>
                         </p>
                     )}
                     
