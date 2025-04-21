@@ -5,6 +5,25 @@ console.log('DocumentViewer component loaded');
 const DocumentViewer = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [urlParams, setUrlParams] = useState({
+        documentPath: null,
+        taskName: null,
+        uploader: 'Unknown',
+        rating: 'Not rated'
+    });
+
+    // Extract URL parameters safely in useEffect
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const queryParams = new URLSearchParams(window.location.search);
+            setUrlParams({
+                documentPath: queryParams.get('path'),
+                taskName: queryParams.get('taskName'),
+                uploader: queryParams.get('uploader') || 'Unknown',
+                rating: queryParams.get('rating') || 'Not rated'
+            });
+        }
+    }, []);
 
     // Implement security measures
     useEffect(() => {
@@ -36,14 +55,8 @@ const DocumentViewer = () => {
         }
     }, []);
 
-    const queryParams = new URLSearchParams(window.location.search);
-    const documentPath = queryParams.get('path');
-    const taskName = queryParams.get('taskName');
-    const uploader = queryParams.get('uploader') || 'Unknown';
-    const rating = queryParams.get('rating') || 'Not rated';
-
     useEffect(() => {
-        if (documentPath) {
+        if (urlParams.documentPath) {
             setLoading(true);
             setError(null);
             
@@ -51,7 +64,7 @@ const DocumentViewer = () => {
                 setLoading(false);
             }, 1000);
         }
-    }, [documentPath]);
+    }, [urlParams.documentPath]);
 
     if (loading) return (
         <DocumentViewerLayout>
@@ -69,7 +82,8 @@ const DocumentViewer = () => {
         </DocumentViewerLayout>
     );
 
-    if (!documentPath) return (
+    // Only continue if we have URL parameters and they're loaded
+    if (!urlParams.documentPath) return (
         <DocumentViewerLayout>
             <div className="flex items-center justify-center h-full text-gray-500">
                 <p>No document selected</p>
@@ -78,7 +92,7 @@ const DocumentViewer = () => {
     );
 
     // Determine the file type to render appropriate viewer
-    const fileExtension = documentPath.split('.').pop().toLowerCase();
+    const fileExtension = urlParams.documentPath.split('.').pop().toLowerCase();
     
     // PDF viewer with disabled download options
     if (fileExtension === 'pdf') {
@@ -90,7 +104,7 @@ const DocumentViewer = () => {
                 </div>
                 <div className="w-full h-full relative">
                     <iframe
-                        src={`${documentPath}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
+                        src={`${urlParams.documentPath}#toolbar=0&navpanes=0&scrollbar=0&view=FitH`}
                         className="w-full h-[calc(100vh-200px)]"
                         title="PDF Document Viewer"
                         sandbox="allow-scripts allow-same-origin"
@@ -117,7 +131,7 @@ const DocumentViewer = () => {
                             <span className="text-white text-5xl font-bold transform rotate-45">VIEW ONLY</span>
                         </div>
                         <img 
-                            src={documentPath} 
+                            src={urlParams.documentPath} 
                             alt="Document" 
                             className="max-w-full max-h-[calc(100vh-200px)] object-contain pointer-events-none"
                             style={{userSelect: 'none'}}
@@ -138,7 +152,7 @@ const DocumentViewer = () => {
                     <p>For security reasons, downloading is disabled. Please contact your administrator for access to the original file.</p>
                 </div>
                 <div className="text-center">
-                    <p className="text-gray-600">File: {documentPath.split('/').pop()}</p>
+                    <p className="text-gray-600">File: {urlParams.documentPath.split('/').pop()}</p>
                     <p className="text-gray-600">Type: {fileExtension.toUpperCase()}</p>
                 </div>
             </div>

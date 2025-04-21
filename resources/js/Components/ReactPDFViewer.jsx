@@ -3,12 +3,9 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
 
-// Configure PDF.js worker
-// This is important as it tells react-pdf where to load the PDF.js worker from
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.js',
-  import.meta.url,
-).toString();
+// Configure PDF.js worker with the correct version
+// Using a more reliable method to set the worker source that works with Vite
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 
 export default function ReactPDFViewer({ url, watermarkText = "VIEW ONLY" }) {
     const [numPages, setNumPages] = useState(null);
@@ -148,7 +145,7 @@ export default function ReactPDFViewer({ url, watermarkText = "VIEW ONLY" }) {
                         onLoadError={onDocumentLoadError}
                         loading={null}
                         options={{
-                            cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.6.172/cmaps/',
+                            cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
                             cMapPacked: true,
                         }}
                     >

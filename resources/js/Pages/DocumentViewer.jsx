@@ -12,22 +12,46 @@ export default function DocumentViewerPage() {
     const [debugInfo, setDebugInfo] = useState(null);
     const [blockedByClient, setBlockedByClient] = useState(false);
     const iframeRef = useRef(null);
-
-    const queryParams = new URLSearchParams(window.location.search);
-    const documentId = queryParams.get('id');
-    const taskName = queryParams.get('taskName');
-    const uploader = queryParams.get('uploader') || 'Unknown';
-    const rating = queryParams.get('rating') || 'Not rated';
     
-    // Generate secure document URL using document ID
-    const secureDocumentUrl = documentId ? 
-        `/secure-document?id=${encodeURIComponent(documentId)}` : 
-        null;
+    // Initialize URL parameters as state
+    const [urlParams, setUrlParams] = useState({
+        documentId: null,
+        taskName: null,
+        uploader: 'Unknown',
+        rating: 'Not rated',
+        secureDocumentUrl: null,
+        alternativeDocumentUrl: null
+    });
     
-    // Create alternative URL for fallback
-    const alternativeDocumentUrl = documentId ? 
-        `/alt-document-viewer/${encodeURIComponent(documentId)}` : 
-        null;
+    // Extract URL parameters safely in useEffect
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const queryParams = new URLSearchParams(window.location.search);
+            const documentId = queryParams.get('id');
+            const taskName = queryParams.get('taskName');
+            const uploader = queryParams.get('uploader') || 'Unknown';
+            const rating = queryParams.get('rating') || 'Not rated';
+            
+            // Generate secure document URL using document ID
+            const secureDocumentUrl = documentId ? 
+                `/secure-document?id=${encodeURIComponent(documentId)}` : 
+                null;
+            
+            // Create alternative URL for fallback
+            const alternativeDocumentUrl = documentId ? 
+                `/alt-document-viewer/${encodeURIComponent(documentId)}` : 
+                null;
+                
+            setUrlParams({
+                documentId,
+                taskName,
+                uploader,
+                rating,
+                secureDocumentUrl,
+                alternativeDocumentUrl
+            });
+        }
+    }, []);
 
     // Add event listeners to disable right-click and keyboard shortcuts
     useEffect(() => {
@@ -59,10 +83,14 @@ export default function DocumentViewerPage() {
         }
     }, []);
 
+    // Fetch document data once we have a documentId
     useEffect(() => {
+        const { documentId } = urlParams;
         if (!documentId) {
-            setError("No document ID provided");
-            setLoading(false);
+            if (typeof window !== 'undefined') { // Only set error in browser
+                setError("No document ID provided");
+                setLoading(false);
+            }
             return;
         }
 
@@ -119,8 +147,10 @@ export default function DocumentViewerPage() {
             }
         };
         
-        fetchDocument();
-    }, [documentId]);
+        if (typeof window !== 'undefined') { // Only fetch in browser
+            fetchDocument();
+        }
+    }, [urlParams.documentId]);
     
     // Check for iframe load errors that might indicate blocking (only for non-PDF documents)
     useEffect(() => {
@@ -195,7 +225,7 @@ export default function DocumentViewerPage() {
                         
                         {blockedByClient && (
                             <a 
-                                href={alternativeDocumentUrl}
+                                href={urlParams.alternativeDocumentUrl}
                                 className="px-3 py-1.5 md:px-4 md:py-2 bg-green-500 hover:bg-green-600 text-white rounded text-sm"
                             >
                                 Use Alternative Viewer
@@ -203,7 +233,7 @@ export default function DocumentViewerPage() {
                         )}
                         
                         <a 
-                            href={`/debug-file-view/${documentId}`}
+                            href={`/debug-file-view/${urlParams.documentId}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="px-3 py-1.5 md:px-4 md:py-2 bg-blue-500 hover:bg-blue-600 text-white rounded text-sm"
@@ -241,7 +271,7 @@ export default function DocumentViewerPage() {
                             <span className="text-white text-3xl md:text-5xl font-bold transform rotate-45">VIEW ONLY</span>
                         </div>
                         <img 
-                            src={secureDocumentUrl} 
+                            src={urlParams.secureDocumentUrl} 
                             alt="Document" 
                             className="max-w-full max-h-[calc(100vh-220px)] md:max-h-[calc(100vh-250px)] object-contain pointer-events-none"
                             style={{userSelect: 'none'}}
@@ -263,7 +293,7 @@ export default function DocumentViewerPage() {
                 <div className="h-[calc(100vh-220px)] md:h-[calc(100vh-250px)] relative border border-gray-300">
                     <div className="absolute bottom-0 left-0 right-0 z-20 flex items-center justify-between text-xs p-1 md:p-2">
                         <div className="bg-slate-800 bg-opacity-20 text-white p-1 md:p-2 rounded shadow truncate max-w-[45%]">
-                            Viewed by: {uploader}
+                            Viewed by: {urlParams.uploader}
                         </div>
                         <div className="bg-slate-800 bg-opacity-20 text-white p-1 md:p-2 rounded shadow">
                             {new Date().toLocaleDateString()}
@@ -271,7 +301,7 @@ export default function DocumentViewerPage() {
                     </div>
                     
                     <ReactPDFViewer 
-                        url={secureDocumentUrl} 
+                        url={urlParams.secureDocumentUrl} 
                         watermarkText="MinSU Accreditation" 
                     />
                 </div>
@@ -299,7 +329,7 @@ export default function DocumentViewerPage() {
                     {/* Bottom watermark with user info */}
                     <div className="w-full flex justify-between text-xs">
                         <div className="bg-slate-800 bg-opacity-20 text-white p-1 md:p-2 rounded shadow truncate max-w-[45%]">
-                            Viewed by: {uploader}
+                            Viewed by: {urlParams.uploader}
                         </div>
                         <div className="bg-slate-800 bg-opacity-20 text-white p-1 md:p-2 rounded shadow">
                             {new Date().toLocaleDateString()}
@@ -309,7 +339,7 @@ export default function DocumentViewerPage() {
                 
                 <iframe
                     ref={iframeRef}
-                    src={secureDocumentUrl}
+                    src={urlParams.secureDocumentUrl}
                     className="w-full h-full border-0"
                     title="Document Viewer"
                     sandbox="allow-scripts allow-same-origin"
@@ -364,7 +394,7 @@ export default function DocumentViewerPage() {
                     <div className="absolute bottom-0 left-0 right-0 bg-gray-800 bg-opacity-80 text-white text-xs p-1 md:p-2 text-center z-20">
                         If the document doesn't load, it may be blocked by your browser. 
                         <a 
-                            href={alternativeDocumentUrl}
+                            href={urlParams.alternativeDocumentUrl}
                             className="ml-1 md:ml-2 underline text-blue-300 hover:text-blue-100"
                         >
                             Try alternative viewer
@@ -377,13 +407,13 @@ export default function DocumentViewerPage() {
 
     return (
         <DocumentViewerLayout>
-            <Head title={`Viewing: ${taskName || "Document"}`} />
+            <Head title={`Viewing: ${urlParams.taskName || "Document"}`} />
             
             <div className="space-y-4 md:space-y-6">
                 {/* Document info header */}
                 <div className="bg-white shadow rounded-lg p-4 md:p-6">
                     <h1 className="text-xl md:text-2xl font-bold text-gray-800 mb-2 md:mb-3">
-                        {taskName || "Document Viewer"}
+                        {urlParams.taskName || "Document Viewer"}
                     </h1>
                     
                     {documentData && (
@@ -394,13 +424,13 @@ export default function DocumentViewerPage() {
                     
                     <div className="flex flex-wrap gap-2 md:gap-3">
                         <div className="px-2 md:px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs md:text-sm">
-                            <span className="font-medium">Task:</span> {taskName || "N/A"}
+                            <span className="font-medium">Task:</span> {urlParams.taskName || "N/A"}
                         </div>
                         <div className="px-2 md:px-3 py-1 bg-green-100 text-green-800 rounded-full text-xs md:text-sm">
-                            <span className="font-medium">Uploaded by:</span> {uploader}
+                            <span className="font-medium">Uploaded by:</span> {urlParams.uploader}
                         </div>
                         <div className="px-2 md:px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-xs md:text-sm">
-                            <span className="font-medium">Self-Rating:</span> {rating}
+                            <span className="font-medium">Self-Rating:</span> {urlParams.rating}
                         </div>
                     </div>
                     
@@ -409,7 +439,7 @@ export default function DocumentViewerPage() {
                             <p className="font-bold">Content Blocked Warning</p>
                             <p>Your browser appears to be blocking content from loading.</p>
                             <a 
-                                href={alternativeDocumentUrl}
+                                href={urlParams.alternativeDocumentUrl}
                                 className="mt-1 md:mt-2 inline-block px-2 md:px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700 text-xs"
                             >
                                 Use Alternative Viewer
