@@ -142,6 +142,9 @@ Route::middleware(['auth', 'role:localtaskforce'])
         Route::get('/selfsurveyLTF', function () {
             return Inertia::render('LocalTaskForce/Selfsurvey');
         })->name('localtaskforce.selfsurvey');
+        Route::get('/exhibit', function () {
+            return Inertia::render('LocalTaskForce/Exhibit');
+        })->name('exhibit');
     });
 
 Route::middleware(['auth', 'role:localaccreditor'])
