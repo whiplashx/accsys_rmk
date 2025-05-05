@@ -68,6 +68,9 @@ Route::middleware(['auth', 'role:admin'])
         Route::get('/assignTask', function () {
             return Inertia::render('Admin/TaskAssignmentPage');
         })->name('assignTask');
+        Route::get('/exhibitAdmin', function () {
+            return Inertia::render('Admin/Exhibit');
+        })->name('exhibitAdmin');
 
         Route::get('/documents', function () {
             return Inertia::render('Admin/Documents');
@@ -147,6 +150,9 @@ Route::middleware(['auth', 'role:localaccreditor'])
         Route::get('/accreditationAcc', function () {
             return Inertia::render('LocalAccreditor/Accreditation');
         })->name('accreditationAcc');
+        Route::get('/exhibitAcc', function () {
+            return Inertia::render('LocalAccreditor/Exhibit');
+        })->name('exhibitAcc');
         Route::get('/selfsurveyAcc', function () {
             return Inertia::render('LocalAccreditor/Selfsurvey');
         })->name('selfsurveyAcc');
