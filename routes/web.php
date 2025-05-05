@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\ExhibitController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\SelfSurveyController;
 use App\Http\Controllers\TaskController;
@@ -145,6 +146,13 @@ Route::middleware(['auth', 'role:localtaskforce'])
         Route::get('/exhibit', function () {
             return Inertia::render('LocalTaskForce/Exhibit');
         })->name('exhibit');
+        
+        // Exhibit routes - update method names to match our controller
+        Route::get('/exhibits', [ExhibitController::class, 'index'])->name('exhibits.index');
+        Route::post('/upload-exhibit', [ExhibitController::class, 'upload'])->name('exhibits.upload');
+        Route::delete('/exhibits/{id}', [ExhibitController::class, 'destroy'])->name('exhibits.delete');
+        Route::get('/exhibits/{id}/view', [ExhibitController::class, 'view'])->name('exhibits.view');
+        Route::get('/exhibits/{id}/download', [ExhibitController::class, 'download'])->name('exhibits.download');
     });
 
 Route::middleware(['auth', 'role:localaccreditor'])
@@ -414,6 +422,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/user', function (Request $request) {
         return $request->user();
     });
+});
+
+// Add routes for admins and accreditors to view exhibits (but not upload/delete)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/shared-exhibits', [ExhibitController::class, 'index'])->name('shared-exhibits.index');
+    Route::get('/shared-exhibits/{id}/view', [ExhibitController::class, 'view'])->name('shared-exhibits.view');
+    Route::get('/shared-exhibits/{id}/download', [ExhibitController::class, 'download'])->name('shared-exhibits.download');
 });
 
 
