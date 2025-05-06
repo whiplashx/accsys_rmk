@@ -45,6 +45,8 @@ class DashboardController extends Controller
                 'tasks' => [],
                 'inProgressCriteria' => 0,
                 'activeTasks' => 0,
+                'completedTasks' => 0,
+                'totalTasks' => 0,
                 'totalDocuments' => 0,
                 'pendingReviewDocuments' => 0,
                 'criteriaList' => []
@@ -129,11 +131,12 @@ class DashboardController extends Controller
 
             // Calculate total and completed indicators across all areas, filtered by program_id if provided
             try {
+                // Query indicators directly through tasks instead of via parameters
                 $indicatorsQuery = Indicator::query();
                 
-                // If programId is provided, filter indicators by related areas with that program_id
+                // If programId is provided, filter indicators by that program
                 if ($programId) {
-                    $indicatorsQuery->whereHas('parameter.area', function($query) use ($programId) {
+                    $indicatorsQuery->whereHas('task', function($query) use ($programId) {
                         $query->where('program_id', $programId);
                     });
                 }
@@ -142,19 +145,18 @@ class DashboardController extends Controller
                 $completedCriteria = 0;
                 $inProgressCriteria = 0;
                 
-                // Check if documents relationship exists on Indicator model
-                if (method_exists(Indicator::class, 'documents')) {
-                    // Clone the query to count completed indicators
+                // Count completed indicators based on their associated tasks being completed
+                if (method_exists(Indicator::class, 'task')) {
                     $completedQuery = clone $indicatorsQuery;
-                    $completedCriteria = $completedQuery->whereHas('documents')->count();
+                    $completedCriteria = $completedQuery->whereHas('task', function($query) {
+                        $query->where('status', 'completed');
+                    })->count();
                     
-                    // Clone the query to count in-progress indicators (has some documents but not completed)
+                    // Count in-progress indicators (has tasks that aren't completed)
                     $inProgressQuery = clone $indicatorsQuery;
-                    $inProgressCriteria = $inProgressQuery->whereHas('documents')
-                        ->whereDoesntHave('documents', function($query) {
-                            $query->where('status', 'completed');
-                        })
-                        ->count();
+                    $inProgressCriteria = $inProgressQuery->whereHas('task', function($query) {
+                        $query->where('status', 'in-progress');
+                    })->count();
                 }
                 
                 // Calculate overall progress based on completed indicators
@@ -172,54 +174,54 @@ class DashboardController extends Controller
                     ['name' => 'Not Started', 'value' => $totalCriteria - $completedCriteria - $inProgressCriteria]
                 ];
                 
-                // Generate criteria list for datatable
+                // Generate criteria list for datatable based directly on indicators linked to tasks
                 $criteriaListQuery = Indicator::query();
                 
                 if ($programId) {
-                    $criteriaListQuery->whereHas('parameter.area', function($query) use ($programId) {
+                    $criteriaListQuery->whereHas('task', function($query) use ($programId) {
                         $query->where('program_id', $programId);
                     });
                 }
                 
-                $criteriaListQuery->with(['parameter', 'parameter.area', 'documents']);
+                $criteriaListQuery->with(['task', 'documents']);
                 
                 $criteriaList = $criteriaListQuery->get();
                 
                 $data['criteriaList'] = $criteriaList->map(function($indicator) {
-                    $totalTasks = Task::where('indicator_id', $indicator->id)->count();
-                    $completedTasks = Task::where('indicator_id', $indicator->id)->where('status', 'completed')->count();
+                    // Get task directly from the indicator
+                    $task = $indicator->task;
+                    $totalTasks = $task ? 1 : 0; // Each indicator has one task
+                    $completedTasks = ($task && $task->status === 'completed') ? 1 : 0;
                     $docCount = $indicator->documents->count();
                     
-                    // Determine status based on documents and tasks
+                    // Determine status based on the task status
                     $status = 'not-started';
-                    if ($docCount > 0) {
-                        $status = 'in-progress';
-                        $completedDocs = $indicator->documents->where('status', 'completed')->count();
-                        if ($completedDocs > 0 && $completedTasks === $totalTasks && $totalTasks > 0) {
-                            $status = 'completed';
-                        }
+                    if ($task) {
+                        $status = $task->status;
                     }
                     
-                    // Calculate progress
+                    // Calculate progress based on task status
                     $progress = 0;
-                    if ($totalTasks > 0) {
-                        $progress = round(($completedTasks / $totalTasks) * 100);
-                    } elseif ($docCount > 0) {
-                        $progress = 50; // Some progress if documents exist but no tasks
+                    if ($task) {
+                        if ($task->status === 'completed') {
+                            $progress = 100;
+                        } else if ($task->status === 'in-progress') {
+                            $progress = 50;
+                        }
                     }
                     
                     return [
                         'id' => $indicator->id,
-                        'name' => $indicator->name,
+                        'name' => $indicator->description, // Use description as name
                         'description' => $indicator->description,
-                        'area' => $indicator->parameter->area->name,
-                        'parameter' => $indicator->parameter->name,
                         'status' => $status,
                         'progress' => $progress,
                         'completedTasks' => $completedTasks,
                         'totalTasks' => $totalTasks,
                         'documents' => $docCount,
-                        'deadline' => $indicator->deadline ?? 'Not set',
+                        'deadline' => $task && $task->due_date ? $task->due_date : 'Not set',
+                        'taskTitle' => $task ? $task->title : '',
+                        'taskId' => $task ? $task->id : null
                     ];
                 });
                 
@@ -290,6 +292,24 @@ class DashboardController extends Controller
                 $data['activeTasks'] = $activeTasksQuery->count();
             } catch (Exception $e) {
                 Log::error("Error counting active tasks: " . $e->getMessage());
+            }
+            
+            // Task counts for the new completed tasks card
+            try {
+                $taskCountsQuery = Task::query();
+                
+                if ($programId) {
+                    $taskCountsQuery->whereHas('indicator.parameter.area', function($query) use ($programId) {
+                        $query->where('program_id', $programId);
+                    });
+                }
+                
+                $data['totalTasks'] = $taskCountsQuery->count();
+                
+                $completedTasksQuery = clone $taskCountsQuery;
+                $data['completedTasks'] = $completedTasksQuery->where('status', 'completed')->count();
+            } catch (Exception $e) {
+                Log::error("Error counting tasks: " . $e->getMessage());
             }
             
             // Document counts

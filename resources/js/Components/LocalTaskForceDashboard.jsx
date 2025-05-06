@@ -241,7 +241,7 @@ const LocalTaskForceDashboard = () => {
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm font-medium text-gray-500'>Completed Parameters</p>
+                  <p className='text-sm font-medium text-gray-500'>Completed Indicators</p>
                   <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.completedCriteria}/{dashboardData.totalCriteria}</p>
                 </div>
                 <span className='flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600'>
@@ -267,8 +267,8 @@ const LocalTaskForceDashboard = () => {
                 </span>
               </div>
               <p className='mt-4 text-sm text-gray-500'>
-                Next deadline: <span className='font-medium text-gray-700'>
-                  {dashboardData.upcomingDeadlines[0]?.date || 'None'}
+                Next task due: <span className='font-medium text-gray-700'>
+                  {dashboardData.upcomingDeadlines[0]?.task || 'None'}
                 </span>
               </p>
             </div>
@@ -276,16 +276,16 @@ const LocalTaskForceDashboard = () => {
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm font-medium text-gray-500'>In Progress</p>
-                  <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.inProgressCriteria || 0}</p>
+                  <p className='text-sm font-medium text-gray-500'>Tasks In Progress</p>
+                  <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.activeTasks || 0}</p>
                 </div>
                 <span className='flex items-center justify-center w-12 h-12 rounded-full bg-blue-100 text-blue-600'>
                   <ClockIcon className='h-6 w-6' />
                 </span>
               </div>
               <p className='mt-4 text-sm text-gray-500'>
-                Active tasks: <span className='font-medium text-gray-700'>
-                  {dashboardData.activeTasks || 0}
+                Criteria in progress: <span className='font-medium text-gray-700'>
+                  {dashboardData.inProgressCriteria || 0}
                 </span>
               </p>
             </div>
@@ -293,16 +293,18 @@ const LocalTaskForceDashboard = () => {
             <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm font-medium text-gray-500'>Documents</p>
-                  <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.totalDocuments || 0}</p>
+                  <p className='text-sm font-medium text-gray-500'>Completed Tasks</p>
+                  <p className='text-2xl font-semibold text-gray-800 mt-1'>{dashboardData.completedTasks || 0}</p>
                 </div>
-                <span className='flex items-center justify-center w-12 h-12 rounded-full bg-purple-100 text-purple-600'>
-                  <DocumentTextIcon className='h-6 w-6' />
+                <span className='flex items-center justify-center w-12 h-12 rounded-full bg-green-100 text-green-600'>
+                  <CheckCircleIcon className='h-6 w-6' />
                 </span>
               </div>
               <p className='mt-4 text-sm text-gray-500'>
-                Pending review: <span className='font-medium text-gray-700'>
-                  {dashboardData.pendingReviewDocuments || 0}
+                Completion rate: <span className='font-medium text-gray-700'>
+                  {dashboardData.completedTasks && dashboardData.totalTasks 
+                    ? Math.round((dashboardData.completedTasks / dashboardData.totalTasks) * 100) 
+                    : 0}%
                 </span>
               </p>
             </div>
@@ -381,19 +383,19 @@ const LocalTaskForceDashboard = () => {
             <div className='p-4 border-b border-gray-100'>
               <h2 className='text-lg font-semibold text-gray-800 flex items-center'>
                 <ChartPieIcon className='h-5 w-5 mr-2 text-blue-500' />
-                Criteria Breakdown
+                Indicator Tasks Breakdown
               </h2>
-              <p className='text-sm text-gray-500'>Detailed view of all criteria and their status</p>
+              <p className='text-sm text-gray-500'>Detailed view of all indicators and their associated tasks</p>
             </div>
             
             <div className='overflow-x-auto'>
               <table className='min-w-full divide-y divide-gray-200'>
                 <thead className='bg-gray-50'>
                   <tr>
-                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Criteria</th>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Indicator</th>
+                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Task</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Status</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Progress</th>
-                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Tasks</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Documents</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Deadline</th>
                   </tr>
@@ -405,8 +407,11 @@ const LocalTaskForceDashboard = () => {
                       className='hover:bg-blue-50 cursor-pointer transition-colors'
                       onClick={() => openCriteriaDetail(criteria)}
                     >
-                      <td className='px-6 py-4 whitespace-nowrap'>
+                      <td className='px-6 py-4'>
                         <div className='text-sm font-medium text-gray-900'>{criteria.name}</div>
+                      </td>
+                      <td className='px-6 py-4 whitespace-nowrap'>
+                        <div className='text-sm text-gray-900'>{criteria.taskTitle || 'No task assigned'}</div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
                         {getStatusBadge(criteria.status)}
@@ -424,14 +429,20 @@ const LocalTaskForceDashboard = () => {
                         <div className='text-xs text-gray-500 mt-1'>{criteria.progress}%</div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className='text-sm text-gray-900'>{criteria.completedTasks}/{criteria.totalTasks}</div>
-                      </td>
-                      <td className='px-6 py-4 whitespace-nowrap'>
                         <div className='text-sm text-gray-900'>{criteria.documents}</div>
                       </td>
                       <td className='px-6 py-4 whitespace-nowrap'>
-                        <div className={`text-sm ${new Date(criteria.deadline) < new Date() ? 'text-red-600 font-medium' : 'text-gray-900'}`}>
+                        <div className={`text-sm ${
+                          criteria.status !== 'completed' && criteria.deadline && criteria.deadline !== 'Not set' && new Date(criteria.deadline) < new Date() 
+                            ? 'text-red-600 font-medium' 
+                            : 'text-gray-900'
+                        }`}>
                           {criteria.deadline}
+                          {criteria.status !== 'completed' && criteria.deadline && criteria.deadline !== 'Not set' && new Date(criteria.deadline) < new Date() && 
+                            <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                              Overdue
+                            </span>
+                          }
                         </div>
                       </td>
                     </tr>
@@ -494,10 +505,12 @@ const LocalTaskForceDashboard = () => {
                 <div className='bg-blue-50 rounded-xl p-6 border border-blue-100 mb-6'>
                   <h3 className='text-lg font-semibold text-gray-800 mb-4 flex items-center'>
                     <DocumentTextIcon className='w-5 h-5 mr-2 text-blue-500' />
-                    Associated Tasks
+                    In-Progress Tasks
                   </h3>
                   
-                  {getCriteriaDetails(selectedCriteria.id).tasks.map(task => (
+                  {getCriteriaDetails(selectedCriteria.id).tasks
+                    .filter(task => task.status === 'in-progress')
+                    .map(task => (
                     <div key={task.id} className='bg-white rounded-lg p-4 mb-3 border border-gray-100 shadow-sm'>
                       <div className='flex items-center justify-between'>
                         <div className='flex items-center'>
@@ -513,6 +526,38 @@ const LocalTaskForceDashboard = () => {
                       </div>
                     </div>
                   ))}
+                  {!getCriteriaDetails(selectedCriteria.id).tasks.some(task => task.status === 'in-progress') && (
+                    <div className='text-center py-4 text-gray-500'>No tasks in progress</div>
+                  )}
+                </div>
+
+                <div className='bg-green-50 rounded-xl p-6 border border-green-100'>
+                  <h3 className='text-lg font-semibold text-gray-800 mb-4 flex items-center'>
+                    <CheckCircleIcon className='w-5 h-5 mr-2 text-green-500' />
+                    Completed Tasks
+                  </h3>
+                  
+                  {getCriteriaDetails(selectedCriteria.id).tasks
+                    .filter(task => task.status === 'completed')
+                    .map(task => (
+                    <div key={task.id} className='bg-white rounded-lg p-4 mb-3 border border-gray-100 shadow-sm'>
+                      <div className='flex items-center justify-between'>
+                        <div className='flex items-center'>
+                          {getStatusIcon(task.status)}
+                          <div className='ml-3'>
+                            <div className='text-sm font-medium text-gray-900'>{task.title}</div>
+                            <div className='text-xs text-gray-500 mt-1'>{getStatusBadge(task.status)}</div>
+                          </div>
+                        </div>
+                        <button className='text-blue-600 hover:text-blue-800 text-sm font-medium'>
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  {!getCriteriaDetails(selectedCriteria.id).tasks.some(task => task.status === 'completed') && (
+                    <div className='text-center py-4 text-gray-500'>No completed tasks yet</div>
+                  )}
                 </div>
 
                 <div className='bg-green-50 rounded-xl p-6 border border-green-100'>
