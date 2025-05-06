@@ -21,7 +21,7 @@ const LocalTaskForceDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [departmentDropdownOpen, setDepartmentDropdownOpen] = useState(false);
-  const [selectedTimeframe, setSelectedTimeframe] = useState('monthly');
+  const [selectedTimeframe, setSelectedTimeframe] = useState('daily');
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedCriteria, setSelectedCriteria] = useState(null);
 
@@ -188,28 +188,28 @@ const LocalTaskForceDashboard = () => {
 
             <div className='flex gap-2 bg-gray-100 p-1 rounded-lg'>
               <button
+                onClick={() => handleTimeframeChange('daily')}
+                className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                  selectedTimeframe === 'daily' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Daily
+              </button>
+              <button
+                onClick={() => handleTimeframeChange('weekly')}
+                className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                  selectedTimeframe === 'weekly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Weekly
+              </button>
+              <button
                 onClick={() => handleTimeframeChange('monthly')}
                 className={`px-4 py-2 text-sm rounded-md transition-colors ${
                   selectedTimeframe === 'monthly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 Monthly
-              </button>
-              <button
-                onClick={() => handleTimeframeChange('quarterly')}
-                className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                  selectedTimeframe === 'quarterly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Quarterly
-              </button>
-              <button
-                onClick={() => handleTimeframeChange('yearly')}
-                className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                  selectedTimeframe === 'yearly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Yearly
               </button>
             </div>
           </div>
@@ -349,19 +349,18 @@ const LocalTaskForceDashboard = () => {
               <div className='p-6'>
                 <ResponsiveContainer width="100%" height={300}>
                   <LineChart
-                    data={dashboardData.progressOverTime || [
-                      { name: 'Jan', progress: 20 },
-                      { name: 'Feb', progress: 35 },
-                      { name: 'Mar', progress: 45 },
-                      { name: 'Apr', progress: 60 },
-                      { name: 'May', progress: 75 },
-                      { name: 'Jun', progress: dashboardData.overallProgress }
-                    ]}
+                    data={
+                      selectedTimeframe === 'monthly' 
+                        ? dashboardData.progressOverTime.monthly
+                        : selectedTimeframe === 'weekly' 
+                          ? dashboardData.progressOverTime.weekly 
+                          : dashboardData.progressOverTime.daily
+                    }
                     margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="name" />
-                    <YAxis unit="%" />
+                    <XAxis dataKey="date" />
+                    <YAxis domain={[0, 100]} unit="%" />
                     <Tooltip formatter={(value) => [`${value}%`, 'Progress']} />
                     <Legend />
                     <Line

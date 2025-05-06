@@ -28,8 +28,8 @@ const AccreditationAdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [programDropdownOpen, setDepartmentDropdownOpen] = useState(false);
-  const [selectedTimeframe, setSelectedTimeframe] = useState('monthly');
-  const [selectedProgressPeriod, setSelectedProgressPeriod] = useState('monthly');
+  const [selectedTimeframe, setSelectedTimeframe] = useState('daily');
+  const [selectedProgressPeriod, setSelectedProgressPeriod] = useState('daily');
 
   const [selfSurveyRating, setSelfSurveyRating] = useState(0);
   const [selfSurveyData, setSelfSurveyData] = useState({
@@ -351,28 +351,28 @@ const AccreditationAdminDashboard = () => {
 
             <div className='flex gap-2 bg-gray-100 p-1 rounded-lg'>
               <button
+                onClick={() => handleTimeframeChange('daily')}
+                className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                  selectedTimeframe === 'daily' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Daily
+              </button>
+              <button
+                onClick={() => handleTimeframeChange('weekly')}
+                className={`px-4 py-2 text-sm rounded-md transition-colors ${
+                  selectedTimeframe === 'weekly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                Weekly
+              </button>
+              <button
                 onClick={() => handleTimeframeChange('monthly')}
                 className={`px-4 py-2 text-sm rounded-md transition-colors ${
                   selectedTimeframe === 'monthly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
                 }`}
               >
                 Monthly
-              </button>
-              <button
-                onClick={() => handleTimeframeChange('quarterly')}
-                className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                  selectedTimeframe === 'quarterly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Quarterly
-              </button>
-              <button
-                onClick={() => handleTimeframeChange('yearly')}
-                className={`px-4 py-2 text-sm rounded-md transition-colors ${
-                  selectedTimeframe === 'yearly' ? 'bg-white shadow-sm text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Yearly
               </button>
             </div>
           </div>
