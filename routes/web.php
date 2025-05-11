@@ -129,6 +129,8 @@ Route::middleware(['auth', 'role:localtaskforce'])
         Route::get('/tasks/{taskId}/rating', [TaskController::class, 'getTaskRating']);
         Route::post('/tasks/{taskId}/rating', [TaskController::class, 'updateSelfSurveyRating']);
         Route::get('/tasks/ratings', [TaskController::class, 'getRatings']);
+        Route::get('/tasks/history/{indicatorId}', [TaskController::class, 'getTaskHistoryByIndicator']);
+        Route::post('/tasks/{id}/rating', [TaskController::class, 'updateSelfSurveyRating']);
 
 //Route::post('/tasks/{taskId}/rating', [TaskController::class, 'updateSelfSurveyRatings']);
 

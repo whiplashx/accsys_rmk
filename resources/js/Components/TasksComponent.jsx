@@ -20,6 +20,7 @@ const LocalTaskForceTaskView = () => {
     const [indicators, setIndicator] = useState([]);
     const [documents, setDocument] = useState(null);
     const [taskRatings, setTaskRatings] = useState({});
+    const [taskTimeline, setTaskTimeline] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -132,9 +133,7 @@ const LocalTaskForceTaskView = () => {
         } catch (error) {
             console.error("Error logging activity:", error);
         }
-    };
-
-    const openModal = async (task) => {
+    };    const openModal = async (task) => {
         if (!task || !task.id) {
             console.error("Invalid task object passed to openModal:", task);
             toast.error("Invalid task.");
@@ -147,6 +146,11 @@ const LocalTaskForceTaskView = () => {
         try {
             const response = await axios.get(`/task-documents/${task.id}`);
             setTaskDocument(response.data);
+            
+            // Fetch task timeline for this indicator if available
+            if (task.indicator && task.indicator.id) {
+                await fetchTaskTimelineByIndicator(task.indicator.id);
+            }
         } catch (error) {
             console.error("Error fetching task document:", error);
             setTaskDocument(null);
@@ -177,15 +181,14 @@ const LocalTaskForceTaskView = () => {
                 toast.error("Failed to update task status.");
             }
         }
-    };
-
-    const closeModal = () => {
+    };    const closeModal = () => {
         setSelectedTask(null);
         setModalOpen(false);
         setUploadProgress(0);
         setIsUploading(false);
         setTaskDocument(null);
         setErrorMessage("");
+        setTaskTimeline([]); // Clear timeline data when closing modal
     };
 
     const handleRemoveDocumentReference = async () => {
@@ -403,6 +406,17 @@ const LocalTaskForceTaskView = () => {
             setTaskRatings(ratingsData);
         } catch (error) {
             console.error("Error fetching task ratings:", error);
+        }
+    };
+
+    // Function to fetch task timeline by indicator ID
+    const fetchTaskTimelineByIndicator = async (indicatorId) => {
+        try {
+            const response = await axios.get(`/tasks/history/${indicatorId}`);
+            setTaskTimeline(response.data || []);
+        } catch (error) {
+            console.error("Error fetching task timeline:", error);
+            setTaskTimeline([]);
         }
     };
 
@@ -1133,6 +1147,120 @@ const LocalTaskForceTaskView = () => {
                                         Rate how well you think you completed
                                         this task
                                     </p>
+                                </div>
+                            </div>
+
+                            {/* Task Timeline Section */}
+                            <div className="mb-8">
+                                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                                    <svg
+                                        className="w-5 h-5 mr-2 text-purple-500"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z"
+                                        />
+                                    </svg>
+                                    Task Timeline
+                                </h3>
+                                
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                    {taskTimeline.length > 0 ? (
+                                        <div className="relative">
+                                            {/* Timeline line */}
+                                            <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-300"></div>
+                                            
+                                            {/* Timeline items */}
+                                            <div className="space-y-6 relative z-10">
+                                                {taskTimeline.map((timelineItem, index) => (
+                                                    <div key={timelineItem.id} className="flex items-start">
+                                                        {/* Status indicator */}
+                                                        <div className={`rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 z-10
+                                                            ${timelineItem.id === selectedTask.id ? 
+                                                              'bg-purple-100 text-purple-600 ring-2 ring-purple-500 ring-offset-2' : 
+                                                              timelineItem.status === 'completed' ? 'bg-green-100 text-green-600' :
+                                                              timelineItem.status === 'in-progress' ? 'bg-blue-100 text-blue-600' :
+                                                              'bg-yellow-100 text-yellow-600'}`}>
+                                                            {timelineItem.id === selectedTask.id ? (
+                                                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
+                                                                </svg>
+                                                            ) : timelineItem.status === 'completed' ? (
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                                                </svg>
+                                                            ) : timelineItem.status === 'in-progress' ? (
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                </svg>
+                                                            ) : (
+                                                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                                </svg>
+                                                            )}
+                                                        </div>
+                                                        
+                                                        {/* Timeline content */}
+                                                        <div className="ml-4 flex-1">
+                                                            <div className={`p-3 rounded-lg ${timelineItem.id === selectedTask.id ? 'bg-purple-50 border border-purple-100' : 'bg-white border border-gray-100'}`}>
+                                                                <div className="flex justify-between items-start">
+                                                                    <h4 className="text-sm font-semibold text-gray-800">
+                                                                        {timelineItem.title}
+                                                                        {timelineItem.id === selectedTask.id && (
+                                                                            <span className="ml-2 text-xs bg-purple-100 text-purple-800 py-0.5 px-2 rounded-full">
+                                                                                Current
+                                                                            </span>
+                                                                        )}
+                                                                    </h4>
+                                                                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                                                                        timelineItem.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                                                        timelineItem.status === 'in-progress' ? 'bg-blue-100 text-blue-800' :
+                                                                        'bg-yellow-100 text-yellow-800'
+                                                                    }`}>
+                                                                        {timelineItem.status === 'completed' ? 'Completed' : 
+                                                                        timelineItem.status === 'in-progress' ? 'In Progress' : 'Pending'}
+                                                                    </span>
+                                                                </div>
+                                                                <p className="text-xs text-gray-500 mt-1">
+                                                                    {new Date(timelineItem.created_at).toLocaleDateString('en-US', {
+                                                                        year: 'numeric',
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                    })}
+                                                                </p>
+                                                                <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                                                                    {timelineItem.description}
+                                                                </p>
+                                                                
+                                                                {/* Show if document was uploaded for this timeline item */}
+                                                                {timelineItem.has_document && (
+                                                                    <div className="mt-2 flex items-center text-xs text-green-600">
+                                                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                                        </svg>
+                                                                        Document Attached
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <div className="p-4 text-center">
+                                            <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p className="text-gray-500">No previous tasks for this indicator</p>
+                                            <p className="text-sm text-gray-400 mt-1">This appears to be the first task for this indicator</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

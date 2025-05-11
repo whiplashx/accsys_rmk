@@ -32,4 +32,9 @@ class Task extends Model
     {
         return $this->hasOne(Indicator::class, 'task', 'id');
     }
+
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'task_id');
+    }
 }

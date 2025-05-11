@@ -232,5 +232,28 @@ class TaskController extends Controller
             ], 500);
         }
     }
+
+    public function getTaskHistoryByIndicator($indicatorId)
+    {
+        try {
+            // Fetch all tasks related to this indicator, ordered by creation date
+            $tasks = Task::where('indicator_id', $indicatorId)
+                ->orderBy('created_at', 'desc')
+                ->get()
+                ->map(function ($task) {
+                    // Add a flag indicating if this task has a document
+                    $hasDocument = $task->documents()->exists();
+                    return array_merge($task->toArray(), ['has_document' => $hasDocument]);
+                });
+            
+            return response()->json($tasks);
+        } catch (\Exception $e) {
+            Log::error('Error fetching task history: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to fetch task history',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
 }
 
