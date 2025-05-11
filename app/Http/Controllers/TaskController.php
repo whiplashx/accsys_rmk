@@ -194,17 +194,17 @@ class TaskController extends Controller
 
         DB::beginTransaction();
         try {
-            foreach ($request->tasks as $taskData) {
-                // Create the task with consistent field names
+            foreach ($request->tasks as $taskData) {                // Create the task with consistent field names and the new indicator_id
                 $task = Task::create([
                     'title' => $taskData['title'],
                     'description' => $taskData['description'],
                     'assignee' => $taskData['user_id'], // Make sure this matches your assignTask method
                     'status' => 'pending',
                     'program_id' => $taskData['program_id'],
+                    'indicator_id' => $taskData['indicator_id'], // Store the indicator ID directly in the task
                 ]);
 
-                // Link the indicator to this task
+                // Link the indicator to this task (keeping the bidirectional relationship for backward compatibility)
                 $indicator = Indicator::findOrFail($taskData['indicator_id']);
                 $indicator->update(['task' => $task->id]);
 
@@ -231,24 +231,46 @@ class TaskController extends Controller
                 'message' => 'Failed to assign tasks: ' . $e->getMessage()
             ], 500);
         }
-    }
-
-    public function getTaskHistoryByIndicator($indicatorId)
+    }    public function getTaskHistoryByIndicator($indicatorId)
     {
         try {
-            // Fetch all tasks related to this indicator, ordered by creation date
-            $tasks = Task::where('indicator_id', $indicatorId)
-                ->orderBy('created_at', 'desc')
-                ->get()
-                ->map(function ($task) {
-                    // Add a flag indicating if this task has a document
-                    $hasDocument = $task->documents()->exists();
-                    return array_merge($task->toArray(), ['has_document' => $hasDocument]);
-                });
+            // Find the indicator
+            $indicator = Indicator::findOrFail($indicatorId);
+            Log::info('Found indicator with ID: ' . $indicatorId . ', Parameter ID: ' . $indicator->parameter_id);
             
-            return response()->json($tasks);
+            // Use the direct model method to get tasks
+            $tasks = Task::getTasksByIndicator($indicatorId);
+            
+            // If no tasks found with this indicator_id, try getting the current task from indicator
+            if ($tasks->isEmpty() && $indicator->task) {
+                $currentTask = Task::find($indicator->task);
+                if ($currentTask) {
+                    // Update this task with the indicator_id for future queries
+                    $currentTask->indicator_id = $indicatorId;
+                    $currentTask->save();
+                    
+                    // Use just this task
+                    $tasks = collect([$currentTask]);
+                    Log::info('Updated task #' . $currentTask->id . ' with indicator_id: ' . $indicatorId);
+                }
+            }
+            
+            // Map tasks with additional info
+            $mappedTasks = $tasks->map(function ($task) {
+                // Add a flag indicating if this task has a document
+                $hasDocument = $task->documents()->exists();
+                $indicatorData = $task->indicator()->first();
+                
+                return array_merge($task->toArray(), [
+                    'has_document' => $hasDocument,
+                    'indicator' => $indicatorData
+                ]);
+            });
+            
+            Log::info('Returning ' . count($mappedTasks) . ' tasks for the timeline');
+            return response()->json($mappedTasks);
         } catch (\Exception $e) {
-            Log::error('Error fetching task history: ' . $e->getMessage());
+            Log::error('Error fetching task history: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             return response()->json([
                 'error' => 'Failed to fetch task history',
                 'message' => $e->getMessage()

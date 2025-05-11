@@ -21,6 +21,7 @@ const LocalTaskForceTaskView = () => {
     const [documents, setDocument] = useState(null);
     const [taskRatings, setTaskRatings] = useState({});
     const [taskTimeline, setTaskTimeline] = useState([]);
+    const [timelineLoading, setTimelineLoading] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -143,19 +144,27 @@ const LocalTaskForceTaskView = () => {
         }
 
         setSelectedTask(task);
-        setModalOpen(true);
-
+        setModalOpen(true);        // Using two separate try/catch blocks to handle each API call independently
         try {
             const response = await axios.get(`/task-documents/${task.id}`);
             setTaskDocument(response.data);
-            
-            // Fetch task timeline for this indicator if available
-            if (task.indicator && task.indicator.id) {
-                await fetchTaskTimelineByIndicator(task.indicator.id);
-            }
         } catch (error) {
             console.error("Error fetching task document:", error);
             setTaskDocument(null);
+        }
+        
+        // Fetch task timeline for this indicator if available
+        try {
+            if (task.indicator && task.indicator.id) {
+                console.log("Task has indicator with ID:", task.indicator.id);
+                await fetchTaskTimelineByIndicator(task.indicator.id);
+            } else {
+                console.log("Task has no indicator or indicator ID");
+                setTaskTimeline([]);
+            }
+        } catch (error) {
+            console.error("Error in timeline fetch process:", error);
+            setTaskTimeline([]);
         }
 
         if (task.status !== "in-progress" && task.status !== "completed") {
@@ -411,16 +420,20 @@ const LocalTaskForceTaskView = () => {
         } catch (error) {
             console.error("Error fetching task ratings:", error);
         }
-    };
-
-    // Function to fetch task timeline by indicator ID
+    };    // Function to fetch task timeline by indicator ID
     const fetchTaskTimelineByIndicator = async (indicatorId) => {
+        setTimelineLoading(true);
         try {
+            console.log("Fetching task timeline for indicator ID:", indicatorId);
             const response = await axios.get(`/tasks/history/${indicatorId}`);
+            console.log("Task timeline response:", response.data);
             setTaskTimeline(response.data || []);
         } catch (error) {
             console.error("Error fetching task timeline:", error);
+            console.error("Error details:", error.response ? error.response.data : "No response data");
             setTaskTimeline([]);
+        } finally {
+            setTimelineLoading(false);
         }
     };
 
@@ -451,7 +464,7 @@ const LocalTaskForceTaskView = () => {
         <div className="bg-gray-50 min-h-screen py-8">
             <div className="container mx-auto px-4 max-w-6xl">
                 <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2 texw23t-center">
                         Assigned Tasks
                     </h1>
                     <p className="text-gray-500 text-center mb-8">
@@ -975,8 +988,12 @@ const LocalTaskForceTaskView = () => {
                                     Task Timeline
                                 </h3>
                                 
-                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-                                    {taskTimeline.length > 0 ? (
+                                <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">                                    {timelineLoading ? (
+                                        <div className="flex justify-center items-center py-8">
+                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+                                            <span className="ml-2 text-gray-600">Loading timeline...</span>
+                                        </div>
+                                    ) : taskTimeline && taskTimeline.length > 0 ? (
                                         <div className="relative">
                                             {/* Timeline line */}
                                             <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-300"></div>
