@@ -34,13 +34,20 @@ class TaskController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to fetch rating'], 500);
         }
-    }
-
-    public function updateSelfSurveyRating(Request $request, $taskId)
+    }    public function updateSelfSurveyRating(Request $request, $taskId)
     {
         try {
             $task = Task::findOrFail($taskId);
             $task->selfsurvey_rating = $request->input('rating');
+            
+            // Make sure indicator_id is set if we have an indicator related to this task
+            if (!$task->indicator_id) {
+                $indicator = Indicator::where('task', $task->id)->first();
+                if ($indicator) {
+                    $task->indicator_id = $indicator->id;
+                }
+            }
+            
             $task->save();
 
             return response()->json([
@@ -65,17 +72,16 @@ class TaskController extends Controller
             $user = User::findOrFail($request->user_id);
             $indicator = Indicator::findOrFail($request->indicator_id);
 
-            DB::beginTransaction();
-
-            // Create the task and associate it with the indicator
+            DB::beginTransaction();            // Create the task and associate it with the indicator
             $task = Task::create([
                 'title' => $request->title,
                 'description' => $request->description,
                 'assignee' => $user->id,
                 'status' => 'pending',
+                'indicator_id' => $request->indicator_id, // Store the indicator ID directly in the task
             ]);
 
-            // Update the indicator's `task` field to reference the created task
+            // Update the indicator's `task` field to reference the created task (bidirectional relationship)
             $indicator->update(['task' => $task->id]);
 
             DB::commit();
