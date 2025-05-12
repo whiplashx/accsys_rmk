@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 const LocalTaskForceTaskView = () => {
-    const [tasks, setTasks] = useState([]);
+    const [indicators, setIndicators] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [selectedTask, setSelectedTask] = useState(null);
@@ -17,7 +17,6 @@ const LocalTaskForceTaskView = () => {
     const [taskDocument, setTaskDocument] = useState(null);
     const [errorMessage, setErrorMessage] = useState("");
     const [userId, setUserId] = useState(null);
-    const [indicators, setIndicator] = useState([]);
     const [documents, setDocument] = useState(null);
     const [taskRatings, setTaskRatings] = useState({});
     const [taskTimeline, setTaskTimeline] = useState([]);
@@ -27,8 +26,7 @@ const LocalTaskForceTaskView = () => {
         const fetchData = async () => {
             try {
                 await Promise.all([
-                    fetchAssignedTasks(),
-                    fetchIndicator(),
+                    fetchAssignedIndicators(),
                     fetchDocument(),
                     fetchUserId(),
                     fetchTaskRatings(),
@@ -39,47 +37,25 @@ const LocalTaskForceTaskView = () => {
         };
 
         fetchData();
-    }, []);
-
-    const fetchIndicator = async () => {
-        try {
-            const response = await axios.get("indicatorsForTask");
-            setIndicator(response.data || []);
-        } catch (error) {
-            // Changed 'e' to 'error'
-            console.error("Error fetching indicators:", error);
-            setError("Failed to get indicators. Please try again later.");
-        }
-    };
-    const fetchDocument = async () => {
+    }, []);    const fetchDocument = async () => {
         try {
             const response = await axios.get("documentsForTask");
             setDocument(response.data);
         } catch (error) {
-            // Changed 'e' to 'error'
-            console.error("Error documents:", error);
+            console.error("Error fetching documents:", error);
             setError("Failed to get documents. Please try again later.");
         }
     };
 
-    // Function to get the indicator for a task
-    const getIndicatorForTask = (indicatorId) => {
-        //console.log(indicators);
-        return (
-            indicators?.find((indicator) => indicator.id === indicatorId) ||
-            null
-        );
-    };
-
-    const fetchAssignedTasks = async () => {
+    const fetchAssignedIndicators = async () => {
         try {
             setLoading(true);
-            const response = await axios.get("/assigned-tasks");
-            setTasks(response.data);
+            const response = await axios.get("/assigned-indicators");
+            setIndicators(response.data);
             setLoading(false);
         } catch (error) {
-            console.error("Error fetching assigned tasks:", error);
-            setError("Failed to load tasks. Please try again later.");
+            console.error("Error fetching assigned indicators:", error);
+            setError("Failed to load indicators. Please try again later.");
             setLoading(false);
         }
     };
@@ -91,19 +67,19 @@ const LocalTaskForceTaskView = () => {
         } catch (error) {
             console.error("Error fetching user ID:", error);
         }
-    };
+    };    const handleStatusChange = async (taskId, newStatus) => {
+        // Find the indicator that contains this task
+        const indicator = indicators.find((ind) => ind.task_id === taskId);
 
-    const handleStatusChange = async (taskId, newStatus) => {
-        const task = tasks.find((t) => t.id === taskId);
-
-        if (task && task.status === newStatus) {
+        if (indicator && indicator.status === newStatus) {
             return; // Don't update if the status is the same
         }
         try {
             await axios.patch(`/tasks/${taskId}`, { status: newStatus });
-            setTasks((tasks) =>
-                tasks.map((task) =>
-                    task.id === taskId ? { ...task, status: newStatus } : task
+            // Update the indicators array with the new status
+            setIndicators((indicators) =>
+                indicators.map((indicator) =>
+                    indicator.task_id === taskId ? { ...indicator, status: newStatus } : indicator
                 )
             );
             await logActivity(
@@ -135,18 +111,28 @@ const LocalTaskForceTaskView = () => {
             console.error("Error logging activity:", error);
         }
     };    
-    
-    const openModal = async (task) => {
-        if (!task || !task.id) {
-            console.error("Invalid task object passed to openModal:", task);
-            toast.error("Invalid task.");
+      const openModal = async (indicator) => {
+        if (!indicator || !indicator.task_id) {
+            console.error("Invalid indicator object passed to openModal:", indicator);
+            toast.error("Invalid indicator.");
             return;
         }
 
+        const taskId = indicator.task_id;
+        
+        // Create a task object with needed properties from the indicator
+        const task = {
+            id: taskId,
+            status: indicator.status,
+            indicator: { id: indicator.id }
+        };
+        
         setSelectedTask(task);
-        setModalOpen(true);        // Using two separate try/catch blocks to handle each API call independently
+        setModalOpen(true);
+        
+        // Using two separate try/catch blocks to handle each API call independently
         try {
-            const response = await axios.get(`/task-documents/${task.id}`);
+            const response = await axios.get(`/task-documents/${taskId}`);
             setTaskDocument(response.data);
         } catch (error) {
             console.error("Error fetching task document:", error);
@@ -155,11 +141,11 @@ const LocalTaskForceTaskView = () => {
         
         // Fetch task timeline for this indicator if available
         try {
-            if (task.indicator && task.indicator.id) {
-                console.log("Task has indicator with ID:", task.indicator.id);
-                await fetchTaskTimelineByIndicator(task.indicator.id);
+            if (indicator.id) {
+                console.log("Fetching timeline for indicator with ID:", indicator.id);
+                await fetchTaskTimelineByIndicator(indicator.id);
             } else {
-                console.log("Task has no indicator or indicator ID");
+                console.log("Indicator has no ID");
                 setTaskTimeline([]);
             }
         } catch (error) {
@@ -167,14 +153,14 @@ const LocalTaskForceTaskView = () => {
             setTaskTimeline([]);
         }
 
-        if (task.status !== "in-progress" && task.status !== "completed") {
+        if (indicator.status !== "in-progress" && indicator.status !== "completed") {
             try {
-                await axios.patch(`/tasks/${task.id}`, {
+                await axios.patch(`/tasks/${taskId}`, {
                     status: "in-progress",
                 });
-                setTasks((tasks) =>
-                    tasks.map((t) =>
-                        t.id === task.id ? { ...t, status: "in-progress" } : t
+                setIndicators((indicators) =>
+                    indicators.map((ind) =>
+                        ind.task_id === taskId ? { ...ind, status: "in-progress" } : ind
                     )
                 );
 
@@ -182,7 +168,7 @@ const LocalTaskForceTaskView = () => {
                     "update",
                     "Task in-progress",
                     "Task",
-                    task.id
+                    taskId
                 );
             } catch (error) {
                 console.error(
@@ -192,7 +178,7 @@ const LocalTaskForceTaskView = () => {
                 toast.error("Failed to update task status.");
             }
         }
-    };    
+    };
     
     const closeModal = () => {
         setSelectedTask(null);
@@ -463,12 +449,11 @@ const LocalTaskForceTaskView = () => {
     return (
         <div className="bg-gray-50 min-h-screen py-8">
             <div className="container mx-auto px-4 max-w-6xl">
-                <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
-                    <h1 className="text-3xl font-bold text-gray-800 mb-2 texw23t-center">
-                        Assigned Tasks
+                <div className="bg-white rounded-xl shadow-sm p-8 mb-8">                    <h1 className="text-3xl font-bold text-gray-800 mb-2 texw23t-center">
+                        Assigned Indicators
                     </h1>
                     <p className="text-gray-500 text-center mb-8">
-                        Manage and track your assigned tasks
+                        Manage and track your assigned indicators and their associated tasks
                     </p>
 
                     {loading ? (
@@ -506,8 +491,7 @@ const LocalTaskForceTaskView = () => {
                     ) : (
                         <>
                             {/* Active Tasks Section */}
-                            <div className="mb-12">
-                                <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
+                            <div className="mb-12">                                <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
                                     <svg
                                         className="w-5 h-5 mr-2 text-blue-500"
                                         fill="none"
@@ -522,61 +506,51 @@ const LocalTaskForceTaskView = () => {
                                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
                                         ></path>
                                     </svg>
-                                    Active Tasks
-                                </h2>
-
-                                {tasks.some(
-                                    (task) =>
-                                        task.status === "in-progress" ||
-                                        task.status === "pending"
+                                    Active Assigned Indicators
+                                </h2>{indicators.some(
+                                    (indicator) =>
+                                        indicator.status === "in-progress" ||
+                                        indicator.status === "pending"
                                 ) ? (
                                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                        {tasks.map((task) => {
+                                        {indicators.map((indicator) => {
                                             if (
-                                                task.status === "in-progress" ||
-                                                task.status === "pending"
+                                                indicator.status === "in-progress" ||
+                                                indicator.status === "pending"
                                             ) {
-                                                const indicator =
-                                                    getIndicatorForTask(
-                                                        task.id
-                                                    );
                                                 return (
                                                     <div
-                                                        key={task.id}
+                                                        key={indicator.id}
                                                         className="bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden cursor-pointer"
                                                         onClick={() =>
-                                                            openModal(task)
+                                                            openModal(indicator)
                                                         }
-                                                    >
-                                                        <div className="p-5 border-b border-gray-100">
+                                                    >                                                        <div className="p-5 border-b border-gray-100">
                                                             <div className="flex justify-between items-start mb-3">
                                                                 <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">
-                                                                    {task.title}
+                                                                    {indicator.description}
                                                                 </h3>
                                                                 {getStatusIcon(
-                                                                    task.status
+                                                                    indicator.status
                                                                 )}
                                                             </div>
                                                             <div className="mb-3">
                                                                 {getStatusBadge(
-                                                                    task.status
+                                                                    indicator.status
                                                                 )}
                                                             </div>
-                                                            <p className="text-gray-600 mb-4 line-clamp-2">
-                                                                {
-                                                                    task.description
-                                                                }
-                                                            </p>
-
-                                                            {indicator && (
+                                                            {indicator.parameter && (
+                                                                <p className="text-gray-600 mb-4 line-clamp-2">
+                                                                    <span className="font-medium">Parameter:</span> {indicator.parameter.name}
+                                                                </p>
+                                                            )}                                                            {indicator.assigned_user && (
                                                                 <div className="bg-gray-50 p-3 rounded-md">
                                                                     <p className="text-sm text-gray-600 font-medium mb-1">
-                                                                        Indicator
+                                                                        Assigned User
                                                                     </p>
                                                                     <p className="text-sm text-gray-500 line-clamp-2">
-                                                                        {
-                                                                            indicator.description
-                                                                        }
+                                                                        {indicator.assigned_user.name}
+                                                                        <span className="text-xs text-gray-400 block">{indicator.assigned_user.email}</span>
                                                                     </p>
 
                                                                     {indicator.documents ? (
@@ -618,10 +592,8 @@ const LocalTaskForceTaskView = () => {
                                                                     )}
                                                                 </div>
                                                             )}
-                                                        </div>
-
-                                                        {taskRatings[
-                                                            task.id
+                                                        </div>                                                        {indicator.task_id && taskRatings[
+                                                            indicator.task_id
                                                         ] && (
                                                             <div className="px-5 py-3 bg-gray-50">
                                                                 <div className="flex items-center justify-between mb-1">
@@ -639,8 +611,7 @@ const LocalTaskForceTaskView = () => {
                                                                         </svg>
                                                                         {
                                                                             taskRatings[
-                                                                                task
-                                                                                    .id
+                                                                                indicator.task_id
                                                                             ]
                                                                         }
                                                                         /5
@@ -652,8 +623,7 @@ const LocalTaskForceTaskView = () => {
                                                                         style={{
                                                                             width: `${
                                                                                 (taskRatings[
-                                                                                    task
-                                                                                        .id
+                                                                                    indicator.task_id
                                                                                 ] /
                                                                                     5) *
                                                                                 100
@@ -669,8 +639,7 @@ const LocalTaskForceTaskView = () => {
                                             return null;
                                         })}
                                     </div>
-                                ) : (
-                                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 text-center">
+                                ) : (                                    <div className="bg-blue-50 border border-blue-100 rounded-lg p-6 text-center">
                                         <svg
                                             className="w-12 h-12 text-blue-400 mx-auto mb-4"
                                             fill="none"
@@ -685,11 +654,11 @@ const LocalTaskForceTaskView = () => {
                                             ></path>
                                         </svg>
                                         <p className="text-blue-800 text-lg font-medium">
-                                            No active tasks assigned to you at
+                                            No active indicators assigned to you at
                                             the moment.
                                         </p>
                                         <p className="text-blue-600 mt-1">
-                                            All your tasks are either completed
+                                            All your indicators are either completed
                                             or not yet assigned.
                                         </p>
                                     </div>
@@ -707,10 +676,16 @@ const LocalTaskForceTaskView = () => {
                         <div className="p-6 border-b border-gray-100">
                             <div className="flex justify-between items-center">
                                 <div className="flex items-center">
-                                    {getStatusIcon(selectedTask.status)}
-                                    <h2 className="text-2xl font-bold text-gray-800 ml-3">
-                                        {selectedTask.title}
-                                    </h2>
+                                    {getStatusIcon(selectedTask.status)}                                    <div className="ml-3">
+                                        <h2 className="text-2xl font-bold text-gray-800">
+                                            {indicators.find(i => i.task_id === selectedTask.id)?.description || "Indicator"}
+                                        </h2>
+                                        {indicators.find(i => i.task_id === selectedTask.id)?.parameter && (
+                                            <p className="text-sm text-gray-500 mt-1">
+                                                Parameter: {indicators.find(i => i.task_id === selectedTask.id)?.parameter?.name}
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                                 <button
                                     onClick={closeModal}
@@ -733,8 +708,7 @@ const LocalTaskForceTaskView = () => {
                             </div>
                         </div>
 
-                        <div className="p-6">
-                            <div className="mb-6">
+                        <div className="p-6">                                <div className="mb-6">
                                 <div className="flex items-center mb-2">
                                     <span className="text-sm font-medium text-gray-500">
                                         Status:
@@ -744,10 +718,42 @@ const LocalTaskForceTaskView = () => {
                                     </div>
                                 </div>
 
-                                <p className="text-gray-700 mb-4">
-                                    {selectedTask.description ||
-                                        "No description provided."}
-                                </p>
+                                {/* Show the indicator info with assigned user details */}
+                                {(() => {
+                                    const indicator = indicators.find(ind => ind.task_id === selectedTask.id);
+                                    return indicator ? (
+                                        <>
+                                            <div className="bg-blue-50 p-4 rounded-lg mb-4 border border-blue-100">
+                                                <h3 className="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                                                    <svg className="w-4 h-4 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                                                    </svg>
+                                                    Assigned To
+                                                </h3>
+                                                <div className="flex items-center">
+                                                    <div className="flex-shrink-0 h-9 w-9 bg-gradient-to-r from-blue-600 to-blue-400 rounded-full flex items-center justify-center text-white font-medium text-sm">
+                                                        {indicator.assigned_user?.name.substring(0, 2).toUpperCase() || "?"}
+                                                    </div>
+                                                    <div className="ml-3">
+                                                        <p className="text-gray-800 font-medium">{indicator.assigned_user?.name || "Not assigned"}</p>
+                                                        <p className="text-gray-500 text-sm">{indicator.assigned_user?.email || ""}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {indicator.parameter && (
+                                                <p className="text-gray-700 mb-4">
+                                                    <span className="font-medium">Parameter:</span> {indicator.parameter.name}
+                                                </p>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <p className="text-gray-700 mb-4">
+                                            {selectedTask.description || "No description provided."}
+                                        </p>
+                                    );
+                                })()}
+                                
                                 <div className="bg-gray-50 p-4 rounded-lg mb-6">
                                     <h3 className="text-sm font-medium text-gray-500 mb-2">
                                         Task Details
@@ -759,8 +765,7 @@ const LocalTaskForceTaskView = () => {
                                 </div>
                             </div>
 
-                            <div className="mb-8 bg-blue-50 rounded-xl p-6 border border-blue-100">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <div className="mb-8 bg-blue-50 rounded-xl p-6 border border-blue-100">                                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                     <svg
                                         className="w-5 h-5 mr-2 text-blue-500"
                                         fill="none"
@@ -774,7 +779,7 @@ const LocalTaskForceTaskView = () => {
                                             d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                                         />
                                     </svg>
-                                    Indicator Document
+                                    Supporting Documentation
                                 </h3>
                                 {selectedTask.indicator?.documents ? (
                                     <div className="space-y-4">
@@ -976,17 +981,14 @@ const LocalTaskForceTaskView = () => {
                                                 </div>
                                             ))}
                                         </div>
-                                    </div>
-                                    <p className="text-sm text-gray-500 mt-3 italic">
-                                        Rate how well you think you completed
-                                        this task
+                                    </div>                                    <p className="text-sm text-gray-500 mt-3 italic">
+                                        Rate how well you think the indicator objectives have been achieved
                                     </p>
                                 </div>
                             </div>
 
                             {/* Task Timeline Section */}
-                            <div className="mb-8">
-                                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                            <div className="mb-8">                                <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                                     <svg
                                         className="w-5 h-5 mr-2 text-purple-500"
                                         fill="none"
@@ -1000,7 +1002,7 @@ const LocalTaskForceTaskView = () => {
                                             d="M13 10V3L4 14h7v7l9-11h-7z"
                                         />
                                     </svg>
-                                    Task Timeline
+                                    Indicator Timeline
                                 </h3>
                                 
                                 <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">                                    {timelineLoading ? (
@@ -1113,9 +1115,8 @@ const LocalTaskForceTaskView = () => {
                                         <div className="p-4 text-center">
                                             <svg className="w-12 h-12 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                            </svg>
-                                            <p className="text-gray-500">No previous tasks for this indicator</p>
-                                            <p className="text-sm text-gray-400 mt-1">This appears to be the first task for this indicator</p>
+                                            </svg>                                            <p className="text-gray-500">No previous activity for this indicator</p>
+                                            <p className="text-sm text-gray-400 mt-1">This appears to be the first time this indicator has been worked on</p>
                                         </div>
                                     )}
                                 </div>

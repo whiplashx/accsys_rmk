@@ -116,6 +116,10 @@ Route::middleware(['auth', 'role:localtaskforce'])
         Route::get('/file/view/{documentId}', [DocumentController::class, 'view']);
         //tasks
         Route::get('/assigned-tasks', [TaskController::class, 'getAssignedTasks']);
+        Route::get('/assigned-indicators', [IndicatorController::class, 'getAssignedIndicators']);
+        Route::post('/indicators', [IndicatorController::class, 'store']);
+        Route::put('/indicators/{indicator}', [IndicatorController::class, 'update']);
+        Route::post('/indicators/{indicator}/assign', [IndicatorController::class, 'assignToUser']);
         Route::patch('/tasks/{taskId}', [TaskController::class, 'updateTaskStatus']);
         Route::post('/activities', [TaskController::class, 'logActivity']);
         Route::post('/upload-document', [DocumentController::class, 'upload']);

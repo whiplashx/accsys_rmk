@@ -5,12 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 
 class Indicator extends Model
-{
-    protected $fillable = [
+{    protected $fillable = [
         'parameter_id',
         'description',
         'documents',
-        'task'
+        'task',
+        'user_id'
     ];
 
     // Ensure these fields can be null
@@ -19,13 +19,9 @@ class Indicator extends Model
         'task' => null
     ];
 
-    protected $table = 'indicators';
-
-    // Add with property to automatically eager load task relationship
-    protected $with = ['task'];
-
-    // Add appends property to automatically include task data
-    protected $appends = ['task_data'];
+    protected $table = 'indicators';    // Add with property to automatically eager load task and user relationships
+    protected $with = ['task', 'user'];    // Add appends property to automatically include task data and user data
+    protected $appends = ['task_data', 'user_data'];
 
     // Define a relationship with the Task model
     public function task()
@@ -45,10 +41,22 @@ class Indicator extends Model
         return $this->belongsTo(Parameter::class, 'parameter_id'); // Assuming 'parameter_id' is the foreign key
     }
 
+    // Define relationship with User model
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     // Add accessor method to get task data
     public function getTaskDataAttribute()
     {
         return $this->task()->first();
+    }
+
+    // Add accessor method to get user data
+    public function getUserDataAttribute()
+    {
+        return $this->user()->first();
     }
 
 }

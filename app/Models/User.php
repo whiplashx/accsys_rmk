@@ -53,6 +53,11 @@ class User extends Authenticatable
         return $this->hasMany(Task::class, 'assignee');
     }
     
+    public function indicators()
+    {
+        return $this->hasMany(Indicator::class, 'user_id');
+    }
+    
     public function department()
     {
         return $this->belongsTo(Program::class, 'program_id', 'id'); // Changed from 'programs' to 'program_id'
