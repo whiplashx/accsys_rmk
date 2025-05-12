@@ -8,7 +8,7 @@ import LocalTaskForceTaskView from "@/Components/TasksComponent";
 export default function AccreditationLocalTaskForce(){
     return(
         <TaskForceLayout>
-                <div className="min-h-screen bg-gray.-50 w-full">
+                <div className="min-h-screen bg-gray-50 w-full">
       <main>
         <div className="w-full mx-auto py-6">
           <LocalTaskForceTaskView></LocalTaskForceTaskView>
