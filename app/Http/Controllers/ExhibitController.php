@@ -54,6 +54,16 @@ class ExhibitController extends Controller
     public function upload(Request $request)
     {
         try {
+            // Add debugging
+            \Log::info('Upload request received', [
+                'title' => $request->title,
+                'area_id' => $request->area_id,
+                'program_id' => $request->program_id,
+                'fileType' => $request->fileType,
+                'file_present' => $request->hasFile('file'),
+                'user_id' => Auth::id()
+            ]);
+
             $validator = Validator::make($request->all(), [
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
@@ -64,6 +74,7 @@ class ExhibitController extends Controller
             ]);
 
             if ($validator->fails()) {
+                \Log::error('Validation failed', ['errors' => $validator->errors()]);
                 return response()->json(['error' => $validator->errors()], 422);
             }
 
@@ -72,8 +83,17 @@ class ExhibitController extends Controller
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = 'exhibits/' . $fileName;
 
+            \Log::info('About to store file', [
+                'original_name' => $file->getClientOriginalName(),
+                'file_name' => $fileName,
+                'file_path' => $filePath,
+                'file_size' => $file->getSize()
+            ]);
+
             // Store file in private storage disk
             Storage::disk('private')->put($filePath, file_get_contents($file));
+
+            \Log::info('File stored successfully, creating database record');
 
             // Create exhibit record
             $exhibit = Exhibit::create([
@@ -85,8 +105,10 @@ class ExhibitController extends Controller
                 'mime_type' => $file->getMimeType(),
                 'area_id' => $request->area_id,
                 'program_id' => $request->program_id,
-                'user_id' => Auth::id(),
+                'uploaded_by' => Auth::id(),
             ]);
+
+            \Log::info('Database record created successfully', ['exhibit_id' => $exhibit->id]);
 
             // Format response
             $response = [
@@ -103,6 +125,12 @@ class ExhibitController extends Controller
 
             return response()->json($response, 201);
         } catch (\Exception $e) {
+            \Log::error('Error uploading exhibit', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json(['error' => 'Failed to upload exhibit: ' . $e->getMessage()], 500);
         }
     }

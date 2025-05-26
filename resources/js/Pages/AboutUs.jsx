@@ -21,34 +21,34 @@ const UniversityDashboard = () => {
     // Team members data
     const teamMembers = [
         {
-            name: "Jane Doe",
-            role: "Lead Developer",
+            name: "Josh Neiel C. Manalo",
+            role: "Lead Developer/Project Leader",
             description: "Responsible for system architecture and backend development",
-            image: "/images/placeholder.jpg"
+            image: "/images/profiles/josh.jpg"
         },
         {
-            name: "John Smith",
-            role: "Frontend Developer",
+            name: "Myca G. Masilungan",
+            role: "Copy Writer",
             description: "Created the user interface and user experience design",
-            image: "/images/placeholder.jpg"
+            image: "/images/profiles/myca.jpg"
         },
         {
-            name: "Alex Johnson",
-            role: "Database Specialist",
-            description: "Designed and implemented the database architecture",
-            image: "/images/placeholder.jpg"
-        },
-        {
-            name: "Sam Wilson",
-            role: "QA Engineer",
-            description: "Ensured quality and performance of the system",
-            image: "/images/placeholder.jpg"
-        },
-        {
-            name: "Taylor Brown",
+            name: "Mc Xavier Alcaraz",
             role: "Project Manager",
             description: "Coordinated development and managed project timeline",
-            image: "/images/placeholder.jpg"
+            image: "/images/profiles/xavier.jpg"
+        },
+        {
+            name: "Alexander Siasat",
+            role: "QA Engineer",
+            description: "Designed and implemented the database architecture",
+            image: "/images/profiles/alex.jpg"
+        },
+        {
+            name: "John Lester Bruit",
+            role: "Core",
+            description: "Ensured quality and performance of the system",
+            image: "/images/profiles/lester.jpg"
         }
     ];
 
@@ -200,14 +200,29 @@ const UniversityDashboard = () => {
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-8">
+                        <div className="flex flex-col items-center gap-8 max-w-md mx-auto">
                             {teamMembers.map((member, index) => (
                                 <div 
                                     key={index} 
-                                    className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-50 group hover:border-emerald-50 hover:-translate-y-1"
+                                    className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-all duration-500 border border-gray-50 group hover:border-emerald-50 hover:-translate-y-1 w-full"
                                 >
-                                    <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mb-6 mx-auto transition-transform duration-300 group-hover:scale-110">
-                                        <span className="text-2xl text-emerald-700">{member.name.charAt(0)}</span>
+                                    <div className="w-40 h-40 rounded-full mb-6 mx-auto transition-transform duration-300 group-hover:scale-110 overflow-hidden border-4 border-emerald-100 group-hover:border-emerald-200 relative">
+                                        <img 
+                                            src={member.image} 
+                                            alt={member.name}
+                                            className="w-full h-full object-cover absolute inset-0"
+                                            onError={(e) => {
+                                                console.log(`Failed to load image: ${member.image}`);
+                                                e.target.style.display = 'none';
+                                                e.target.parentNode.querySelector('.fallback-avatar').style.display = 'flex';
+                                            }}
+                                            onLoad={() => {
+                                                console.log(`Successfully loaded image: ${member.image}`);
+                                            }}
+                                        />
+                                        <div className="fallback-avatar w-full h-full bg-emerald-100 flex items-center justify-center absolute inset-0" style={{display: 'none'}}>
+                                            <span className="text-5xl text-emerald-700 font-semibold">{member.name.charAt(0)}</span>
+                                        </div>
                                     </div>
                                     <h3 className="text-xl font-medium text-emerald-900 mb-3 text-center">
                                         {member.name}
@@ -217,15 +232,6 @@ const UniversityDashboard = () => {
                                         {member.description}
                                     </p>
                                     <div className="flex justify-center gap-4">
-                                        <a href="#" className="text-emerald-500 hover:text-emerald-700 transition-colors">
-                                            <Twitter size={16} />
-                                        </a>
-                                        <a href="#" className="text-emerald-500 hover:text-emerald-700 transition-colors">
-                                            <Instagram size={16} />
-                                        </a>
-                                        <a href="#" className="text-emerald-500 hover:text-emerald-700 transition-colors">
-                                            <Facebook size={16} />
-                                        </a>
                                     </div>
                                 </div>
                             ))}
@@ -330,19 +336,13 @@ const UniversityDashboard = () => {
                             </h3>
                             <div className="flex gap-4">
                                 <a
-                                    href="#"
+                                    href="https://www.facebook.com/joshneiel.manalo/"
                                     className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-all duration-300"
                                 >
                                     <Facebook className="w-5 h-5" />
                                 </a>
                                 <a
-                                    href="#"
-                                    className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-all duration-300"
-                                >
-                                    <Twitter className="w-5 h-5" />
-                                </a>
-                                <a
-                                    href="#"
+                                    href="https://www.instagram.com/shhooojjj/"
                                     className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 transition-all duration-300"
                                 >
                                     <Instagram className="w-5 h-5" />

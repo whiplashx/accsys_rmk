@@ -23,7 +23,7 @@ class Exhibit extends Model
         'mime_type',
         'area_id',
         'program_id',
-        'user_id', // Changed from uploaded_by to user_id to match controller
+        'uploaded_by', // Changed from user_id to uploaded_by to match migration
     ];
     
     /**
@@ -47,6 +47,6 @@ class Exhibit extends Model
      */
     public function user()
     {
-        return $this->belongsTo(User::class); // Changed from uploader to user to match controller
+        return $this->belongsTo(User::class, 'uploaded_by'); // Specify the foreign key
     }
 }
