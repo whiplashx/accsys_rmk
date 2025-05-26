@@ -25,7 +25,6 @@
         "@tanstack/react-query": "^5.62.3",
         "html2pdf.js": "^0.10.3",
         "lucide-react": "^0.460.0",
-        "pdfjs-dist": "^5.2.133",
         "react-chat-elements": "^12.0.18",
         "react-pdf": "^9.2.1",
         "react-to-pdf": "^2.0.0",

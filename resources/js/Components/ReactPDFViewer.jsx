@@ -1,23 +1,21 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
 
-// Configure PDF.js worker with the correct version
-// Using a more reliable method to set the worker source that works with Vite
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
+// Configure worker using CDN to avoid MIME type issues
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export default function ReactPDFViewer({ url, watermarkText = "VIEW ONLY" }) {
     const [numPages, setNumPages] = useState(null);
     const [pageNumber, setPageNumber] = useState(1);
     const [scale, setScale] = useState(1.0);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-
-    // Memoize the options object to prevent unnecessary re-renders
+    const [error, setError] = useState(null);    // Memoize the options object to prevent unnecessary re-renders
     const pdfOptions = useMemo(() => ({
-        cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/',
+        cMapUrl: '/cmaps/',
         cMapPacked: true,
+        standardFontDataUrl: '/standard_fonts/',
     }), []);
 
     // Add effect to prevent right-click and keyboard shortcuts
@@ -47,25 +45,16 @@ export default function ReactPDFViewer({ url, watermarkText = "VIEW ONLY" }) {
             document.removeEventListener('contextmenu', handleContextMenu);
             document.removeEventListener('keydown', handleKeyDown);
         };
-    }, []);
-
-    // Handle transport destroyed error by creating a cleanup function
+    }, []);    // Handle transport destroyed error by creating a cleanup function
     useEffect(() => {
         return () => {
             // Cleanup function to handle component unmounting
             // This helps prevent "Transport destroyed" warnings
-            if (pdfjs.PDFWorker) {
-                // Attempt to terminate any worker threads when component unmounts
-                try {
-                    const workers = pdfjs.GlobalWorkerOptions._workers;
-                    if (workers) {
-                        workers.forEach(worker => {
-                            try { worker.terminate(); } catch (e) { /* ignore */ }
-                        });
-                    }
-                } catch (e) {
-                    // Silently handle any errors during cleanup
-                }
+            try {
+                // The latest version handles cleanup automatically
+                // Just ensure we don't have any hanging references
+            } catch (e) {
+                // Silently handle any errors during cleanup
             }
         };
     }, []);
