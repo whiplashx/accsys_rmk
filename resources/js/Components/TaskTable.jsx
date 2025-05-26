@@ -20,71 +20,73 @@ const TasksTable = () => {
       setLoading(false);
     }
   };
-
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      <div className="flex items-center justify-center py-16">
+        <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-200 border-t-gray-600"></div>
       </div>
     );
   }
-
   const getStatusClass = (status) => {
     switch (status) {
       case 'pending':
-        return 'text-orange-500 font-bold';
+        return 'bg-yellow-50 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium';
       case 'completed':
-        return 'text-green-500 font-bold';
+        return 'bg-green-50 text-green-700 px-2 py-1 rounded-full text-xs font-medium';
       case 'in-progress':
-        return 'text-blue-500 font-bold';
+        return 'bg-blue-50 text-blue-700 px-2 py-1 rounded-full text-xs font-medium';
       case 'cancelled':
-        return 'text-red-500 font-bold';
+        return 'bg-red-50 text-red-700 px-2 py-1 rounded-full text-xs font-medium';
       default:
-        return '';
+        return 'bg-gray-50 text-gray-700 px-2 py-1 rounded-full text-xs font-medium';
     }
   };
-
   return (
-    <div className="container mx-auto mt-8">
-      <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-4 text-center text-slate-700">Tasks</h2>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-slate-300">
-            <thead>
-              <tr className="bg-slate-100">
-                <th className="border border-slate-300 p-2 text-center text-lg font-semibold text-slate-700">
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h2 className="text-xl font-semibold text-gray-900">Tasks</h2>
+        </div>
+        
+        <div className="overflow-hidden">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   ID
                 </th>
-                <th className="border border-slate-300 p-2 text-center text-lg font-semibold text-slate-700">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Assignee
                 </th>
-                <th className="border border-slate-300 p-2 text-center text-lg font-semibold text-slate-700">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Title
                 </th>
-                <th className="border border-slate-300 p-2 text-center text-lg font-semibold text-slate-700">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="border border-slate-300 p-2 text-center text-lg font-semibold text-slate-700">
-                  Created At
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Created
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white divide-y divide-gray-100">
               {tasks.map((task) => (
-                <tr key={task.id} className="hover:bg-slate-50">
-                  <td className="border border-slate-300 p-2 text-sm text-slate-600 text-center">
-                    {task.id}
+                <tr key={task.id} className="hover:bg-gray-50 transition-colors duration-150">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    #{task.id}
                   </td>
-                  <td className="border border-slate-300 p-2 text-sm text-slate-600">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                     {task.assigned_user.name}
                   </td>
-                  <td className="border border-slate-300 p-2 text-sm text-slate-600">
+                  <td className="px-6 py-4 text-sm text-gray-900">
                     {task.title}
                   </td>
-                  <td className={`border border-slate-300 p-2 text-sm text-center ${getStatusClass(task.status)}`}>
-                    {task.status}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={getStatusClass(task.status)}>
+                      {task.status}
+                    </span>
                   </td>
-                  <td className="border border-slate-300 p-2 text-sm text-slate-600 text-center">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {new Date(task.created_at).toLocaleDateString()}
                   </td>
                 </tr>

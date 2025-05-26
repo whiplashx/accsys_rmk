@@ -17,11 +17,7 @@ class Indicator extends Model
     protected $attributes = [
         'documents' => null,
         'task' => null
-    ];
-
-    protected $table = 'indicators';    // Add with property to automatically eager load task and user relationships
-    protected $with = ['task', 'user'];    // Add appends property to automatically include task data and user data
-    protected $appends = ['task_data', 'user_data'];
+    ];    protected $table = 'indicators';
 
     // Define a relationship with the Task model
     public function task()
@@ -45,19 +41,5 @@ class Indicator extends Model
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id');
-    }
-
-    // Add accessor method to get task data
-    public function getTaskDataAttribute()
-    {
-        return $this->task()->first();
-    }
-
-    // Add accessor method to get user data
-    public function getUserDataAttribute()
-    {
-        return $this->user()->first();
-    }
-
-}
+    }}
 

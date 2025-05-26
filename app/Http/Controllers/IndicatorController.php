@@ -40,47 +40,29 @@ class IndicatorController extends Controller
      * @return \Illuminate\Http\JsonResponse
      */    public function getAssignedIndicators()
     {
-        try {
-            // Get the current authenticated user's ID
+        try {            // Get the current authenticated user's ID
             $userId = Auth::id();
             Log::info('Fetching indicators for user ID: ' . $userId);
             
-            // Get indicators directly assigned to the current user
-            $indicators = Indicator::with(['parameter', 'user', 'task'])
-                ->where('user_id', $userId)
-                ->get();
+            // Get task IDs assigned to this user (since indicators don't have direct user_id assignment)
+            $taskIds = Task::where('assignee', $userId)->pluck('id')->toArray();
+            Log::info('Found ' . count($taskIds) . ' tasks assigned to user');
             
-            Log::info('Direct indicators found: ' . $indicators->count());
-            
-            // Log the first indicator details for debugging
-            if ($indicators->count() > 0) {
-                $firstIndicator = $indicators->first();
-                Log::info('First indicator task type: ' . gettype($firstIndicator->task) . ', value: ' . json_encode($firstIndicator->task));
-            }
-
-            // If no direct assignments found, fall back to task-based assignments (for backward compatibility)
-            if ($indicators->isEmpty()) {
-                Log::info('No direct assignments, falling back to task-based assignments');                // First, get task IDs assigned to this user
-                $taskIds = Task::where('assignee', $userId)->pluck('id')->toArray();
-                Log::info('Found ' . count($taskIds) . ' tasks assigned to user');
-                
-                // Then, get indicators with task ID in that list
-                $indicators = Indicator::whereIn('task', $taskIds)
-                    ->with(['parameter'])
-                    ->get();
-                
-                // Load associated tasks manually to avoid relationship issues
-                foreach ($indicators as $indicator) {
-                    if (is_numeric($indicator->task)) {
-                        $indicator->task_object = Task::with('assignedUser')->find($indicator->task);
-                    }
+            // Get indicators with task ID in that list
+            $indicators = Indicator::whereIn('task', $taskIds)
+                ->with(['parameter'])
+                ->get();            
+            // Load associated tasks manually to avoid relationship issues
+            foreach ($indicators as $indicator) {
+                if (is_numeric($indicator->task)) {
+                    $indicator->task_object = Task::with('assignedUser')->find($indicator->task);
                 }
-                
-                Log::info('Task-based indicators found: ' . $indicators->count());
-            }            // Transform the indicators to include user reference
+            }
+            
+            Log::info('Task-based indicators found: ' . $indicators->count());            // Transform the indicators to include user reference
             $indicatorsWithUsers = $indicators->map(function($indicator) {
-                // Get user from direct relationship if available
-                $user = $indicator->user;
+                // Get user from task assignment (since indicators don't have direct user assignment)
+                $user = null;
                 
                 // Get task data safely - check for manually loaded task_object first
                 $task = null;
@@ -93,8 +75,8 @@ class IndicatorController extends Controller
                     $task = Task::find($indicator->task);
                 }
                 
-                // If no direct user and we have a task with assigned user
-                if (!$user && $task && isset($task->assignedUser)) {
+                // Get user from task if available
+                if ($task && isset($task->assignedUser)) {
                     $user = $task->assignedUser;
                 }
                 

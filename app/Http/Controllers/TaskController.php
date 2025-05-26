@@ -57,9 +57,7 @@ class TaskController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to update rating'], 500);
         }
-    }
-
-    public function assignTask(Request $request)
+    }    public function assignTask(Request $request)
     {
         try {
             $request->validate([
@@ -67,6 +65,7 @@ class TaskController extends Controller
                 'user_id' => 'required|exists:users,id',
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
+                'program_id' => 'required|exists:programs,id',
             ]);
 
             $user = User::findOrFail($request->user_id);
@@ -78,6 +77,7 @@ class TaskController extends Controller
                 'description' => $request->description,
                 'assignee' => $user->id,
                 'status' => 'pending',
+                'program_id' => $request->program_id,
                 'indicator_id' => $request->indicator_id, // Store the indicator ID directly in the task
             ]);
 
