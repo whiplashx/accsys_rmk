@@ -19,26 +19,27 @@ class ExhibitController extends Controller
     public function index(Request $request)
     {
         try {
-            $programId = $request->query('program_id');
-            $query = Exhibit::with(['area', 'user']);
+            $programId = $request->query('program_id');        $query = Exhibit::with(['area', 'user', 'program']);
 
-            if ($programId) {
-                $query->where('program_id', $programId);
-            }
+        if ($programId) {
+            $query->where('program_id', $programId);
+        }
 
-            $exhibits = $query->orderBy('created_at', 'desc')->get();
+        $exhibits = $query->orderBy('created_at', 'desc')->get();
 
-            $formattedExhibits = $exhibits->map(function ($exhibit) {
-                return [
-                    'id' => $exhibit->id,
-                    'title' => $exhibit->title,
-                    'description' => $exhibit->description,
-                    'fileType' => $exhibit->file_type,
-                    'fileUrl' => route('exhibits.view', $exhibit->id),
-                    'areaId' => $exhibit->area_id,
-                    'areaName' => $exhibit->area ? $exhibit->area->name : 'Unknown Area',
-                    'uploadedBy' => $exhibit->user ? $exhibit->user->name : 'Unknown User',
-                    'uploadDate' => $exhibit->created_at->format('M d, Y')
+        $formattedExhibits = $exhibits->map(function ($exhibit) {
+            return [
+                'id' => $exhibit->id,
+                'title' => $exhibit->title,
+                'description' => $exhibit->description,
+                'fileType' => $exhibit->file_type,
+                'fileUrl' => route('exhibits.view', $exhibit->id),
+                'areaId' => $exhibit->area_id,
+                'areaName' => $exhibit->area ? $exhibit->area->name : 'Unknown Area',
+                'programId' => $exhibit->program_id,
+                'programName' => $exhibit->program ? $exhibit->program->name : 'Unknown Program',
+                'uploadedBy' => $exhibit->user ? $exhibit->user->name : 'Unknown User',
+                'uploadDate' => $exhibit->created_at->format('M d, Y')
                 ];
             });
 

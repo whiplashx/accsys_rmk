@@ -271,8 +271,7 @@ export default function Exhibit() {
                                                             <option value="document">Document</option>
                                                             <option value="other">Other</option>
                                                         </select>
-                                                    </div>
-                                                    <div className="mb-4">
+                                                    </div>                                                    <div className="mb-4">
                                                         <label htmlFor="file-input" className="block text-sm font-medium text-gray-700 mb-1">
                                                             File <span className="text-red-500">*</span>
                                                         </label>
@@ -293,12 +292,39 @@ export default function Exhibit() {
                                                                 ''}
                                                             required
                                                         />
-                                                    </div>
-                                                    {selectedFile && (
+                                                        <div className="mt-2 flex items-center text-xs text-gray-500">
+                                                            <svg className="w-4 h-4 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                            </svg>
+                                                            Maximum file size: <span className="font-medium text-gray-700 ml-1">40MB</span>
+                                                        </div>
+                                                    </div>                                                    {selectedFile && (
                                                         <div className="mb-4">
-                                                            <p className="text-sm text-gray-600">
-                                                                Selected file: <span className="font-medium">{selectedFile.name}</span> ({Math.round(selectedFile.size / 1024)} KB)
-                                                            </p>
+                                                            <div className="flex items-start justify-between">
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm text-gray-600">
+                                                                        Selected file: <span className="font-medium">{selectedFile.name}</span>
+                                                                    </p>
+                                                                    <p className="text-sm text-gray-500">
+                                                                        Size: {Math.round(selectedFile.size / 1024)} KB ({(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)
+                                                                    </p>
+                                                                </div>
+                                                                {selectedFile.size > 40 * 1024 * 1024 && (
+                                                                    <div className="ml-3 flex items-center text-red-600">
+                                                                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                                        </svg>
+                                                                        <span className="text-xs font-medium">Exceeds limit</span>
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            {selectedFile.size > 40 * 1024 * 1024 && (
+                                                                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                                                                    <p className="text-xs text-red-700">
+                                                                        File size exceeds the 40MB limit. Please select a smaller file.
+                                                                    </p>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                     
