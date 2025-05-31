@@ -16,18 +16,61 @@ export default function programs() {
     });
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
-    
-    // New state variables for CRUD operations
+      // New state variables for CRUD operations
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState('add'); // 'add' or 'edit'
     const [formData, setFormData] = useState({
         name: '',
         college: '',
     });
-
-    useEffect(() => {
+      // Sorting state
+    const [sortBy, setSortBy] = useState('name'); // 'name', 'college', 'status'
+    const [sortOrder, setSortOrder] = useState('asc'); // 'asc' or 'desc'
+    const [filteredData, setFilteredData] = useState([]);
+    
+    // Filter state
+    const [filterCollege, setFilterCollege] = useState('all');useEffect(() => {
         fetchProgram();
-    }, []);
+    }, []);    // Sort and filter data whenever data, sortBy, sortOrder, or filterCollege changes
+    useEffect(() => {
+        let filteredByCollege = [...data];
+        
+        // Apply college filter first
+        if (filterCollege !== 'all') {
+            filteredByCollege = filteredByCollege.filter(item => 
+                item.college?.toLowerCase() === filterCollege.toLowerCase()
+            );
+        }
+        
+        // Then apply sorting
+        const sortedData = filteredByCollege.sort((a, b) => {
+            let aValue, bValue;
+            
+            switch (sortBy) {
+                case 'college':
+                    aValue = a.college?.toLowerCase() || '';
+                    bValue = b.college?.toLowerCase() || '';
+                    break;
+                case 'status':
+                    aValue = getStatus(a);
+                    bValue = getStatus(b);
+                    break;
+                case 'name':
+                default:
+                    aValue = a.name?.toLowerCase() || '';
+                    bValue = b.name?.toLowerCase() || '';
+                    break;
+            }
+            
+            if (sortOrder === 'asc') {
+                return aValue > bValue ? 1 : -1;
+            } else {
+                return aValue < bValue ? 1 : -1;
+            }
+        });
+        
+        setFilteredData(sortedData);
+    }, [data, sortBy, sortOrder, filterCollege]);
 
     const fetchProgram = () => {
         setIsLoading(true);
@@ -206,12 +249,16 @@ export default function programs() {
             if (now < startDate) return 'Upcoming';
             return 'Ongoing';
         }
-    };
-
-    const formatDate = (dateString) => {
+    };    const formatDate = (dateString) => {
         if (!dateString) return '';
         return new Date(dateString).toLocaleDateString() + ' ' + 
                new Date(dateString).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    };
+
+    // Get unique colleges for filter dropdown
+    const getUniqueColleges = () => {
+        const colleges = data.map(program => program.college).filter(Boolean);
+        return [...new Set(colleges)].sort();
     };
 
     const columns = [
@@ -286,34 +333,106 @@ export default function programs() {
         <AdminLayout>
             <div className="bg-slate-100 min-h-screen p-6">
                 <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} />
-                
-                <div className="max-w-7xl mx-auto">
+                  <div className="max-w-7xl mx-auto">
                     <div className="flex justify-between items-center mb-6">
-                        <h1 className="text-2xl font-bold text-gray-800">Programs</h1>
-                        <button
-                            onClick={openAddModal}
-                            className="px-4 py-2 bg-slate-700 text-white rounded-md hover:bg-slate-600 flex items-center gap-2"
-                        >
-                            <Plus size={16} />
-                            Add Program
-                        </button>
+                        <h1 className="text-2xl font-bold text-gray-800">Programs</h1>                        <div className="flex items-center gap-4">
+                            {/* Filter Controls */}
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-medium text-gray-700">Filter by College:</label>
+                                <select
+                                    value={filterCollege}
+                                    onChange={(e) => setFilterCollege(e.target.value)}
+                                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:border-slate-500 focus:ring focus:ring-slate-200 focus:ring-opacity-50"
+                                >
+                                    <option value="all">All Colleges</option>
+                                    {getUniqueColleges().map(college => (
+                                        <option key={college} value={college}>
+                                            {college}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            {/* Sorting Controls */}
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-medium text-gray-700">Sort by:</label>
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:border-slate-500 focus:ring focus:ring-slate-200 focus:ring-opacity-50"
+                                >
+                                    <option value="name">Name</option>
+                                    <option value="college">College</option>
+                                    <option value="status">Status</option>
+                                </select>                                <select
+                                    value={sortOrder}
+                                    onChange={(e) => setSortOrder(e.target.value)}
+                                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:border-slate-500 focus:ring focus:ring-slate-200 focus:ring-opacity-50"
+                                >
+                                    <option value="asc">Ascending</option>
+                                    <option value="desc">Descending</option>
+                                </select>
+                            </div>
+                            
+                            {/* Clear Filter Button */}
+                            {filterCollege !== 'all' && (
+                                <button
+                                    onClick={() => setFilterCollege('all')}
+                                    className="px-3 py-1 bg-gray-200 text-gray-700 rounded-md text-sm hover:bg-gray-300"
+                                >
+                                    Clear Filter
+                                </button>
+                            )}
+                            
+                            <button
+                                onClick={openAddModal}
+                                className="px-4 py-2 bg-slate-700 text-white rounded-md hover:bg-slate-600 flex items-center gap-2"
+                            >
+                                <Plus size={16} />
+                                Add Program
+                            </button>
+                        </div>
                     </div>
-                    
+                      {/* Summary Section */}
+                    <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                        <div className="flex justify-between items-center">
+                            <div className="text-sm text-gray-600">
+                                Showing {filteredData.length} of {data.length} programs
+                                {filterCollege !== 'all' && (
+                                    <span className="ml-2 px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                                        Filtered by: {filterCollege}
+                                    </span>
+                                )}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                                {sortBy === 'college' && (
+                                    <span>Sorted by College ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})</span>
+                                )}
+                                {sortBy === 'name' && (
+                                    <span>Sorted by Name ({sortOrder === 'asc' ? 'A-Z' : 'Z-A'})</span>
+                                )}
+                                {sortBy === 'status' && (
+                                    <span>Sorted by Status</span>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                      
                     <div className="bg-white rounded-lg shadow-sm p-6">
-                        {isLoading && data.length === 0 ? (
+                        {isLoading && filteredData.length === 0 ? (
                             <div className="flex justify-center p-8">
                                 <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-slate-700"></div>
                             </div>
                         ) : (
                             <DataTable 
-                                data={data} 
+                                data={filteredData} 
                                 columns={columns} 
                                 itemsPerPage={10} 
                                 className="min-w-full divide-y divide-gray-200"
                             />
                         )}
                         
-                        {!isLoading && data.length === 0 && (
+                        {!isLoading && filteredData.length === 0 && (
                             <div className="text-center py-8 text-gray-500">
                                 No programs found. Add one to get started.
                             </div>

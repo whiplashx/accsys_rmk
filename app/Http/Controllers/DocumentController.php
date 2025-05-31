@@ -407,5 +407,55 @@ class DocumentController extends Controller
 
         return $accessRequest !== null;
     }
+
+    /**
+     * Upload a general document to the Documents library
+     */
+    public function uploadGeneral(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|max:51200', // 50MB max size
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:1000',
+            'category' => 'required|string|max:100',
+        ]);
+
+        $user = Auth::user();
+        $file = $request->file('file');
+
+        // Store the uploaded file in the private storage
+        $fileName = time() . '_' . $file->getClientOriginalName();
+        $path = Storage::disk('private')->put('general_documents', $file);
+
+        // Create a new document record
+        $document = Document::create([
+            'name' => $file->getClientOriginalName(),
+            'title' => $request->title,
+            'description' => $request->description,
+            'category' => $request->category,
+            'path' => $path,
+            'file_size' => $file->getSize(),
+            'mime_type' => $file->getMimeType(),
+            'uploaded_by' => $user->id,
+            'user_id' => $user->id,
+            'program_id' => $user->program_id,
+            'task_id' => null, // Not associated with a specific task
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        Log::info('General document uploaded', [
+            'document_id' => $document->id,
+            'user_id' => $user->id,
+            'filename' => $file->getClientOriginalName(),
+            'size' => $file->getSize()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Document uploaded successfully',
+            'document' => $document
+        ], 201);
+    }
 }
 
