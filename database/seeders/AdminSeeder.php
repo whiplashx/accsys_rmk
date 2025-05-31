@@ -28,7 +28,7 @@ class AdminSeeder extends Seeder
 
         $user = User::create([
             'name' => 'Josh Manalo',
-            'email' => 'lwhip91@gmail.com',
+            'email' => 'admin@gmail.com',
             'program_id' => $program->id,
             'role' => 'admin',
             'status' => 'active',

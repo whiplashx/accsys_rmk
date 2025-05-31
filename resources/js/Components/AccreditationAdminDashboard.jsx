@@ -318,16 +318,7 @@ const AccreditationAdminDashboard = () => {
           
           <div className='mb-6 flex flex-col md:flex-row justify-between items-center gap-4'>
             <div className='relative w-full md:w-auto'>
-              <button 
-                onClick={() => setDepartmentDropdownOpen(!programDropdownOpen)}
-                className='w-full md:w-auto flex items-center justify-between gap-2 bg-white border border-gray-300 rounded-lg px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
-              >
-                <span className='flex items-center gap-2'>
-                  <AcademicCapIcon className='h-5 w-5 text-gray-500' />
-                  {selectedDepartment ? selectedDepartment.name : 'Select Department'}
-                </span>
-                <ChevronDownIcon className='h-5 w-5 text-gray-500' />
-              </button>
+
            
               {programDropdownOpen && (
                 <div className='absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-md shadow-lg'>
@@ -444,33 +435,7 @@ const AccreditationAdminDashboard = () => {
               </div>
             </div>
 
-            <div className='bg-white border border-gray-100 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-6'>
-              <div className='flex items-center justify-between'>
-                <div>
-                  <p className='text-sm font-medium text-gray-500'>Self-Survey Rating</p>
-                  <p className='text-2xl font-semibold text-gray-800 mt-1'>
-                    {selfSurveyRating > 0 ? selfSurveyRating.toFixed(1) : 'N/A'} 
-                    {selfSurveyRating > 0 && <span className='text-sm text-gray-500'>/5</span>}
-                  </p>
-                  {selfSurveyData.tasks && (
-                    <p className='text-xs text-gray-400 mt-1'>
-                      Based on {selfSurveyData.tasks.length} completed tasks
-                    </p>
-                  )}
-                </div>
-                <span className='flex items-center justify-center w-12 h-12 rounded-full bg-yellow-100 text-yellow-600'>
-                  <DocumentTextIcon className='h-6 w-6' />
-                </span>
-              </div>
-              {selfSurveyRating > 0 && (
-                <div className='mt-4 w-full bg-gray-200 rounded-full h-1.5'>
-                  <div 
-                    className='bg-yellow-500 h-1.5 rounded-full'
-                    style={{ width: `${(selfSurveyRating / 5) * 100}%` }}
-                  ></div>
-                </div>
-              )}
-            </div>
+            
           </div>
 
           <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6'>
@@ -585,7 +550,7 @@ const AccreditationAdminDashboard = () => {
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Program</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>College</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Status</th>
-                    <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Progress</th>
+                   
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Schedule</th>
                     <th scope='col' className='px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider'>Last Updated</th>
                   </tr>
@@ -605,18 +570,6 @@ const AccreditationAdminDashboard = () => {
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
                           {getStatusBadge(status)}
-                        </td>
-                        <td className='px-6 py-4 whitespace-nowrap'>
-                          <div className='w-full bg-gray-200 rounded-full h-2'>
-                            <div 
-                              className={`h-2 rounded-full ${
-                                progress >= 100 ? 'bg-green-500' : 
-                                progress > 50 ? 'bg-blue-500' : 'bg-yellow-500'
-                              }`}
-                              style={{ width: `${progress}%` }}
-                            ></div>
-                          </div>
-                          <div className='text-xs text-gray-500 mt-1'>{progress}%</div>
                         </td>
                         <td className='px-6 py-4 whitespace-nowrap'>
                           <div className='text-sm text-gray-500'>

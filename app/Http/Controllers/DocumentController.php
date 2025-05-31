@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Document;
+use App\Models\DocumentAccessRequest;
 use App\Models\Indicator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Illuminate\Support\Facades\Response;
 use Illuminate\Support\Facades\Crypt;
@@ -282,8 +284,128 @@ class DocumentController extends Controller
                 'line' => $e->getLine(),
                 'file' => $e->getFile()
             ]);
-            abort(500, 'Error accessing document: ' . $e->getMessage());
+            abort(500, 'Error accessing document: ' . $e->getMessage());        }
+    }
+
+    /**
+     * Download a document
+     * 
+     * @param int $id The document ID
+     * @return \Symfony\Component\HttpFoundation\StreamedResponse
+     */
+    public function download($id)
+    {
+        Log::info('Downloading document', ['id' => $id]);
+        
+        try {
+            // Validate ID is numeric            if (!is_numeric($id)) {
+                Log::error('Invalid document ID format for download', ['id' => $id]);
+                abort(400, 'Invalid document ID format');
+            
+            
+            // Find the document
+            $document = \App\Models\Document::find($id);
+            
+            if (!$document) {
+                Log::error('Document not found for download', ['id' => $id]);
+                abort(404, 'Document not found');
+            }
+
+            // Load the task relationship
+            $document->load('task');
+
+            // Check access permissions
+            $user = Auth::user();
+            if (!$this->canUserDownloadDocument($user, $document)) {
+                Log::warning('Access denied for document download', [
+                    'user_id' => $user->id,
+                    'document_id' => $document->id,
+                    'document_owner' => $document->user_id
+                ]);
+                abort(403, 'You do not have permission to download this document. Please request access from the program dean.');
+            }
+            
+            Log::info('Document found for download', [
+                'id' => $document->id,
+                'name' => $document->name,
+                'path' => $document->path
+            ]);
+            
+            // Check if file exists in private storage
+            if (!Storage::disk('private')->exists($document->path)) {
+                Log::error('Document file not found in storage for download', [
+                    'id' => $document->id,
+                    'path' => $document->path
+                ]);
+                abort(404, 'Document file not found');
+            }
+            
+            // Get file contents
+            $fileContents = Storage::disk('private')->get($document->path);
+            $fileName = $document->name;
+            
+            // Get MIME type
+            $mimeType = Storage::disk('private')->mimeType($document->path);
+            
+            Log::info('Serving document for download', [
+                'id' => $document->id,
+                'name' => $fileName,
+                'mime_type' => $mimeType,
+                'size' => strlen($fileContents)
+            ]);
+            
+            // Return file as download
+            return Response::make($fileContents, 200, [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                'Content-Length' => strlen($fileContents),
+                'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+                'Pragma' => 'public',
+                'Expires' => '0'
+            ]);
+            
+        } catch (\Exception $e) {
+            Log::error('Error downloading document', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'line' => $e->getLine(),
+                'file' => $e->getFile()
+            ]);            abort(500, 'Error downloading document: ' . $e->getMessage());
         }
+    }    /**
+     * Check if a user can download a specific document
+     * 
+     * @param \App\Models\User $user
+     * @param \App\Models\Document $document
+     * @return bool
+     */
+    private function canUserDownloadDocument($user, $document)
+    {
+        // Users can always download their own documents
+        if ($document->user_id === $user->id) {
+            return true;
+        }
+
+        // Get the program ID associated with the document through the task
+        $documentProgramId = $document->task->program_id ?? null;
+        
+        if (!$documentProgramId) {
+            return false;
+        }
+
+        // Users can download documents from their own program
+        if ($user->program_id === $documentProgramId) {
+            return true;
+        }
+
+        // Check if user has an approved access request for this document
+        $accessRequest = DocumentAccessRequest::where('user_id', $user->id)
+            ->where('document_id', $document->id)
+            ->where('status', 'approved')
+            ->first();
+
+        return $accessRequest !== null;
     }
 }
 

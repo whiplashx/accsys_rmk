@@ -6,12 +6,12 @@ import SelfSurveyFormAccreditor from '@/Components/SelfSurveyFormAccreditor';
 
 export default function Selfsurvey({ auth }) {
     return (
-        <AuthenticatedLayout
+        <AccreditorLayout
             user={auth.user}
             header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">Self-Survey Form</h2>}
         >
             <Head title="Self-Survey" />
             <SelfSurveyFormAccreditor />
-        </AuthenticatedLayout>
+        </AccreditorLayout>
     );
 }

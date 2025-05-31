@@ -4,6 +4,7 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AreaController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\DocumentController;
+use App\Http\Controllers\DocumentAccessRequestController;
 use App\Http\Controllers\ExhibitController;
 use App\Http\Controllers\IndicatorController;
 use App\Http\Controllers\SelfSurveyController;
@@ -148,10 +149,13 @@ Route::middleware(['auth', 'role:localtaskforce'])
         // Add the missing selfsurvey route for localtaskforce
         Route::get('/selfsurveyLTF', function () {
             return Inertia::render('LocalTaskForce/Selfsurvey');
-        })->name('localtaskforce.selfsurvey');
-        Route::get('/exhibit', function () {
+        })->name('localtaskforce.selfsurvey');        Route::get('/exhibit', function () {
             return Inertia::render('LocalTaskForce/Exhibit');
         })->name('exhibit');
+        
+        Route::get('/documents', function () {
+            return Inertia::render('LocalTaskForce/Documents');
+        })->name('documents.taskforce');
         
         // Exhibit routes - update method names to match our controller
         Route::get('/exhibits', [ExhibitController::class, 'index'])->name('exhibits.index');
@@ -413,6 +417,15 @@ Route::get('/selfsurvey', function () {
 Route::middleware(['auth'])->group(function () {
     // API route for document listing
     Route::get('/api/documents', [DocumentController::class, 'index'])->name('api.documents.index');
+    
+    // Document access request routes
+    Route::post('/api/document-access-requests', [DocumentAccessRequestController::class, 'store'])->name('api.document-access-requests.store');
+    Route::get('/api/document-access-requests/user', [DocumentAccessRequestController::class, 'getUserRequests'])->name('api.document-access-requests.user');
+    Route::get('/api/document-access-requests/dean', [DocumentAccessRequestController::class, 'getDeanRequests'])->name('api.document-access-requests.dean');
+    Route::patch('/api/document-access-requests/{id}/approve', [DocumentAccessRequestController::class, 'approve'])->name('api.document-access-requests.approve');
+    Route::patch('/api/document-access-requests/{id}/reject', [DocumentAccessRequestController::class, 'reject'])->name('api.document-access-requests.reject');
+    Route::get('/api/documents/{id}/can-download', [DocumentAccessRequestController::class, 'canDownload'])->name('api.documents.can-download');
+    Route::get('/api/documents/{id}/download', [DocumentController::class, 'download'])->name('api.documents.download');
 });
 
 // Add a new route for fetching self-survey ratings
