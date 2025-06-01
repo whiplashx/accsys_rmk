@@ -108,32 +108,66 @@ export default function Documents() {
     // Get file extension
     const getFileExtension = (filename) => {
         return filename.split('.').pop().toLowerCase();
-    };
-
-    // Get file type icon
+    };    // Get file type icon with Google Drive-like styling
     const getFileIcon = (filename) => {
         const extension = getFileExtension(filename);
-        const iconClass = "w-8 h-8";
 
         switch (extension) {
             case 'pdf':
-                return <DocumentTextIcon className={`${iconClass} text-red-500`} />;
+                return (
+                    <div className="w-12 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-md">
+                        <DocumentTextIcon className="w-6 h-6 text-white" />
+                    </div>
+                );
             case 'doc':
             case 'docx':
-                return <DocumentTextIcon className={`${iconClass} text-blue-500`} />;
+                return (
+                    <div className="w-12 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-md">
+                        <DocumentTextIcon className="w-6 h-6 text-white" />
+                    </div>
+                );
             case 'xls':
             case 'xlsx':
-                return <DocumentTextIcon className={`${iconClass} text-green-500`} />;
+                return (
+                    <div className="w-12 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md">
+                        <DocumentTextIcon className="w-6 h-6 text-white" />
+                    </div>
+                );
             case 'ppt':
             case 'pptx':
-                return <DocumentTextIcon className={`${iconClass} text-orange-500`} />;
+                return (
+                    <div className="w-12 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
+                        <DocumentTextIcon className="w-6 h-6 text-white" />
+                    </div>
+                );
             case 'jpg':
             case 'jpeg':
             case 'png':
             case 'gif':
-                return <DocumentTextIcon className={`${iconClass} text-purple-500`} />;
+                return (
+                    <div className="w-12 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+                        <DocumentTextIcon className="w-6 h-6 text-white" />
+                    </div>
+                );
+            case 'txt':
+                return (
+                    <div className="w-12 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-lg flex items-center justify-center shadow-md">
+                        <DocumentTextIcon className="w-6 h-6 text-white" />
+                    </div>
+                );
+            case 'zip':
+            case 'rar':
+                return (
+                    <div className="w-12 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg flex items-center justify-center shadow-md">
+                        <FolderIcon className="w-6 h-6 text-white" />
+                    </div>
+                );
             default:
-                return <DocumentTextIcon className={`${iconClass} text-gray-500`} />;
+                return (
+                    <div className="w-12 h-16 bg-gradient-to-br from-gray-400 to-gray-500 rounded-lg flex items-center justify-center shadow-md">
+                        <DocumentTextIcon className="w-6 h-6 text-white" />
+                    </div>
+                );
         }
     };
 
@@ -240,9 +274,7 @@ export default function Documents() {
     // Check if user owns the document
     const isDocumentOwner = (document) => {
         return document.user_id === auth.user.id;
-    };
-
-    // Render download action button based on permissions
+    };    // Render download action button based on permissions - Google Drive style
     const renderDownloadAction = (document, isGrid = true) => {
         const accessStatus = getAccessRequestStatus(document.id);
         const isOwner = isDocumentOwner(document);
@@ -250,91 +282,78 @@ export default function Documents() {
 
         // If user owns the document, show download button
         if (isOwner) {
-            const buttonClass = isGrid 
-                ? "p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded"
-                : "text-green-600 hover:text-green-900 flex items-center gap-1 ml-3";
-            
             return (
                 <button
-                    onClick={() => handleDownload(document)}
-                    className={buttonClass}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(document);
+                    }}
+                    className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
                     title="Download"
                 >
                     <ArrowDownTrayIcon className="w-4 h-4" />
-                    {!isGrid && "Download"}
                 </button>
             );
         }
 
         // If user has approved access, show download button
         if (accessStatus === 'approved') {
-            const buttonClass = isGrid 
-                ? "p-1.5 text-gray-600 hover:text-green-600 hover:bg-green-50 rounded"
-                : "text-green-600 hover:text-green-900 flex items-center gap-1 ml-3";
-            
             return (
                 <button
-                    onClick={() => handleDownload(document)}
-                    className={buttonClass}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(document);
+                    }}
+                    className="p-1.5 text-gray-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors"
                     title="Download (Access Approved)"
                 >
                     <ArrowDownTrayIcon className="w-4 h-4" />
-                    {!isGrid && "Download"}
                 </button>
             );
         }
 
         // If access request is pending, show pending status
         if (accessStatus === 'pending') {
-            const buttonClass = isGrid 
-                ? "p-1.5 text-yellow-600 bg-yellow-50 rounded cursor-not-allowed"
-                : "text-yellow-600 flex items-center gap-1 ml-3 cursor-not-allowed";
-            
             return (
                 <button
-                    className={buttonClass}
+                    className="p-1.5 text-amber-500 bg-amber-50 rounded cursor-not-allowed"
                     title="Access Request Pending"
                     disabled
                 >
                     <ClockIcon className="w-4 h-4" />
-                    {!isGrid && "Pending"}
                 </button>
             );
         }
 
         // If access request was rejected, show request button again
         if (accessStatus === 'rejected') {
-            const buttonClass = isGrid 
-                ? "p-1.5 text-red-600 hover:text-orange-600 hover:bg-orange-50 rounded"
-                : "text-red-600 hover:text-orange-600 flex items-center gap-1 ml-3";
-            
             return (
                 <button
-                    onClick={() => requestAccess(document)}
-                    className={buttonClass}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        requestAccess(document);
+                    }}
+                    className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded transition-colors"
                     title="Request Access (Previous request rejected)"
                     disabled={isRequesting}
                 >
                     <LockClosedIcon className="w-4 h-4" />
-                    {!isGrid && (isRequesting ? "Requesting..." : "Request Again")}
                 </button>
             );
         }
 
         // Default: show request access button
-        const buttonClass = isGrid 
-            ? "p-1.5 text-gray-600 hover:text-orange-600 hover:bg-orange-50 rounded"
-            : "text-gray-600 hover:text-orange-600 flex items-center gap-1 ml-3";
-        
         return (
             <button
-                onClick={() => requestAccess(document)}
-                className={buttonClass}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    requestAccess(document);
+                }}
+                className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-colors"
                 title="Request Access"
                 disabled={isRequesting}
             >
                 <LockClosedIcon className="w-4 h-4" />
-                {!isGrid && (isRequesting ? "Requesting..." : "Request Access")}
             </button>
         );
     };
@@ -358,247 +377,276 @@ export default function Documents() {
         );
     }
 
-    return (
-        <TaskForceLayout>
+    return (        <TaskForceLayout>
             <div className="min-h-screen bg-gray-50">
                 <ToastContainer />
                 
-                {/* Header */}
-                <div className="bg-white border-b border-gray-200 px-6 py-4">
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                        <div>
-                            <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
-                            <p className="text-gray-600 mt-1">
-                                {filteredDocuments.length} of {documents.length} documents
-                            </p>
-                        </div>
-                        
-                        {/* View Toggle */}
-                        <div className="flex items-center gap-3">
-                            <div className="flex bg-gray-100 rounded-lg p-1">
-                                <button
-                                    onClick={() => setViewMode('grid')}
-                                    className={`p-2 rounded-md transition-colors ${
-                                        viewMode === 'grid'
-                                            ? 'bg-white shadow-sm text-blue-600'
-                                            : 'text-gray-600 hover:text-gray-900'
-                                    }`}
-                                >
-                                    <Squares2X2Icon className="w-5 h-5" />
-                                </button>
-                                <button
-                                    onClick={() => setViewMode('list')}
-                                    className={`p-2 rounded-md transition-colors ${
-                                        viewMode === 'list'
-                                            ? 'bg-white shadow-sm text-blue-600'
-                                            : 'text-gray-600 hover:text-gray-900'
-                                    }`}
-                                >
-                                    <ListBulletIcon className="w-5 h-5" />
-                                </button>
+                {/* Header - Google Drive Style */}
+                <div className="bg-white border-b border-gray-200">
+                    <div className="px-6 py-4">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                                <h1 className="text-2xl font-normal text-gray-900">My Drive</h1>
+                                <div className="text-sm text-gray-500">
+                                    {filteredDocuments.length} {filteredDocuments.length === 1 ? 'item' : 'items'}
+                                </div>
+                            </div>
+                            
+                            {/* Right side controls */}
+                            <div className="flex items-center space-x-3">
+                                <div className="flex bg-gray-100 rounded-lg p-1">
+                                    <button
+                                        onClick={() => setViewMode('grid')}
+                                        className={`p-2 rounded-md transition-colors ${
+                                            viewMode === 'grid'
+                                                ? 'bg-white shadow-sm text-blue-600'
+                                                : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                        title="Grid view"
+                                    >
+                                        <Squares2X2Icon className="w-5 h-5" />
+                                    </button>
+                                    <button
+                                        onClick={() => setViewMode('list')}
+                                        className={`p-2 rounded-md transition-colors ${
+                                            viewMode === 'list'
+                                                ? 'bg-white shadow-sm text-blue-600'
+                                                : 'text-gray-600 hover:text-gray-900'
+                                        }`}
+                                        title="List view"
+                                    >
+                                        <ListBulletIcon className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                    
+                    {/* Search and Filters Bar */}
+                    <div className="px-6 py-3 border-t border-gray-100 bg-gray-50">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            {/* Search */}
+                            <div className="relative flex-1 max-w-md">
+                                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                                <input
+                                    type="text"
+                                    placeholder="Search in Drive"
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                            </div>
 
-                {/* Search and Filters */}
-                <div className="bg-white border-b border-gray-200 px-6 py-3">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        {/* Search */}
-                        <div className="relative flex-1 max-w-md">
-                            <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                            <input
-                                type="text"
-                                placeholder="Search documents..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                        </div>
+                            {/* Filters */}
+                            <div className="flex gap-2">
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowFilters(!showFilters)}
+                                        className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-white focus:ring-2 focus:ring-blue-500 bg-white transition-colors"
+                                    >
+                                        <AdjustmentsHorizontalIcon className="w-4 h-4" />
+                                        <span className="text-sm">Filters</span>
+                                        <ChevronDownIcon className="w-4 h-4" />
+                                    </button>
+                                    
+                                    {showFilters && (
+                                        <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                                            <div className="p-4 space-y-4">
+                                                {/* File Type Filter */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        File Type
+                                                    </label>
+                                                    <select
+                                                        value={filterBy}
+                                                        onChange={(e) => setFilterBy(e.target.value)}
+                                                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    >
+                                                        <option value="all">All Types</option>
+                                                        {getFileTypes().map(type => (
+                                                            <option key={type} value={type}>
+                                                                .{type.toUpperCase()}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </div>
 
-                        {/* Filters */}
-                        <div className="flex gap-2">
-                            <div className="relative">
-                                <button
-                                    onClick={() => setShowFilters(!showFilters)}
-                                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 focus:ring-2 focus:ring-blue-500"
-                                >
-                                    <AdjustmentsHorizontalIcon className="w-5 h-5" />
-                                    Filters
-                                    <ChevronDownIcon className="w-4 h-4" />
-                                </button>
-                                
-                                {showFilters && (
-                                    <div className="absolute right-0 mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
-                                        <div className="p-4 space-y-4">
-                                            {/* File Type Filter */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    File Type
-                                                </label>
-                                                <select
-                                                    value={filterBy}
-                                                    onChange={(e) => setFilterBy(e.target.value)}
-                                                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                                                >
-                                                    <option value="all">All Types</option>
-                                                    {getFileTypes().map(type => (
-                                                        <option key={type} value={type}>
-                                                            .{type.toUpperCase()}
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            {/* Sort Options */}
-                                            <div>
-                                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                                    Sort By
-                                                </label>
-                                                <select
-                                                    value={sortBy}
-                                                    onChange={(e) => setSortBy(e.target.value)}
-                                                    className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2"
-                                                >
-                                                    <option value="name">Name</option>
-                                                    <option value="created_at">Date Created</option>
-                                                </select>
-                                                
-                                                <select
-                                                    value={sortOrder}
-                                                    onChange={(e) => setSortOrder(e.target.value)}
-                                                    className="w-full border border-gray-300 rounded-md px-3 py-2"
-                                                >
-                                                    <option value="asc">Ascending</option>
-                                                    <option value="desc">Descending</option>
-                                                </select>
+                                                {/* Sort Options */}
+                                                <div>
+                                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                        Sort By
+                                                    </label>
+                                                    <select
+                                                        value={sortBy}
+                                                        onChange={(e) => setSortBy(e.target.value)}
+                                                        className="w-full border border-gray-300 rounded-md px-3 py-2 mb-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    >
+                                                        <option value="name">Name</option>
+                                                        <option value="created_at">Date Modified</option>
+                                                    </select>
+                                                    
+                                                    <select
+                                                        value={sortOrder}
+                                                        onChange={(e) => setSortOrder(e.target.value)}
+                                                        className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                    >
+                                                        <option value="asc">A to Z</option>
+                                                        <option value="desc">Z to A</option>
+                                                    </select>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                )}
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Content Area */}
-                <div className="p-6">
-                    {filteredDocuments.length === 0 ? (
-                        <div className="text-center py-12">
-                            <FolderIcon className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                            <h3 className="text-lg font-medium text-gray-900 mb-2">No documents found</h3>
-                            <p className="text-gray-600">
+                <div className="p-6">                    {filteredDocuments.length === 0 ? (
+                        <div className="text-center py-16">
+                            <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <FolderIcon className="w-12 h-12 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-medium text-gray-900 mb-2">
+                                {searchTerm || filterBy !== 'all' ? 'No files found' : 'Your Drive is empty'}
+                            </h3>
+                            <p className="text-gray-500 max-w-sm mx-auto">
                                 {searchTerm || filterBy !== 'all'
-                                    ? 'Try adjusting your search or filters'
-                                    : 'No documents have been uploaded yet'}
+                                    ? 'Try adjusting your search terms or filters to find what you\'re looking for.'
+                                    : 'Upload files to get started with your document library.'}
                             </p>
+                            {(searchTerm || filterBy !== 'all') && (
+                                <button
+                                    onClick={() => {
+                                        setSearchTerm('');
+                                        setFilterBy('all');
+                                    }}
+                                    className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                    Clear filters
+                                </button>
+                            )}
                         </div>
                     ) : (
-                        <>
-                            {viewMode === 'grid' ? (
-                                /* Grid View */
-                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                        <>                            {viewMode === 'grid' ? (
+                                /* Grid View - Google Drive Style */
+                                <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-4">
                                     {filteredDocuments.map((document) => (
                                         <div
                                             key={document.id}
-                                            className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer group"
+                                            className="group cursor-pointer"
+                                            onDoubleClick={() => handlePreview(document)}
                                         >
-                                            <div className="flex flex-col items-center text-center">
-                                                {/* File Icon */}
-                                                <div className="mb-3">
-                                                    {getFileIcon(document.name)}
-                                                </div>
-                                                
-                                                {/* File Name */}
-                                                <h3 className="text-sm font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600">
+                                            {/* File Icon */}
+                                            <div className="flex justify-center mb-2">
+                                                {getFileIcon(document.name)}
+                                            </div>
+                                            
+                                            {/* File Name */}
+                                            <div className="text-center">
+                                                <p className="text-xs text-gray-700 group-hover:text-blue-600 line-clamp-2 leading-tight break-words px-1">
                                                     {document.name}
-                                                </h3>
-                                                
-                                                {/* File Info */}
-                                                <p className="text-xs text-gray-500 mb-3">
-                                                    {formatDate(document.created_at)}
                                                 </p>
-                                                  
-                                                {/* Actions */}
-                                                <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                            </div>
+                                            
+                                            {/* Hover Actions */}
+                                            <div className="flex justify-center mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex gap-1 bg-white rounded-lg shadow-lg border p-1">
                                                     <button
-                                                        onClick={() => handlePreview(document)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            handlePreview(document);
+                                                        }}
                                                         className="p-1.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded"
                                                         title="Preview"
                                                     >
                                                         <EyeIcon className="w-4 h-4" />
                                                     </button>
-                                                    {renderDownloadAction(document, true)}
+                                                    <div onClick={(e) => e.stopPropagation()}>
+                                                        {renderDownloadAction(document, true)}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
-                                </div>
-                            ) : (
-                                /* List View */
-                                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                                    <table className="w-full">
-                                        <thead className="bg-gray-50 border-b border-gray-200">
-                                            <tr>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Name
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Type
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Task
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Upload Date
-                                                </th>
-                                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                                    Actions
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="bg-white divide-y divide-gray-200">
-                                            {filteredDocuments.map((document) => (
-                                                <tr key={document.id} className="hover:bg-gray-50">
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <div className="flex items-center">
-                                                            <div className="flex-shrink-0">
-                                                                {getFileIcon(document.name)}
-                                                            </div>
-                                                            <div className="ml-4">
-                                                                <div className="text-sm font-medium text-gray-900">
-                                                                    {document.name}
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap">
-                                                        <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                                            .{getFileExtension(document.name).toUpperCase()}
+                                </div>                            ) : (
+                                /* List View - Google Drive Style */
+                                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                                    <div className="bg-gray-50 px-6 py-3 border-b border-gray-200">
+                                        <div className="flex items-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                            <div className="flex-1">Name</div>
+                                            <div className="w-20 text-center">Type</div>
+                                            <div className="w-32 text-center hidden md:block">Owner</div>
+                                            <div className="w-32 text-center hidden lg:block">Modified</div>
+                                            <div className="w-24 text-center">Actions</div>
+                                        </div>
+                                    </div>
+                                    <div className="divide-y divide-gray-100">
+                                        {filteredDocuments.map((document) => (
+                                            <div 
+                                                key={document.id} 
+                                                className="px-6 py-3 hover:bg-gray-50 flex items-center cursor-pointer group"
+                                                onDoubleClick={() => handlePreview(document)}
+                                            >                                                <div className="flex-1 flex items-center min-w-0">
+                                                    <div className="flex-shrink-0 mr-3">
+                                                        {getFileIcon(document.name)}
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <p className="text-sm font-medium text-gray-900 truncate group-hover:text-blue-600">
+                                                            {document.name}
+                                                        </p>
+                                                        <p className="text-xs text-gray-500 truncate">
+                                                            {document.description || 'No description'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="w-20 text-center">
+                                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                                        {getFileExtension(document.name).toUpperCase()}
+                                                    </span>
+                                                </div>
+                                                
+                                                <div className="w-32 text-center hidden md:block">
+                                                    <div className="flex items-center justify-center">
+                                                        <UserIcon className="w-4 h-4 text-gray-400 mr-1" />
+                                                        <span className="text-xs text-gray-500">
+                                                            {document.user?.name || 'Unknown'}
                                                         </span>
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        Task #{document.task_id || 'N/A'}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                        {formatDate(document.created_at)}
-                                                    </td>
-                                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => handlePreview(document)}
-                                                                className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
-                                                            >
-                                                                <EyeIcon className="w-4 h-4" />
-                                                                Preview
-                                                            </button>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="w-32 text-center hidden lg:block">
+                                                    <div className="flex items-center justify-center">
+                                                        <CalendarIcon className="w-4 h-4 text-gray-400 mr-1" />
+                                                        <span className="text-xs text-gray-500">
+                                                            {formatDate(document.created_at)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                
+                                                <div className="w-24 text-center">
+                                                    <div className="flex justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                handlePreview(document);
+                                                            }}
+                                                            className="p-1.5 text-gray-400 hover:text-blue-600 rounded"
+                                                            title="Preview"
+                                                        >
+                                                            <EyeIcon className="w-4 h-4" />
+                                                        </button>
+                                                        <div onClick={(e) => e.stopPropagation()}>
                                                             {renderDownloadAction(document, false)}
                                                         </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             )}
                         </>

@@ -7,9 +7,11 @@ use App\Models\DocumentAccessRequest;
 use App\Models\Program;
 use App\Models\User;
 use App\Models\Task;
+use App\Mail\DocumentAccessRequestNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class DocumentAccessRequestController extends Controller
 {
@@ -89,6 +91,23 @@ class DocumentAccessRequestController extends Controller
             'document_id' => $document->id,
             'dean_id' => $dean->id
         ]);
+
+        // Also send notification to admin users
+        try {
+            $adminUsers = User::where('role', 'admin')->get();
+            foreach ($adminUsers as $admin) {
+                Mail::to($admin->email)->send(new DocumentAccessRequestNotification($accessRequest));
+            }
+            Log::info('Email notifications sent to admins', [
+                'admin_count' => $adminUsers->count(),
+                'request_id' => $accessRequest->id
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to send email notifications to admins', [
+                'request_id' => $accessRequest->id,
+                'error' => $e->getMessage()
+            ]);
+        }
 
         return response()->json([
             'message' => 'Access request submitted successfully',

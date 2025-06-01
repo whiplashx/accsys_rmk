@@ -418,13 +418,12 @@ Route::middleware(['auth'])->group(function () {
     // API route for document listing
     Route::get('/api/documents', [DocumentController::class, 'index'])->name('api.documents.index');
     
-    // Document access request routes
-    Route::post('/api/document-access-requests', [DocumentAccessRequestController::class, 'store'])->name('api.document-access-requests.store');
+        // Document access request routes
+    Route::post('/api/document-access-requests', [DocumentAccessRequestController::class, 'requestAccess'])->name('api.document-access-requests.store');
     Route::get('/api/document-access-requests/user', [DocumentAccessRequestController::class, 'getUserRequests'])->name('api.document-access-requests.user');
-    Route::get('/api/document-access-requests/dean', [DocumentAccessRequestController::class, 'getDeanRequests'])->name('api.document-access-requests.dean');
-    Route::patch('/api/document-access-requests/{id}/approve', [DocumentAccessRequestController::class, 'approve'])->name('api.document-access-requests.approve');
-    Route::patch('/api/document-access-requests/{id}/reject', [DocumentAccessRequestController::class, 'reject'])->name('api.document-access-requests.reject');
-    Route::get('/api/documents/{id}/can-download', [DocumentAccessRequestController::class, 'canDownload'])->name('api.documents.can-download');
+    Route::get('/api/document-access-requests/dean', [DocumentAccessRequestController::class, 'getPendingRequests'])->name('api.document-access-requests.dean');
+    Route::patch('/api/document-access-requests/{id}/status', [DocumentAccessRequestController::class, 'updateRequestStatus'])->name('api.document-access-requests.update-status');
+    Route::get('/api/documents/{id}/access-check', [DocumentAccessRequestController::class, 'checkAccess'])->name('api.documents.access-check');
     Route::get('/api/documents/{id}/download', [DocumentController::class, 'download'])->name('api.documents.download');
 });
 
