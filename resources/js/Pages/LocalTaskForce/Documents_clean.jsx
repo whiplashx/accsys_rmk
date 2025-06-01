@@ -197,7 +197,6 @@ export default function Documents() {
 
     // Handle document preview
     const handlePreview = (document) => {
-        // Navigate to document viewer
         window.open(`/document-viewer?path=${encodeURIComponent(document.path)}`, '_blank');
     };
 
@@ -908,40 +907,38 @@ export default function Documents() {
                                                             <h4 className="text-sm font-medium text-gray-900 mb-3">Access Request Details</h4>
                                                             {(() => {
                                                                 const accessDetails = getAccessRequestDetails(document.id);
-                                                                if (!accessDetails) return null;
-                                                                
                                                                 return (
-                                                                    <div className="space-y-2 text-sm">
-                                                                        <div className="flex items-start">
-                                                                            <span className="w-24 text-gray-500">Status:</span>
-                                                                            <span className={`font-medium ${
-                                                                                accessDetails.status === 'approved' ? 'text-green-600' : 
-                                                                                accessDetails.status === 'pending' ? 'text-amber-600' : 
-                                                                                'text-red-600'
-                                                                            }`}>
-                                                                                {accessDetails.status.charAt(0).toUpperCase() + accessDetails.status.slice(1)}
-                                                                            </span>
-                                                                        </div>
-                                                                        <div className="flex items-start">
-                                                                            <span className="w-24 text-gray-500">Requested:</span>
-                                                                            <span>{new Date(accessDetails.created_at).toLocaleString()}</span>
-                                                                        </div>
-                                                                        {accessDetails.status !== 'pending' && (
-                                                                            <div className="flex items-start">
-                                                                                <span className="w-24 text-gray-500">Processed:</span>
-                                                                                <span>{new Date(accessDetails.updated_at).toLocaleString()}</span>
+                                                                    <div className="space-y-3">
+                                                                        <div className="bg-white p-3 rounded-md border">
+                                                                            <div className="flex items-start justify-between">
+                                                                                <div className="flex-1">
+                                                                                    <p className="text-sm font-medium text-gray-900">
+                                                                                        Request Status: {' '}
+                                                                                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                                                            accessDetails.status === 'approved' ? 'bg-green-100 text-green-800' :
+                                                                                            accessDetails.status === 'pending' ? 'bg-amber-100 text-amber-800' :
+                                                                                            'bg-red-100 text-red-800'
+                                                                                        }`}>
+                                                                                            {accessDetails.status.charAt(0).toUpperCase() + accessDetails.status.slice(1)}
+                                                                                        </span>
+                                                                                    </p>
+                                                                                    <p className="text-sm text-gray-600 mt-1">
+                                                                                        <strong>Reason:</strong> {accessDetails.reason}
+                                                                                    </p>
+                                                                                    <p className="text-xs text-gray-500 mt-2">
+                                                                                        Requested on {formatDate(accessDetails.created_at)}
+                                                                                        {accessDetails.updated_at !== accessDetails.created_at && (
+                                                                                            <span> • Updated on {formatDate(accessDetails.updated_at)}</span>
+                                                                                        )}
+                                                                                    </p>
+                                                                                    {accessDetails.response && (
+                                                                                        <p className="text-sm text-gray-600 mt-2">
+                                                                                            <strong>Response:</strong> {accessDetails.response}
+                                                                                        </p>
+                                                                                    )}
+                                                                                </div>
                                                                             </div>
-                                                                        )}
-                                                                        <div className="flex items-start">
-                                                                            <span className="w-24 text-gray-500">Reason:</span>
-                                                                            <span className="italic">{accessDetails.reason}</span>
                                                                         </div>
-                                                                        {accessDetails.response_note && (
-                                                                            <div className="flex items-start">
-                                                                                <span className="w-24 text-gray-500">Response:</span>
-                                                                                <span className="italic">{accessDetails.response_note}</span>
-                                                                            </div>
-                                                                        )}
                                                                     </div>
                                                                 );
                                                             })()}
