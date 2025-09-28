@@ -1,66 +1,179 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# AccSys - Accreditation Management System
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://img.shields.io/badge/Laravel-11.x-FF2D20?style=flat-square&logo=laravel&logoColor=white" alt="Laravel 11.x">
+  <img src="https://img.shields.io/badge/React-18.x-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React 18.x">
+  <img src="https://img.shields.io/badge/PHP-8.2+-777BB4?style=flat-square&logo=php&logoColor=white" alt="PHP 8.2+">
+  <img src="https://img.shields.io/badge/Inertia.js-1.0-9553E9?style=flat-square&logo=inertia&logoColor=white" alt="Inertia.js">
+  <img src="https://img.shields.io/badge/TailwindCSS-3.x-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="TailwindCSS">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg?style=flat-square" alt="License">
 </p>
 
-## About Laravel
+## About AccSys
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+**AccSys (Accreditation System)** is a comprehensive web-based application designed to streamline and manage institutional accreditation processes. Built specifically for educational institutions, AccSys facilitates collaboration between different stakeholders in the accreditation process, from initial preparation to final evaluation.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 🎯 Key Features
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Multi-Role Access Control**: Four distinct user roles (Admin/Dean, Local Task Force, Local Accreditor, Outside Accreditor) with tailored interfaces
+- **Hierarchical Accreditation Structure**: Areas → Parameters → Indicators organization system
+- **Task Management**: Assign and track accreditation tasks across teams with real-time progress monitoring
+- **Document Management**: Secure upload, storage, and access control for accreditation documents with approval workflows
+- **Self-Survey System**: Digital rating and evaluation tools for internal assessments
+- **Document Access Requests**: Secure document sharing with approval workflows and time-limited access
+- **Real-time Analytics**: Progress tracking, performance dashboards, and comprehensive reporting
+- **Program Management**: Support for multiple academic programs with individual oversight
+- **Email Notifications**: Automated notifications for access requests, task assignments, and updates
 
-## Learning Laravel
+### 🏗️ System Architecture
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+AccSys is built using modern web technologies:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+- **Backend**: Laravel 11.x with Fortify for authentication
+- **Frontend**: React 18.x with Inertia.js for seamless SPA experience
+- **Styling**: TailwindCSS with custom components
+- **Database**: MySQL with comprehensive relationships
+- **File Storage**: AWS S3 integration for document storage
+- **Email**: Mailgun integration for notifications
+- **Charts**: Recharts for analytics and reporting
+- **PDF Generation**: HTML2PDF.js for document generation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### 👥 User Roles & Capabilities
 
-## Laravel Sponsors
+#### Admin/Dean
+- Complete system oversight and user management
+- Program and accreditation structure management
+- Task assignment and monitoring across all programs
+- Document access approval and management
+- Comprehensive analytics and reporting
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+#### Local Task Force
+- Task execution and document upload
+- Self-survey completion and rating submission
+- Document access requests for restricted materials
+- Progress tracking and status updates
 
-### Premium Partners
+#### Local Accreditor
+- Independent evaluation and rating of indicators
+- Document review and assessment
+- Quality assurance and feedback provision
+- Comparison with self-assessments
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+#### Outside Accreditor
+- External evaluation and validation
+- Independent assessment of institutional claims
+- Final recommendation and reporting
+- Objective third-party perspective
+
+### 📋 Core Modules
+
+1. **User Management**: Role-based access control with program assignments
+2. **Accreditation Structure**: Hierarchical organization of evaluation criteria
+3. **Task Management**: Assignment, tracking, and completion workflows
+4. **Document Management**: Secure storage with granular access controls
+5. **Self-Survey System**: Digital evaluation and rating tools
+6. **Analytics Dashboard**: Real-time progress and performance metrics
+7. **Notification System**: Email alerts and in-app notifications
+
+## Getting Started
+
+### System Requirements
+
+- PHP 8.2 or higher
+- Node.js 16+ and npm
+- MySQL 8.0+
+- Composer
+- Modern web browser (Chrome, Firefox, Safari, Edge)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/whiplashx/accsys_rmk.git
+   cd accsys_rmk
+   ```
+
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
+
+3. **Install Node.js dependencies**
+   ```bash
+   npm install
+   ```
+
+4. **Environment setup**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+5. **Database setup**
+   ```bash
+   php artisan migrate --seed
+   ```
+
+6. **Build assets**
+   ```bash
+   npm run build
+   ```
+
+### Development
+
+Run the development environment with all services:
+
+```bash
+composer dev
+```
+
+This starts:
+- Laravel development server
+- Queue worker
+- Log monitoring (Pail)
+- Vite development server with hot reloading
+
+Alternatively, run services individually:
+- **Server**: `php artisan serve`
+- **Frontend**: `npm run dev`
+- **Queue**: `php artisan queue:work`
+
+## Documentation
+
+For detailed usage instructions, see the [User Manual](USER_MANUAL.md) which covers:
+- System navigation and interfaces
+- Role-specific workflows and capabilities
+- Feature guides and best practices
+- Administrative procedures
+- Troubleshooting and support
+
+## Technology Stack
+
+- **Backend Framework**: Laravel 11.x
+- **Frontend Library**: React 18.x
+- **Full-Stack Framework**: Inertia.js
+- **CSS Framework**: TailwindCSS
+- **Authentication**: Laravel Fortify
+- **Authorization**: Spatie Laravel Permission
+- **Build Tool**: Vite
+- **Icons**: Heroicons & Lucide React
+- **Charts**: Recharts
+- **Notifications**: React Toastify
+- **PDF Generation**: HTML2PDF.js
 
 ## Contributing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+AccSys is developed to meet the specific needs of institutional accreditation processes. Contributions are welcome through:
 
-## Code of Conduct
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes with proper testing
+4. Submit a pull request with detailed description
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Security
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+If you discover a security vulnerability within AccSys, please send an email to the development team. All security vulnerabilities will be promptly addressed.
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+AccSys is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
