@@ -171,6 +171,7 @@ export default function MinsuDashboard() {
     '/images/minsu-campus-2.jpg',
     '/images/minsu-campus-3.jpg',
     '/images/minsu-campus-4.jpg',
+    '/images/minsu-campus-1.jpg', // Reuse for 5th system
   ];
 
   const systems = [
@@ -208,6 +209,30 @@ export default function MinsuDashboard() {
       color: 'orange',
       gradient: 'from-orange-500 via-orange-600 to-red-500',
       features: ['Application Management', 'Scholarship Tracking', 'Document Submission', 'Grant Monitoring'],
+      link: 'https://osas-i-scholar.vercel.app'
+    },
+    {
+      id: 4,
+      title: 'MinSU Connect',
+      client: 'MinSU Community',
+      description: 'Community forum for students, faculty, and staff to connect, discuss, and share information within the MinSU community.',
+      status: 'Active',
+      icon: UserGroupIcon,
+      color: 'blue',
+      gradient: 'from-blue-500 via-indigo-500 to-purple-500',
+      features: ['Discussion Forums', 'Community Posts', 'Direct Messaging', 'Event Announcements'],
+      link: 'https://minsu-connect.vercel.app/welcome'
+    },
+    {
+      id: 5,
+      title: 'Accreditation System',
+      client: 'MinSU Quality Assurance',
+      description: 'Comprehensive accreditation management system for tracking program compliance, documentation, and evaluation processes.',
+      status: 'Active',
+      icon: ClipboardDocumentCheckIcon,
+      color: 'green',
+      gradient: 'from-green-600 via-teal-600 to-cyan-600',
+      features: ['Document Management', 'Progress Tracking', 'Compliance Monitoring', 'Evaluation Tools'],
       link: 'https://osas-i-scholar.vercel.app'
     },
     {
