@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('programs', function (Blueprint $table) {
             $table->id(); // Auto-incrementing primary key
             $table->string('name'); // Department name
-            $table->string('college')->unique(); // Unique department college
+            $table->string('college', 191)->unique(); // Unique department college with limited length
             $table->string('areaID')->nullable(); // Foreign key for area
             $table->timestamp('schedule')->nullable(); // Original schedule field for backward compatibility
             $table->timestamp('schedule_start')->nullable(); // Start time for scheduling

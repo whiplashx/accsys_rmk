@@ -4,9 +4,10 @@ import NavLink from './NavLink';
 import ResponsiveNavLink from './ResponsiveNavLink';
 import { usePage } from '@inertiajs/react';
 
-const ProfileSection = ({ data }) => {
+const ProfileSection = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const user = usePage().props.auth.user;
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -19,7 +20,7 @@ const ProfileSection = ({ data }) => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
-  const user = usePage().props.auth.user;
+
   return (
     <div className="fixed top-4 right-4 z-50" ref={dropdownRef}>
       <div className="relative">
@@ -31,16 +32,13 @@ const ProfileSection = ({ data }) => {
           <div className="relative">
             <img 
               src="/images/account.png" 
-              alt={`${data?.name}'s profile`} 
+              alt={`${user?.name}'s profile`} 
               className="w-8 h-8 rounded-full object-cover ring-2 ring-gray-100"
             />
             <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
           </div>
-          <div className='text-black'>
-            <p>{user.name}</p>
-          </div>
           <div className="flex items-center space-x-2">
-            <span className="text-sm font-medium text-gray-700">{data?.name}</span>
+            <span className="text-sm font-medium text-gray-700">{user?.name}</span>
             <ChevronDown 
               size={16}
               className={`text-gray-500 transform transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
@@ -53,8 +51,8 @@ const ProfileSection = ({ data }) => {
           <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
             {/* User Info Header */}
             <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-              <div className="text-sm font-semibold text-gray-800">{data?.name}</div>
-              <div className="text-xs text-gray-500 truncate">{data?.email}</div>
+              <div className="text-sm font-semibold text-gray-800">{user?.name}</div>
+              <div className="text-xs text-gray-500 truncate">{user?.email}</div>
             </div>
 
             {/* Menu Items */}

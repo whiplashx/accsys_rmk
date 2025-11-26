@@ -30,7 +30,9 @@ Route::get('/aboutus', function () {
 Route::get('/welcome', function () {
     return Inertia::render('Welcome');
 })->name('welcome');
-
+Route::get('/home', function () {
+    return Inertia::render('Dashboard-bsit');
+})->name('home');
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
