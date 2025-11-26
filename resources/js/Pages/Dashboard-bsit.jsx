@@ -233,19 +233,7 @@ export default function MinsuDashboard() {
       color: 'green',
       gradient: 'from-green-600 via-teal-600 to-cyan-600',
       features: ['Document Management', 'Progress Tracking', 'Compliance Monitoring', 'Evaluation Tools'],
-      link: 'https://osas-i-scholar.vercel.app'
-    },
-    {
-      id: 4,
-      title: 'Accreditation System',
-      client: 'MinSU Quality Assurance',
-      description: 'Comprehensive accreditation management system for tracking program compliance, documentation, and evaluation processes.',
-      status: 'Active',
-      icon: ClipboardDocumentCheckIcon,
-      color: 'green',
-      gradient: 'from-green-600 via-teal-600 to-cyan-600',
-      features: ['Document Management', 'Progress Tracking', 'Compliance Monitoring', 'Evaluation Tools'],
-      link: window.location.origin
+      link: window.location.origin 
     }
   ];
 
