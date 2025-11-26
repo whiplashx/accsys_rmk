@@ -21,16 +21,13 @@ export default function Dashboard() {
             <AdminLayout>
                 <Head title="Dashboard" />
                 <div className="w-full">
-                    <div className="mx-auto">
-                        <div className="bg-white shadow-sm rounded-lg">
-                            <div className="p-6">
+
                                 <AccreditationAdminDashboard />
                                 {
                                     //<ActivityLog />
                                 }
-                            </div>
-                        </div>
-                    </div>
+                      
+
                 </div>
             </AdminLayout>
             : (user.role === 'localtaskforce' ?

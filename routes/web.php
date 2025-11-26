@@ -74,6 +74,9 @@ Route::middleware(['auth', 'role:admin'])
             return Inertia::render('Admin/Exhibit');
         })->name('exhibitAdmin');
 
+        Route::get('/dashboardAdmin', function () {
+            return Inertia::render('Dashboard-activity');
+        })->name('dashboardAdmin');
         Route::get('/documents', function () {
             return Inertia::render('Admin/Documents');
         })->name('documents');

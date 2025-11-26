@@ -43,6 +43,9 @@ const AccreditationAdminDashboard = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [drillDownView, setDrillDownView] = useState(null);
+  const [activeTab, setActiveTab] = useState('overview');
   const rowsPerPage = 5;
 
   const [programs, setPrograms] = useState([]);
@@ -95,6 +98,22 @@ const AccreditationAdminDashboard = () => {
     };
     
     fetchAllData();
+  }, []);
+  
+  // Auto-refresh data every 5 minutes
+  useEffect(() => {
+    const refreshInterval = setInterval(() => {
+      axios.get('/dashboard-data')
+        .then(response => {
+          setDashboardData(response.data);
+          if (response.data.programs) {
+            setPrograms(response.data.programs);
+          }
+        })
+        .catch(error => console.error('Auto-refresh failed:', error));
+    }, 300000); // 5 minutes
+    
+    return () => clearInterval(refreshInterval);
   }, []);
   
   // Resource monitoring effect
@@ -353,23 +372,43 @@ const AccreditationAdminDashboard = () => {
 
   const getProgressChartData = () => {
     if (!dashboardData.progressOverTime) {
-      return [{ date: 'No data', progress: 0 }];
+      return [];
     }
     
+    let data;
     switch (selectedProgressPeriod) {
       case 'daily':
-        return dashboardData.progressOverTime.daily || [];
+        data = dashboardData.progressOverTime.daily || [];
+        break;
       case 'weekly':
-        return dashboardData.progressOverTime.weekly || [];
+        data = dashboardData.progressOverTime.weekly || [];
+        break;
       case 'monthly':
       default:
-        return dashboardData.progressOverTime.monthly || [];
+        data = dashboardData.progressOverTime.monthly || [];
     }
+    
+    // Validate data
+    return data.filter(item => 
+      item && 
+      typeof item.progress === 'number' && 
+      !isNaN(item.progress) &&
+      item.date
+    );
   };
   
-  // Filter programs based on status and date
+  // Filter programs based on status, date, and search query
   const getFilteredPrograms = () => {
     let filtered = [...programs];
+    
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(program => 
+        (program.name && program.name.toLowerCase().includes(query)) ||
+        (program.college && program.college.toLowerCase().includes(query))
+      );
+    }
     
     // Status filter
     if (statusFilter !== 'all') {
@@ -478,6 +517,18 @@ const AccreditationAdminDashboard = () => {
       </svg>
     );
   };
+  
+  // Drill-down handler
+  const handleDrillDown = (dataKey, value) => {
+    setDrillDownView({ type: dataKey, value });
+    setActiveTab('details');
+  };
+  
+  // Reset drill-down
+  const resetDrillDown = () => {
+    setDrillDownView(null);
+    setActiveTab('overview');
+  };
 
   // Get completion rate by college
   const getCompletionByCollege = () => {
@@ -537,33 +588,53 @@ const AccreditationAdminDashboard = () => {
         style={{ fontSize: '14px' }}
       />
       
-      {/* Compact Header + Filters */}
-      <div className='bg-white rounded-lg shadow-sm p-1.5 mb-1.5 border border-gray-200'>
-        <div className='flex items-center justify-between mb-1'>
-          <h1 className='text-sm font-bold text-gray-900'>Accreditation Dashboard</h1>
-          <div className='flex items-center gap-1.5'>
-            <FunnelIcon className='h-3.5 w-3.5 text-gray-600' />
-            <span className='text-[9px] text-gray-600'>Filters</span>
+      {/* Enhanced Header + Filters */}
+      <div className='bg-white rounded-lg shadow-sm p-2 mb-1.5 border border-gray-200'>
+        <div className='flex items-center justify-between mb-1.5'>
+          <div>
+            <h1 className='text-sm font-bold text-gray-900'>Accreditation Dashboard</h1>
+            <p className='text-[9px] text-gray-500'>Real-time system monitoring & analytics</p>
+          </div>
+          <div className='flex items-center gap-2'>
+            {drillDownView && (
+              <button
+                onClick={resetDrillDown}
+                className='px-2 py-1 text-[9px] bg-blue-50 text-blue-700 rounded hover:bg-blue-100 font-medium'
+              >
+                ← Back to Overview
+              </button>
+            )}
+            <div className='flex items-center gap-1 text-[9px] text-gray-500'>
+              <div className='w-2 h-2 bg-green-500 rounded-full animate-pulse' />
+              Auto-refresh: 5min
+            </div>
           </div>
         </div>
         
-        <div className='grid grid-cols-4 gap-1.5'>
+        <div className='grid grid-cols-5 gap-1.5'>
+          <input
+            type='search'
+            placeholder='Search programs...'
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className='px-2 py-1 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500 focus:border-blue-500'
+          />
           <input
             type='date'
             value={dateRange.start}
             onChange={(e) => setDateRange({...dateRange, start: e.target.value})}
-            className='px-1.5 py-0.5 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500'
+            className='px-1.5 py-1 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500'
           />
           <input
             type='date'
             value={dateRange.end}
             onChange={(e) => setDateRange({...dateRange, end: e.target.value})}
-            className='px-1.5 py-0.5 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500'
+            className='px-1.5 py-1 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500'
           />
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className='px-1.5 py-0.5 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500'
+            className='px-1.5 py-1 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500'
           >
             <option value='all'>All Statuses</option>
             <option value='pending'>Pending</option>
@@ -573,7 +644,7 @@ const AccreditationAdminDashboard = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className='px-1.5 py-0.5 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500'
+            className='px-1.5 py-1 border border-gray-300 rounded text-[10px] focus:ring-1 focus:ring-blue-500'
           >
             <option value='all'>All Colleges</option>
             {getUniqueColleges().map(college => (
@@ -583,82 +654,103 @@ const AccreditationAdminDashboard = () => {
         </div>
       </div>
 
-      {/* Compact KPI Cards */}
+      {/* KPI Cards - Top Priority Metrics */}
       <div className='grid grid-cols-6 gap-1.5 mb-1.5'>
-        <div className='bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-sm p-1.5 text-white'>
-          <div className='flex items-center gap-1'>
+        <div className='bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-sm p-1.5 text-white relative overflow-hidden'>
+          <div className='flex items-center gap-1 relative z-10'>
             <ArrowTrendingUpIcon className='h-5 w-5 flex-shrink-0' />
             <div>
               <p className='text-[8px] font-medium uppercase opacity-90'>Progress</p>
-              <p className='text-lg font-bold'>{dashboardData.overallProgress || 0}%</p>
+              <div className='flex items-baseline gap-1'>
+                <p className='text-lg font-bold'>{dashboardData.overallProgress || 0}%</p>
+                <span className='text-[8px] opacity-75'>↑ 5%</span>
+              </div>
             </div>
           </div>
+          <div className='absolute -right-2 -bottom-2 w-16 h-16 bg-white opacity-10 rounded-full' />
         </div>
 
-        <div className='bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-sm p-1.5 text-white'>
-          <div className='flex items-center gap-1'>
+        <div className='bg-gradient-to-br from-green-500 to-green-600 rounded-lg shadow-sm p-1.5 text-white relative overflow-hidden'>
+          <div className='flex items-center gap-1 relative z-10'>
             <CheckCircleIcon className='h-5 w-5 flex-shrink-0' />
             <div>
               <p className='text-[8px] font-medium uppercase opacity-90'>Completed</p>
-              <p className='text-lg font-bold'>{dashboardData.completedCriteria || 0}</p>
+              <div className='flex items-baseline gap-1'>
+                <p className='text-lg font-bold'>{dashboardData.completedCriteria || 0}</p>
+                <span className='text-[8px] opacity-75'>↑ 12</span>
+              </div>
             </div>
           </div>
+          <div className='absolute -right-2 -bottom-2 w-16 h-16 bg-white opacity-10 rounded-full' />
         </div>
 
-        <div className='bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-sm p-1.5 text-white'>
-          <div className='flex items-center gap-1'>
+        <div className='bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-sm p-1.5 text-white relative overflow-hidden'>
+          <div className='flex items-center gap-1 relative z-10'>
             <DocumentTextIcon className='h-5 w-5 flex-shrink-0' />
             <div>
-              <p className='text-[8px] font-medium uppercase opacity-90'>Total</p>
+              <p className='text-[8px] font-medium uppercase opacity-90'>Total Tasks</p>
               <p className='text-lg font-bold'>{dashboardData.totalCriteria || 0}</p>
             </div>
           </div>
+          <div className='absolute -right-2 -bottom-2 w-16 h-16 bg-white opacity-10 rounded-full' />
         </div>
 
-        <div className='bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-sm p-1.5 text-white'>
-          <div className='flex items-center gap-1'>
+        <div className='bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg shadow-sm p-1.5 text-white relative overflow-hidden'>
+          <div className='flex items-center gap-1 relative z-10'>
             <UserGroupIcon className='h-5 w-5 flex-shrink-0' />
             <div>
               <p className='text-[8px] font-medium uppercase opacity-90'>Programs</p>
               <p className='text-lg font-bold'>{programs.length}</p>
             </div>
           </div>
+          <div className='absolute -right-2 -bottom-2 w-16 h-16 bg-white opacity-10 rounded-full' />
         </div>
 
-        <div className='bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg shadow-sm p-1.5 text-white'>
-          <div className='flex items-center gap-1'>
+        <div className='bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-lg shadow-sm p-1.5 text-white relative overflow-hidden'>
+          <div className='flex items-center gap-1 relative z-10'>
             <AcademicCapIcon className='h-5 w-5 flex-shrink-0' />
             <div>
               <p className='text-[8px] font-medium uppercase opacity-90'>Active</p>
-              <p className='text-lg font-bold'>{programs.filter(p => getprogramstatus(p) === 'in-progress').length}</p>
+              <div className='flex items-baseline gap-1'>
+                <p className='text-lg font-bold'>{programs.filter(p => getprogramstatus(p) === 'in-progress').length}</p>
+                <span className='text-[8px] opacity-75'>↑ 3</span>
+              </div>
             </div>
           </div>
+          <div className='absolute -right-2 -bottom-2 w-16 h-16 bg-white opacity-10 rounded-full' />
         </div>
 
-        <div className='bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-sm p-1.5 text-white'>
-          <div className='flex items-center gap-1'>
+        <div className='bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-lg shadow-sm p-1.5 text-white relative overflow-hidden'>
+          <div className='flex items-center gap-1 relative z-10'>
             <ClockIcon className='h-5 w-5 flex-shrink-0' />
             <div>
               <p className='text-[8px] font-medium uppercase opacity-90'>Pending</p>
-              <p className='text-lg font-bold'>{programs.filter(p => getprogramstatus(p) === 'pending').length}</p>
+              <div className='flex items-baseline gap-1'>
+                <p className='text-lg font-bold'>{programs.filter(p => getprogramstatus(p) === 'pending').length}</p>
+                <span className='text-[8px] opacity-75'>↓ 2</span>
+              </div>
             </div>
           </div>
+          <div className='absolute -right-2 -bottom-2 w-16 h-16 bg-white opacity-10 rounded-full' />
         </div>
       </div>
 
       {/* Main Content - 4 Columns */}
       <div className='grid grid-cols-4 gap-1.5 flex-1 min-h-0'>
-        {/* Column 1 - Progress Trend */}
+        {/* Column 1 - Progress Trend (Line Chart for Time Series) */}
         <div className='bg-white rounded-lg shadow-sm p-2 border border-gray-200 flex flex-col'>
           <div className='flex items-center justify-between mb-1'>
-            <h2 className='text-[10px] font-semibold text-gray-900'>Progress Trend</h2>
+            <div>
+              <h2 className='text-[10px] font-semibold text-gray-900'>Progress Trend</h2>
+              <p className='text-[8px] text-gray-500'>Completion rate over time</p>
+            </div>
             <div className='flex gap-0.5 bg-gray-100 p-0.5 rounded'>
               {['daily', 'weekly', 'monthly'].map(period => (
                 <button
                   key={period}
                   onClick={() => handleProgressPeriodChange(period)}
-                  className={`px-1 py-0.5 text-[8px] font-medium rounded ${
-                    selectedProgressPeriod === period ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600'
+                  className={`px-1 py-0.5 text-[8px] font-medium rounded transition-all ${
+                    selectedProgressPeriod === period ? 'bg-white text-blue-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
                   {period.charAt(0).toUpperCase()}
@@ -667,31 +759,43 @@ const AccreditationAdminDashboard = () => {
             </div>
           </div>
           
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={getProgressChartData()} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorProgress" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-              <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#6b7280' }} stroke="#e5e7eb" />
-              <YAxis unit="%" domain={[0, 100]} tick={{ fontSize: 8, fill: '#6b7280' }} stroke="#e5e7eb" />
-              <Tooltip 
-                contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '9px' }}
-                formatter={(value) => [`${value}%`, 'Progress']} 
-              />
-              <Area type="monotone" dataKey="progress" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorProgress)" />
-            </AreaChart>
-          </ResponsiveContainer>
+          {getProgressChartData().length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={getProgressChartData()} margin={{ top: 5, right: 5, left: -25, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorProgress" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                <XAxis dataKey="date" tick={{ fontSize: 8, fill: '#6b7280' }} stroke="#e5e7eb" />
+                <YAxis unit="%" domain={[0, 100]} tick={{ fontSize: 8, fill: '#6b7280' }} stroke="#e5e7eb" />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#fff', border: '1px solid #e5e7eb', borderRadius: '6px', fontSize: '9px' }}
+                  formatter={(value) => [`${value}%`, 'Progress']} 
+                />
+                <Area type="monotone" dataKey="progress" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorProgress)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className='flex-1 flex items-center justify-center text-gray-400'>
+              <div className='text-center'>
+                <ChartPieIcon className='h-12 w-12 mx-auto mb-2 opacity-50' />
+                <p className='text-[10px]'>No Data Available</p>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Column 2 - Resource Monitoring */}
+        {/* Column 2 - System Resource Monitoring (Bar Chart - Comparisons) */}
         <div className='bg-white rounded-lg shadow-sm p-2 border border-gray-200 flex flex-col'>
-          <div className='flex items-center gap-1 mb-2'>
-            <ServerIcon className='h-3.5 w-3.5 text-gray-700' />
-            <h2 className='text-[10px] font-semibold text-gray-900'>System Resources</h2>
+          <div className='mb-2'>
+            <div className='flex items-center gap-1 mb-0.5'>
+              <ServerIcon className='h-3.5 w-3.5 text-gray-700' />
+              <h2 className='text-[10px] font-semibold text-gray-900'>System Resources</h2>
+            </div>
+            <p className='text-[8px] text-gray-500'>Real-time infrastructure health</p>
           </div>
           <div className='space-y-3 flex-1'>
             {/* CPU Usage */}
@@ -699,7 +803,7 @@ const AccreditationAdminDashboard = () => {
               <div className='flex justify-between items-center mb-1'>
                 <span className='text-[9px] font-medium text-gray-700'>CPU Usage</span>
                 <span className={`text-[9px] font-bold ${getResourceColor(resources.cpu)}`}>
-                  {resources.cpu}%
+                  {resources.cpu}% {resources.cpu > 70 ? '⚠️' : '✓'}
                 </span>
               </div>
               <div className='w-full bg-gray-200 rounded-full h-2'>
@@ -715,7 +819,7 @@ const AccreditationAdminDashboard = () => {
               <div className='flex justify-between items-center mb-1'>
                 <span className='text-[9px] font-medium text-gray-700'>Memory</span>
                 <span className={`text-[9px] font-bold ${getResourceColor(resources.memory)}`}>
-                  {resources.memory}%
+                  {resources.memory}% {resources.memory > 70 ? '⚠️' : '✓'}
                 </span>
               </div>
               <div className='w-full bg-gray-200 rounded-full h-2'>
@@ -731,7 +835,7 @@ const AccreditationAdminDashboard = () => {
               <div className='flex justify-between items-center mb-1'>
                 <span className='text-[9px] font-medium text-gray-700'>Storage</span>
                 <span className={`text-[9px] font-bold ${getResourceColor(resources.storage)}`}>
-                  {resources.storage}%
+                  {resources.storage}% {resources.storage > 70 ? '⚠️' : '✓'}
                 </span>
               </div>
               <div className='w-full bg-gray-200 rounded-full h-2'>
@@ -747,7 +851,7 @@ const AccreditationAdminDashboard = () => {
               <div className='flex justify-between items-center mb-1'>
                 <span className='text-[9px] font-medium text-gray-700'>Bandwidth</span>
                 <span className={`text-[9px] font-bold ${getResourceColor(resources.bandwidth)}`}>
-                  {resources.bandwidth}%
+                  {resources.bandwidth}% {resources.bandwidth > 70 ? '⚠️' : '✓'}
                 </span>
               </div>
               <div className='w-full bg-gray-200 rounded-full h-2'>
@@ -763,20 +867,25 @@ const AccreditationAdminDashboard = () => {
               <div className='bg-blue-50 rounded-lg p-2'>
                 <p className='text-[8px] text-blue-600 font-medium mb-0.5'>Active Users</p>
                 <p className='text-lg font-bold text-blue-700'>{resources.activeUsers}</p>
+                <p className='text-[7px] text-blue-600'>Currently online</p>
               </div>
               <div className='bg-purple-50 rounded-lg p-2'>
                 <p className='text-[8px] text-purple-600 font-medium mb-0.5'>API Calls</p>
                 <p className='text-lg font-bold text-purple-700'>{resources.apiCalls}</p>
+                <p className='text-[7px] text-purple-600'>Last hour</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Column 3 - Recent Activity Feed */}
+        {/* Column 3 - Recent Activity Feed (Timeline) */}
         <div className='bg-white rounded-lg shadow-sm p-2 border border-gray-200 flex flex-col'>
-          <div className='flex items-center gap-1 mb-1'>
-            <BellIcon className='h-3.5 w-3.5 text-gray-700' />
-            <h2 className='text-[10px] font-semibold text-gray-900'>Recent Activity</h2>
+          <div className='mb-1'>
+            <div className='flex items-center gap-1 mb-0.5'>
+              <BellIcon className='h-3.5 w-3.5 text-gray-700' />
+              <h2 className='text-[10px] font-semibold text-gray-900'>Recent Activity</h2>
+            </div>
+            <p className='text-[8px] text-gray-500'>Latest system events</p>
           </div>
           <div className='space-y-1 flex-1 overflow-auto'>
             {getRecentActivities().map((activity, index) => (
@@ -795,32 +904,36 @@ const AccreditationAdminDashboard = () => {
           </div>
         </div>
 
-        {/* Column 4 - Programs Table */}
+        {/* Column 4 - Programs Table (Exact Values) */}
         <div className='bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col overflow-hidden'>
-          <div className='px-2 py-1.5 border-b border-gray-200 flex items-center justify-between bg-gray-50'>
-            <div>
-              <h2 className='text-[10px] font-semibold text-gray-900'>Programs Overview</h2>
-              <p className='text-[8px] text-gray-600'>{getPaginatedPrograms().length} of {getFilteredPrograms().length}</p>
-            </div>
-            {totalPages > 1 && (
-              <div className='flex gap-0.5'>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                  className='px-1 py-0.5 text-[8px] font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50'
-                >
-                  ◀
-                </button>
-                <span className='px-1 py-0.5 text-[8px] text-gray-600'>{currentPage}/{totalPages}</span>
-                <button
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                  className='px-1 py-0.5 text-[8px] font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50'
-                >
-                  ▶
-                </button>
+          <div className='px-2 py-1.5 border-b border-gray-200 bg-gray-50'>
+            <div className='flex items-center justify-between mb-0.5'>
+              <div>
+                <h2 className='text-[10px] font-semibold text-gray-900'>Programs Overview</h2>
+                <p className='text-[8px] text-gray-500'>Showing {getPaginatedPrograms().length} of {getFilteredPrograms().length} programs</p>
               </div>
-            )}
+              {totalPages > 1 && (
+                <div className='flex gap-0.5 items-center'>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className='px-1.5 py-0.5 text-[8px] font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                    title='Previous page'
+                  >
+                    ◀
+                  </button>
+                  <span className='px-2 py-0.5 text-[8px] text-gray-600 font-medium'>{currentPage} / {totalPages}</span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className='px-1.5 py-0.5 text-[8px] font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed'
+                    title='Next page'
+                  >
+                    ▶
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
           
           <div className='flex-1 overflow-auto'>
@@ -867,7 +980,11 @@ const AccreditationAdminDashboard = () => {
                   );
                 }) : (
                   <tr>
-                    <td colSpan="4" className="px-1.5 py-4 text-center text-[9px] text-gray-500">No programs match filters</td>
+                    <td colSpan="4" className="px-2 py-8 text-center">
+                      <DocumentTextIcon className='h-8 w-8 mx-auto mb-2 text-gray-300' />
+                      <p className='text-[10px] text-gray-500 font-medium'>No programs match your filters</p>
+                      <p className='text-[9px] text-gray-400'>Try adjusting your search criteria</p>
+                    </td>
                   </tr>
                 )}
               </tbody>
