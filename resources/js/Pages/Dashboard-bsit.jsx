@@ -24,6 +24,13 @@ export default function MinsuDashboard() {
   const [currentSystemIndex, setCurrentSystemIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [direction, setDirection] = useState('next');
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   // Handle scroll to change systems
   useEffect(() => {
@@ -37,11 +44,11 @@ export default function MinsuDashboard() {
       if (Math.abs(delta) > 10) {
         isScrolling = true;
         
-        if (delta > 0 && currentSystemIndex < systems.length - 1) {
-          // Scroll down - next system
+        if (delta > 0) {
+          // Scroll down - next system (with circular navigation)
           nextSystem();
-        } else if (delta < 0 && currentSystemIndex > 0) {
-          // Scroll up - previous system
+        } else if (delta < 0) {
+          // Scroll up - previous system (with circular navigation)
           prevSystem();
         }
         
@@ -57,6 +64,100 @@ export default function MinsuDashboard() {
       window.removeEventListener('wheel', handleScroll);
     };
   }, [currentSystemIndex]);
+
+  // Handle touch/swipe events
+  const onTouchStart = (e) => {
+    setIsDragging(true);
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+    setDragOffset(0);
+  };
+
+  const onTouchMove = (e) => {
+    if (!touchStart) return;
+    const currentTouch = e.targetTouches[0].clientX;
+    setTouchEnd(currentTouch);
+    const offset = currentTouch - touchStart;
+    
+    // Only allow dragging in the direction of the swipe
+    if (offset > 0) {
+      // Dragging right (showing previous)
+      setDragOffset(Math.min(offset, window.innerWidth * 0.3)); // Limit drag distance
+      setDirection('prev');
+    } else if (offset < 0) {
+      // Dragging left (showing next)
+      setDragOffset(Math.max(offset, -window.innerWidth * 0.3)); // Limit drag distance
+      setDirection('next');
+    }
+  };
+
+  const onTouchEnd = () => {
+    setIsDragging(false);
+    if (!touchStart || !touchEnd) {
+      setDragOffset(0);
+      return;
+    }
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe) {
+      nextSystem();
+    } else if (isRightSwipe) {
+      prevSystem();
+    }
+    
+    setDragOffset(0);
+  };
+
+  // Handle mouse drag events
+  const onMouseDown = (e) => {
+    setIsDragging(true);
+    setDragOffset(0);
+    setTouchStart(e.clientX);
+    setTouchEnd(null);
+  };
+
+  const onMouseMove = (e) => {
+    if (!isDragging || !touchStart) return;
+    const currentMouse = e.clientX;
+    setTouchEnd(currentMouse);
+    const offset = currentMouse - touchStart;
+    
+    // Only allow dragging in the direction of the swipe
+    if (offset > 0) {
+      // Dragging right (showing previous)
+      setDragOffset(Math.min(offset, window.innerWidth * 0.3)); // Limit drag distance
+      setDirection('prev');
+    } else if (offset < 0) {
+      // Dragging left (showing next)
+      setDragOffset(Math.max(offset, -window.innerWidth * 0.3)); // Limit drag distance
+      setDirection('next');
+    }
+  };
+
+  const onMouseUp = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    if (!touchStart || !touchEnd) {
+      setDragOffset(0);
+      return;
+    }
+    
+    const distance = touchStart - touchEnd;
+    const isLeftDrag = distance > minSwipeDistance;
+    const isRightDrag = distance < -minSwipeDistance;
+    
+    if (isLeftDrag) {
+      nextSystem();
+    } else if (isRightDrag) {
+      prevSystem();
+    }
+    
+    setDragOffset(0);
+  };
 
   // Campus background images for each system
   // Save the MinSU campus images to public/images/ as:
@@ -175,7 +276,17 @@ export default function MinsuDashboard() {
       <Head title="MinSU Systems Dashboard" />
       
       {/* Full Screen Hero Section */}
-      <div className="relative h-screen overflow-hidden bg-black">
+      <div 
+        className="relative h-screen overflow-hidden bg-black"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onMouseLeave={onMouseUp}
+        style={{ cursor: isDragging ? 'grabbing' : 'grab' }}
+      >
         {/* Background Image with Crossfade Effect */}
         <div className="absolute inset-0">
           {campusImages.map((image, index) => (
@@ -208,39 +319,45 @@ export default function MinsuDashboard() {
         </div>
 
         {/* Header */}
-        <div className="relative z-10 flex items-center justify-between px-8 py-6 bg-white/10 backdrop-blur-md border-b border-white/20">
-          <div className="flex items-center gap-4">
+        <div className="relative z-10 flex items-center justify-between px-4 sm:px-6 md:px-8 py-4 md:py-6 bg-white/10 backdrop-blur-md border-b border-white/20">
+          <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
             {/* MinSU Logo */}
             <img 
               src="/images/minsu-logo.png" 
               alt="MinSU Logo" 
-              className="h-16 w-16 drop-shadow-2xl"
+              className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 drop-shadow-2xl"
             />
             <div>
-              <h1 className="text-2xl font-bold text-white drop-shadow-lg">Mindoro State University</h1>
+              <h1 className="text-sm sm:text-lg md:text-2xl font-bold text-white drop-shadow-lg">Mindoro State University</h1>
             </div>
           </div>
 
         </div>
 
         {/* Main Hero Content */}
-        <div className="relative z-10 h-[calc(100vh-88px)] flex items-center justify-center px-8">
+        <div className="relative z-10 h-[calc(100vh-88px)] flex items-center justify-center px-4 sm:px-6 md:px-8">
           <div className="max-w-6xl w-full">
             <div 
-              className={`text-center mb-12 transition-all duration-500 ${
+              className={`text-center mb-6 sm:mb-8 md:mb-12 transition-all duration-500 ${
                 isTransitioning 
                   ? direction === 'next' 
                     ? 'opacity-0 translate-x-20' 
                     : 'opacity-0 -translate-x-20'
+                  : isDragging
+                  ? ''
                   : 'opacity-100 translate-x-0'
               }`}
+              style={isDragging ? { 
+                transform: `translateX(${dragOffset}px)`,
+                transition: 'none'
+              } : {}}
             >
               {/* System Icon */}
-              <div className="mb-6 flex justify-center">
+              <div className="mb-4 sm:mb-6 flex justify-center">
                 <div className="relative">
                   <div className="absolute inset-0 bg-white/30 rounded-full blur-2xl animate-pulse"></div>
-                  <div className="relative bg-white/20 backdrop-blur-sm rounded-full p-8 border-4 border-white/30 transform transition-transform duration-500 hover:scale-110">
-                    <Icon className="h-24 w-24 text-white drop-shadow-2xl" />
+                  <div className="relative bg-white/20 backdrop-blur-sm rounded-full p-4 sm:p-6 md:p-8 border-2 sm:border-4 border-white/30 transform transition-transform duration-500 hover:scale-110">
+                    <Icon className="h-12 w-12 sm:h-16 sm:w-16 md:h-24 md:w-24 text-white drop-shadow-2xl" />
                   </div>
                 </div>
               </div>
@@ -248,31 +365,31 @@ export default function MinsuDashboard() {
               
 
               {/* Title */}
-              <h2 className="text-6xl font-bold text-white mb-4 drop-shadow-2xl animate-slide-up">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-4 drop-shadow-2xl animate-slide-up px-2">
                 {currentSystem.title}
               </h2>
               
               {/* Client */}
-              <p className="text-2xl text-white/90 mb-6 font-light animate-slide-up" style={{ animationDelay: '100ms' }}>
+              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 mb-4 sm:mb-5 md:mb-6 font-light animate-slide-up px-4" style={{ animationDelay: '100ms' }}>
                 {currentSystem.client}
               </p>
 
               {/* Description */}
-              <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8 leading-relaxed animate-slide-up" style={{ animationDelay: '200ms' }}>
+              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto mb-6 sm:mb-7 md:mb-8 leading-relaxed animate-slide-up px-4" style={{ animationDelay: '200ms' }}>
                 {currentSystem.description}
               </p>
 
               {/* Features */}
               {currentSystem.features.length > 0 && (
-                <div className="mb-10 animate-slide-up" style={{ animationDelay: '300ms' }}>
-                  <div className="flex flex-wrap justify-center gap-3">
+                <div className="mb-6 sm:mb-8 md:mb-10 animate-slide-up px-4" style={{ animationDelay: '300ms' }}>
+                  <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
                     {currentSystem.features.map((feature, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 transform transition-all duration-300 hover:scale-105 hover:bg-white/30"
+                        className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 transform transition-all duration-300 hover:scale-105 hover:bg-white/30"
                         style={{ animationDelay: `${400 + idx * 50}ms` }}
                       >
-                        <SparklesIcon className="h-4 w-4" />
+                        <SparklesIcon className="h-3 w-3 sm:h-4 sm:w-4" />
                         {feature}
                       </span>
                     ))}
@@ -281,21 +398,21 @@ export default function MinsuDashboard() {
               )}
 
               {/* Action Button */}
-              <div className="flex justify-center gap-4 animate-slide-up" style={{ animationDelay: '500ms' }}>
+              <div className="flex justify-center gap-4 animate-slide-up px-4" style={{ animationDelay: '500ms' }}>
                 {currentSystem.link ? (
                   <button
                     onClick={() => handleSystemClick(currentSystem)}
-                    className="group flex items-center gap-3 px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg hover:bg-white/90 transform hover:scale-105 transition-all duration-300 shadow-2xl"
+                    className="group flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-7 sm:py-3.5 md:px-8 md:py-4 bg-white text-gray-900 rounded-full font-bold text-sm sm:text-base md:text-lg hover:bg-white/90 transform hover:scale-105 transition-all duration-300 shadow-2xl"
                   >
                     <span>Launch System</span>
-                    <ArrowTopRightOnSquareIcon className="h-6 w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    <ArrowTopRightOnSquareIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                   </button>
                 ) : (
                   <button
                     disabled
-                    className="flex items-center gap-3 px-8 py-4 bg-white/20 backdrop-blur-sm text-white rounded-full font-bold text-lg cursor-not-allowed border-2 border-white/30"
+                    className="flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-7 sm:py-3.5 md:px-8 md:py-4 bg-white/20 backdrop-blur-sm text-white rounded-full font-bold text-sm sm:text-base md:text-lg cursor-not-allowed border-2 border-white/30"
                   >
-                    <ClockIcon className="h-6 w-6" />
+                    <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                     <span>Coming Soon</span>
                   </button>
                 )}
@@ -307,30 +424,30 @@ export default function MinsuDashboard() {
         {/* Navigation Arrows */}
         <button
           onClick={prevSystem}
-          className="absolute left-8 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-4 rounded-full transition-all duration-300 border border-white/30 group"
+          className="hidden sm:block absolute left-2 sm:left-4 md:left-8 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-2 sm:p-3 md:p-4 rounded-full transition-all duration-300 border border-white/30 group"
         >
-          <ChevronLeftIcon className="h-8 w-8 group-hover:-translate-x-1 transition-transform" />
+          <ChevronLeftIcon className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 group-hover:-translate-x-1 transition-transform" />
         </button>
         
         <button
           onClick={nextSystem}
-          className="absolute right-8 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-4 rounded-full transition-all duration-300 border border-white/30 group"
+          className="hidden sm:block absolute right-2 sm:right-4 md:right-8 top-1/2 -translate-y-1/2 z-20 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white p-2 sm:p-3 md:p-4 rounded-full transition-all duration-300 border border-white/30 group"
         >
-          <ChevronRightIcon className="h-8 w-8 group-hover:translate-x-1 transition-transform" />
+          <ChevronRightIcon className="h-5 w-5 sm:h-6 sm:w-6 md:h-8 md:w-8 group-hover:translate-x-1 transition-transform" />
         </button>
 
       
 
         {/* Dots Navigation */}
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-20 flex gap-3">
+        <div className="absolute bottom-8 sm:bottom-10 md:bottom-12 left-1/2 -translate-x-1/2 z-20 flex gap-2 sm:gap-3">
           {systems.map((system, index) => (
             <button
               key={system.id}
               onClick={() => goToSystem(index)}
               className={`transition-all duration-300 ${
                 index === currentSystemIndex
-                  ? 'w-12 h-3 bg-white rounded-full'
-                  : 'w-3 h-3 bg-white/50 rounded-full hover:bg-white/70'
+                  ? 'w-8 sm:w-10 md:w-12 h-2 sm:h-2.5 md:h-3 bg-white rounded-full'
+                  : 'w-2 sm:w-2.5 md:w-3 h-2 sm:h-2.5 md:h-3 bg-white/50 rounded-full hover:bg-white/70'
               }`}
               aria-label={`Go to ${system.title}`}
             />
@@ -338,8 +455,8 @@ export default function MinsuDashboard() {
         </div>
 
         {/* System Counter */}
-        <div className="absolute bottom-12 right-8 z-20 text-white/60 text-sm font-semibold">
-          <div className="bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
+        <div className="absolute bottom-8 sm:bottom-10 md:bottom-12 right-4 sm:right-6 md:right-8 z-20 text-white/60 text-xs sm:text-sm font-semibold">
+          <div className="bg-white/10 backdrop-blur-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full border border-white/20">
             {currentSystemIndex + 1} / {systems.length}
           </div>
         </div>
