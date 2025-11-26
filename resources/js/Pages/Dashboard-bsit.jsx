@@ -319,26 +319,26 @@ export default function MinsuDashboard() {
         </div>
 
         {/* Header */}
-        <div className="relative z-10 flex items-center justify-between px-4 sm:px-6 md:px-8 py-4 md:py-6 bg-white/10 backdrop-blur-md border-b border-white/20">
+        <div className="relative z-10 flex items-center justify-between px-3 sm:px-6 md:px-8 py-3 md:py-6 bg-white/10 backdrop-blur-md border-b border-white/20">
           <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
             {/* MinSU Logo */}
             <img 
               src="/images/minsu-logo.png" 
               alt="MinSU Logo" 
-              className="h-10 w-10 sm:h-12 sm:w-12 md:h-16 md:w-16 drop-shadow-2xl"
+              className="h-8 w-8 sm:h-12 sm:w-12 md:h-16 md:w-16 drop-shadow-2xl"
             />
             <div>
-              <h1 className="text-sm sm:text-lg md:text-2xl font-bold text-white drop-shadow-lg">Mindoro State University</h1>
+              <h1 className="text-xs sm:text-lg md:text-2xl font-bold text-white drop-shadow-lg leading-tight">Mindoro State University</h1>
             </div>
           </div>
 
         </div>
 
         {/* Main Hero Content */}
-        <div className="relative z-10 h-[calc(100vh-88px)] flex items-center justify-center px-4 sm:px-6 md:px-8">
+        <div className="relative z-10 h-[calc(100vh-72px)] flex items-center justify-center px-3 sm:px-6 md:px-8">
           <div className="max-w-6xl w-full">
             <div 
-              className={`text-center mb-6 sm:mb-8 md:mb-12 transition-all duration-500 ${
+              className={`text-center mb-4 sm:mb-8 md:mb-12 transition-all duration-500 ${
                 isTransitioning 
                   ? direction === 'next' 
                     ? 'opacity-0 translate-x-20' 
@@ -353,11 +353,11 @@ export default function MinsuDashboard() {
               } : {}}
             >
               {/* System Icon */}
-              <div className="mb-4 sm:mb-6 flex justify-center">
+              <div className="mb-3 sm:mb-6 flex justify-center">
                 <div className="relative">
                   <div className="absolute inset-0 bg-white/30 rounded-full blur-2xl animate-pulse"></div>
-                  <div className="relative bg-white/20 backdrop-blur-sm rounded-full p-4 sm:p-6 md:p-8 border-2 sm:border-4 border-white/30 transform transition-transform duration-500 hover:scale-110">
-                    <Icon className="h-12 w-12 sm:h-16 sm:w-16 md:h-24 md:w-24 text-white drop-shadow-2xl" />
+                  <div className="relative bg-white/20 backdrop-blur-sm rounded-full p-3 sm:p-6 md:p-8 border-2 sm:border-4 border-white/30 transform transition-transform duration-500 hover:scale-110">
+                    <Icon className="h-10 w-10 sm:h-16 sm:w-16 md:h-24 md:w-24 text-white drop-shadow-2xl" />
                   </div>
                 </div>
               </div>
@@ -365,31 +365,31 @@ export default function MinsuDashboard() {
               
 
               {/* Title */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-3 md:mb-4 drop-shadow-2xl animate-slide-up px-2">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-2 md:mb-4 drop-shadow-2xl animate-slide-up px-2 leading-tight">
                 {currentSystem.title}
               </h2>
               
               {/* Client */}
-              <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white/90 mb-4 sm:mb-5 md:mb-6 font-light animate-slide-up px-4" style={{ animationDelay: '100ms' }}>
+              <p className="text-sm sm:text-lg md:text-xl lg:text-2xl text-white/90 mb-3 sm:mb-5 md:mb-6 font-light animate-slide-up px-3" style={{ animationDelay: '100ms' }}>
                 {currentSystem.client}
               </p>
 
               {/* Description */}
-              <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto mb-6 sm:mb-7 md:mb-8 leading-relaxed animate-slide-up px-4" style={{ animationDelay: '200ms' }}>
+              <p className="text-xs sm:text-base md:text-lg lg:text-xl text-white/90 max-w-3xl mx-auto mb-4 sm:mb-7 md:mb-8 leading-relaxed animate-slide-up px-3" style={{ animationDelay: '200ms' }}>
                 {currentSystem.description}
               </p>
 
               {/* Features */}
               {currentSystem.features.length > 0 && (
-                <div className="mb-6 sm:mb-8 md:mb-10 animate-slide-up px-4" style={{ animationDelay: '300ms' }}>
-                  <div className="flex flex-wrap justify-center gap-2 sm:gap-3">
+                <div className="mb-4 sm:mb-8 md:mb-10 animate-slide-up px-2" style={{ animationDelay: '300ms' }}>
+                  <div className="flex flex-wrap justify-center gap-1.5 sm:gap-3">
                     {currentSystem.features.map((feature, idx) => (
                       <span
                         key={idx}
-                        className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full text-xs sm:text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 transform transition-all duration-300 hover:scale-105 hover:bg-white/30"
+                        className="inline-flex items-center gap-1 sm:gap-2 px-2.5 py-1 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-full text-[10px] sm:text-sm font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30 transform transition-all duration-300 hover:scale-105 hover:bg-white/30"
                         style={{ animationDelay: `${400 + idx * 50}ms` }}
                       >
-                        <SparklesIcon className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <SparklesIcon className="h-2.5 w-2.5 sm:h-4 sm:w-4" />
                         {feature}
                       </span>
                     ))}
@@ -398,21 +398,21 @@ export default function MinsuDashboard() {
               )}
 
               {/* Action Button */}
-              <div className="flex justify-center gap-4 animate-slide-up px-4" style={{ animationDelay: '500ms' }}>
+              <div className="flex justify-center gap-4 animate-slide-up px-2" style={{ animationDelay: '500ms' }}>
                 {currentSystem.link ? (
                   <button
                     onClick={() => handleSystemClick(currentSystem)}
-                    className="group flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-7 sm:py-3.5 md:px-8 md:py-4 bg-white text-gray-900 rounded-full font-bold text-sm sm:text-base md:text-lg hover:bg-white/90 transform hover:scale-105 transition-all duration-300 shadow-2xl"
+                    className="group flex items-center gap-1.5 sm:gap-3 px-5 py-2.5 sm:px-7 sm:py-3.5 md:px-8 md:py-4 bg-white text-gray-900 rounded-full font-bold text-xs sm:text-base md:text-lg hover:bg-white/90 transform hover:scale-105 transition-all duration-300 shadow-2xl"
                   >
                     <span>Launch System</span>
-                    <ArrowTopRightOnSquareIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                    <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5 sm:h-5 sm:w-5 md:h-6 md:w-6 group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
                   </button>
                 ) : (
                   <button
                     disabled
-                    className="flex items-center gap-2 sm:gap-3 px-6 py-3 sm:px-7 sm:py-3.5 md:px-8 md:py-4 bg-white/20 backdrop-blur-sm text-white rounded-full font-bold text-sm sm:text-base md:text-lg cursor-not-allowed border-2 border-white/30"
+                    className="flex items-center gap-1.5 sm:gap-3 px-5 py-2.5 sm:px-7 sm:py-3.5 md:px-8 md:py-4 bg-white/20 backdrop-blur-sm text-white rounded-full font-bold text-xs sm:text-base md:text-lg cursor-not-allowed border-2 border-white/30"
                   >
-                    <ClockIcon className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+                    <ClockIcon className="h-3.5 w-3.5 sm:h-5 sm:w-5 md:h-6 md:w-6" />
                     <span>Coming Soon</span>
                   </button>
                 )}
