@@ -180,12 +180,12 @@ export default function MinsuDashboard() {
       title: 'Roomify',
       client: 'MinSU Administration',
       description: 'Room management and scheduling system for efficient space utilization across all MinSU campuses.',
-      status: 'Coming Soon',
+      status: 'Active',
       icon: BuildingOfficeIcon,
       color: 'green',
       gradient: 'from-green-500 via-emerald-500 to-lime-500',
       features: ['Room Booking', 'Schedule Management', 'Resource Allocation'],
-      link: null
+      link: 'https://roomify-management.online'
     },
     {
       id: 2,
